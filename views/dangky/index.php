@@ -201,8 +201,44 @@
             }
             
             if (isValid) {
-                // Submit form
-                this.submit();
+                // Simulate successful registration
+                const notification = document.createElement('div');
+                notification.innerHTML = `
+                    <div style="
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: white;
+                        padding: 30px 50px;
+                        border-radius: 15px;
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+                        z-index: 10000;
+                        text-align: center;
+                    ">
+                        <i class="fas fa-check-circle" style="font-size: 48px; color: #28a745; margin-bottom: 15px;"></i>
+                        <h3 style="margin: 0 0 10px 0; color: #2C3E50;">Đăng ký thành công!</h3>
+                        <p style="margin: 0; color: #666;">Đang chuyển đến trang thiết lập hồ sơ...</p>
+                    </div>
+                    <div style="
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(0,0,0,0.5);
+                        z-index: 9999;
+                    "></div>
+                `;
+                document.body.appendChild(notification);
+                
+                // Redirect to profile setup page after 2 seconds
+                setTimeout(() => {
+                    window.location.href = '../hoso/thietlap.php';
+                }, 2000);
+                
+                // Comment out the actual form submission for now
+                // this.submit();
             }
         });
 
