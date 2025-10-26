@@ -23,7 +23,7 @@
                     <i class="fas fa-home"></i>
                     Trang chủ
                 </a>
-                <a href="../nhantin/index.php" class="nav-item">
+                <a href="../nhantin/chat.php" class="nav-item">
                     <i class="fas fa-comment"></i>
                     Tin nhắn
                 </a>
