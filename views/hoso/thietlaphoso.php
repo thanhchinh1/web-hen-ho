@@ -1,3 +1,10 @@
+<?php
+require_once '../../models/session.php';
+requireLogin(); // Yêu cầu đăng nhập để truy cập trang này
+
+$currentUserEmail = getCurrentUserEmail();
+$currentUserId = getCurrentUserId();
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -15,7 +22,7 @@
                 <a href="../trangchu/index.php" class="nav-link">Trang chủ</a>
                 <a href="#" class="nav-link active">Hồ sơ</a>
             </div>
-            <button class="btn-logout" onclick="window.location.href='../dangnhap/index.php'">
+            <button class="btn-logout" onclick="window.location.href='../../controller/logout.php'">
                 <i class="fas fa-sign-out-alt"></i>
                 Đăng Xuất
             </button>

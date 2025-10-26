@@ -1,3 +1,10 @@
+<?php
+require_once '../../models/session.php';
+requireLogin(); // Yêu cầu đăng nhập để truy cập trang này
+
+$currentUserEmail = getCurrentUserEmail();
+$currentUserId = getCurrentUserId();
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -34,14 +41,14 @@
             </nav>
 
             <div class="nav-right">
-                <a href="../dangnhap/index.php" class="btn-logout">
+                <a href="../../controller/logout.php" class="btn-logout">
                     <i class="fas fa-sign-out-alt"></i>
                     Đăng Xuất
                 </a>
                 <div class="user-menu-wrapper">
                     <img src="https://i.pravatar.cc/100?img=12" alt="User" class="user-avatar">
                     <div class="user-dropdown" id="userDropdown">
-                        <a href="../hoso/thietlap.php" class="user-dropdown-item vip">
+                        <a href="../hoso/thietlaphoso.php" class="user-dropdown-item vip">
                             <i class="fas fa-crown"></i>
                             Nâng cấp tài khoản
                         </a>
