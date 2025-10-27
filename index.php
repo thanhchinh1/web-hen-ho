@@ -17,8 +17,8 @@
                 </svg>
             </div>
             <ul class="nav-menu">
-                <li><a href="#home" class="nav-link active">Trang chủ</a></li>
-                <li><a href="#features" class="nav-link">Khám phá</a></li>
+                <li><a href="#home" class="nav-link active"><i class="fas fa-home"></i>Trang chủ</a></li>
+                <li><a href="#features" class="nav-link"><i class="fas fa-compass"></i>Khám phá</a></li>
             </ul>
             <div class="nav-buttons">
                 <a href="views/dangnhap/login.php" class="btn-outline">Đăng nhập</a>
@@ -69,30 +69,39 @@
         <div class="section-container">
             <h2>Danh sách hồ sơ nổi bật</h2>
             <a href="views/dangnhap/login.php" class="btn-success btn-help">Ghép đôi nhanh</a>
-            
+            <div class="profile-card" onclick="viewProfile(1)">
+                <div class="profile-avatar-wrapper">
+                    <img src="" alt="">
+                </div>
+                <div class="profile-info">
+                    <h3></h3>
+                    <p class="profile-location"></p>
+                    <p class="profile-status"></p>
+                </div>
+                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
+            </div>
         </div>
     </section>
 
     <!-- Footer -->
     <footer class="landing-footer" id="contact">
         <div class="footer-container">
-            
-            <div class="footer-links">
-                <a href="#about">Về chúng tôi</a>
-                <a href="#support">Hỗ trợ</a>
-                <a href="#legal">Pháp lý</a>
+            <div class="footer-top">
+                <div class="footer-links">
+                    <a href="#about">Về chúng tôi</a>
+                    <a href="#support">Hỗ trợ</a>
+                    <a href="#legal">Pháp lý</a>
+                </div>
+                <div class="footer-social">
+                    <a href="#" class="social-icon" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-icon" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                </div>
             </div>
-            
-            <div class="footer-social">
-                <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Kết Nối Yêu Thương. Mọi quyền được bảo lưu.</p>
             </div>
-        </div>
-        
-        <div class="footer-bottom">
-            <p>&copy; 2024 Kết Nối Yêu Thương. Mọi quyền được bảo lưu.</p>
         </div>
     </footer>
 
