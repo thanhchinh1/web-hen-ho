@@ -19,12 +19,10 @@
             <ul class="nav-menu">
                 <li><a href="#home" class="nav-link active">Trang chủ</a></li>
                 <li><a href="#features" class="nav-link">Khám phá</a></li>
-                <li><a href="#contact" class="nav-link">Tin nhắn</a></li>
-                <li><a href="#contact" class="nav-link">Tìm Kiếm</a></li>
             </ul>
             <div class="nav-buttons">
-                <a href="views/dangnhap/index.php" class="btn-outline">Đăng nhập</a>
-                <a href="views/dangky/index.php" class="btn-primary">Đăng ký</a>
+                <a href="views/dangnhap/login.php" class="btn-outline">Đăng nhập</a>
+                <a href="views/dangky/register.php" class="btn-primary">Đăng ký</a>
             </div>
         </nav>
     </header>
@@ -69,141 +67,15 @@
     <!-- Features Preview -->
     <section class="features-preview" id="features">
         <div class="section-container">
-            <h2>Danh sách hẹ sơ nổi bật</h2>
-            <a href="views/dangky/index.php" class="btn-success btn-help">Ghép đôi nhanh</a>
+            <h2>Danh sách hồ sơ nổi bật</h2>
+            <a href="views/dangnhap/login.php" class="btn-success btn-help">Ghép đôi nhanh</a>
             
-            <div class="profiles-grid">
-                <!-- Profile Card 1 -->
-                <div class="profile-preview-card">
-                    <div class="profile-preview-avatar">
-                        <img src="https://i.pravatar.cc/300?img=5" alt="Nguyễn Thị Mai">
-                    </div>
-                    <div class="profile-preview-info">
-                        <h3>Nguyễn Thị Mai, 1995</h3>
-                        <p class="location">Hà Nội</p>
-                        <p class="status">Độc thân</p>
-                    </div>
-                    <button class="btn-like-preview">
-                        <i class="fas fa-heart"></i>
-                    </button>
-                </div>
-
-                <!-- Profile Card 2 -->
-                <div class="profile-preview-card">
-                    <div class="profile-preview-avatar">
-                        <img src="https://i.pravatar.cc/300?img=12" alt="Trần Văn Hưng">
-                    </div>
-                    <div class="profile-preview-info">
-                        <h3>Trần Văn Hưng, 1992</h3>
-                        <p class="location">TP.HCM</p>
-                        <p class="status">Độc thân</p>
-                    </div>
-                    <button class="btn-like-preview">
-                        <i class="fas fa-heart"></i>
-                    </button>
-                </div>
-
-                <!-- Profile Card 3 -->
-                <div class="profile-preview-card">
-                    <div class="profile-preview-avatar">
-                        <img src="https://i.pravatar.cc/300?img=9" alt="Lê Thu Thảo">
-                    </div>
-                    <div class="profile-preview-info">
-                        <h3>Lê Thu Thảo, 1998</h3>
-                        <p class="location">Đà Nẵng</p>
-                        <p class="status">Độc thân</p>
-                    </div>
-                    <button class="btn-like-preview">
-                        <i class="fas fa-heart"></i>
-                    </button>
-                </div>
-
-                <!-- Profile Card 4 -->
-                <div class="profile-preview-card">
-                    <div class="profile-preview-avatar">
-                        <img src="https://i.pravatar.cc/300?img=33" alt="Phạm Minh Đức">
-                    </div>
-                    <div class="profile-preview-info">
-                        <h3>Phạm Minh Đức, 1990</h3>
-                        <p class="location">Hà Nội</p>
-                        <p class="status">Độc thân</p>
-                    </div>
-                    <button class="btn-like-preview">
-                        <i class="fas fa-heart"></i>
-                    </button>
-                </div>
-
-                <!-- Profile Card 5 -->
-                <div class="profile-preview-card">
-                    <div class="profile-preview-avatar">
-                        <img src="https://i.pravatar.cc/300?img=20" alt="Đinh Hà Phương">
-                    </div>
-                    <div class="profile-preview-info">
-                        <h3>Đinh Hà Phương, 1996</h3>
-                        <p class="location">Cần Thơ</p>
-                        <p class="status">Độc thân</p>
-                    </div>
-                    <button class="btn-like-preview">
-                        <i class="fas fa-heart"></i>
-                    </button>
-                </div>
-
-                <!-- Profile Card 6 -->
-                <div class="profile-preview-card">
-                    <div class="profile-preview-avatar">
-                        <img src="https://i.pravatar.cc/300?img=15" alt="Hoàng Gia Bảo">
-                    </div>
-                    <div class="profile-preview-info">
-                        <h3>Hoàng Gia Bảo, 1993</h3>
-                        <p class="location">TP.HCM</p>
-                        <p class="status">Độc thân</p>
-                    </div>
-                    <button class="btn-like-preview">
-                        <i class="fas fa-heart"></i>
-                    </button>
-                </div>
-
-                <!-- Profile Card 7 -->
-                <div class="profile-preview-card">
-                    <div class="profile-preview-avatar">
-                        <img src="https://i.pravatar.cc/300?img=25" alt="Đặng Hải Yến">
-                    </div>
-                    <div class="profile-preview-info">
-                        <h3>Đặng Hải Yến, 1997</h3>
-                        <p class="location">Hải Phòng</p>
-                        <p class="status">Độc thân</p>
-                    </div>
-                    <button class="btn-like-preview">
-                        <i class="fas fa-heart"></i>
-                    </button>
-                </div>
-
-                <!-- Profile Card 8 -->
-                <div class="profile-preview-card">
-                    <div class="profile-preview-avatar">
-                        <img src="https://i.pravatar.cc/300?img=30" alt="Bùi Thanh Long">
-                    </div>
-                    <div class="profile-preview-info">
-                        <h3>Bùi Thanh Long, 1989</h3>
-                        <p class="location">Huế</p>
-                        <p class="status">Độc thân</p>
-                    </div>
-                    <button class="btn-like-preview">
-                        <i class="fas fa-heart"></i>
-                    </button>
-                </div>
-            </div>
         </div>
     </section>
 
     <!-- Footer -->
     <footer class="landing-footer" id="contact">
         <div class="footer-container">
-            <div class="footer-brand">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="footer-logo">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#5BC0DE"/>
-                </svg>
-            </div>
             
             <div class="footer-links">
                 <a href="#about">Về chúng tôi</a>
