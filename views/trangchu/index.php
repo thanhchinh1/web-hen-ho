@@ -45,9 +45,9 @@ $currentUserId = getCurrentUserId();
                     <i class="fas fa-sign-out-alt"></i>
                     Đăng Xuất
                 </a>
-                <div class="user-menu-wrapper">
-                    <img src="https://i.pravatar.cc/100?img=12" alt="User" class="user-avatar">
-                    <div class="user-dropdown" id="userDropdown">
+                <div class="user-menu-wrapper" style="position: relative;">
+                    <img src="https://i.pravatar.cc/100?img=12" alt="User" class="user-avatar" id="userAvatar" style="cursor:pointer;">
+                    <div class="user-dropdown" id="userDropdown" style="display:none;">
                         <a href="../hoso/thietlaphoso.php" class="user-dropdown-item vip">
                             <i class="fas fa-crown"></i>
                             Nâng cấp tài khoản
@@ -71,6 +71,18 @@ $currentUserId = getCurrentUserId();
                         </a>
                     </div>
                 </div>
+                <script>
+                    const avatar = document.getElementById('userAvatar');
+                    const dropdown = document.getElementById('userDropdown');
+                    avatar.addEventListener('click', function(e) {
+                        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                    });
+                    document.addEventListener('click', function(e) {
+                        if (!avatar.contains(e.target) && !dropdown.contains(e.target)) {
+                            dropdown.style.display = 'none';
+                        }
+                    });
+                </script>
             </div>
         </div>
     </header>
@@ -107,102 +119,142 @@ $currentUserId = getCurrentUserId();
         <div class="profiles-grid">
             <div class="profile-card" onclick="viewProfile(1)">
                 <div class="profile-avatar-wrapper">
-                    <img src="https://i.pravatar.cc/200?img=5" alt="Linh Nguyễn">
+                    <img src="" alt="">
                 </div>
                 <div class="profile-info">
-                    <h3>Linh Nguyễn, 1995</h3>
-                    <p class="profile-location">TP.HCM</p>
-                    <p class="profile-status">Độc thân</p>
+                    <h3></h3>
+                    <p class="profile-location"></p>
+                    <p class="profile-status"></p>
                 </div>
                 <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
             </div>
-            <div class="profile-card" onclick="viewProfile(2)">
+            <div class="profile-card" onclick="viewProfile(1)">
                 <div class="profile-avatar-wrapper">
-                    <img src="https://i.pravatar.cc/200?img=12" alt="Trần Văn Hưng">
+                    <img src="" alt="">
                 </div>
                 <div class="profile-info">
-                    <h3>Trần Văn Hưng, 1992</h3>
-                    <p class="profile-location">TP.HCM</p>
-                    <p class="profile-status">Độc thân</p>
+                    <h3></h3>
+                    <p class="profile-location"></p>
+                    <p class="profile-status"></p>
                 </div>
                 <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
             </div>
-            <div class="profile-card" onclick="viewProfile(3)">
+            <div class="profile-card" onclick="viewProfile(1)">
                 <div class="profile-avatar-wrapper">
-                    <img src="https://i.pravatar.cc/200?img=9" alt="Lê Thu Thảo">
+                    <img src="" alt="">
                 </div>
                 <div class="profile-info">
-                    <h3>Lê Thu Thảo, 1998</h3>
-                    <p class="profile-location">Đà Nẵng</p>
-                    <p class="profile-status">Độc thân</p>
+                    <h3></h3>
+                    <p class="profile-location"></p>
+                    <p class="profile-status"></p>
                 </div>
                 <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
             </div>
-            <div class="profile-card" onclick="viewProfile(4)">
+            <div class="profile-card" onclick="viewProfile(1)">
                 <div class="profile-avatar-wrapper">
-                    <img src="https://i.pravatar.cc/200?img=33" alt="Phạm Minh Đức">
+                    <img src="" alt="">
                 </div>
                 <div class="profile-info">
-                    <h3>Phạm Minh Đức, 1990</h3>
-                    <p class="profile-location">Hà Nội</p>
-                    <p class="profile-status">Độc thân</p>
+                    <h3></h3>
+                    <p class="profile-location"></p>
+                    <p class="profile-status"></p>
                 </div>
                 <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
             </div>
-            <div class="profile-card" onclick="viewProfile(5)">
+            <div class="profile-card" onclick="viewProfile(1)">
                 <div class="profile-avatar-wrapper">
-                    <img src="https://i.pravatar.cc/200?img=20" alt="Võ Kim Ngân">
+                    <img src="" alt="">
                 </div>
                 <div class="profile-info">
-                    <h3>Võ Kim Ngân, 1996</h3>
-                    <p class="profile-location">TP.HCM</p>
-                    <p class="profile-status">Độc thân</p>
+                    <h3></h3>
+                    <p class="profile-location"></p>
+                    <p class="profile-status"></p>
                 </div>
                 <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
             </div>
-            <div class="profile-card" onclick="viewProfile(6)">
+            <div class="profile-card" onclick="viewProfile(1)">
                 <div class="profile-avatar-wrapper">
-                    <img src="https://i.pravatar.cc/200?img=15" alt="Hoàng Gia Bảo">
+                    <img src="" alt="">
                 </div>
                 <div class="profile-info">
-                    <h3>Hoàng Gia Bảo, 1988</h3>
-                    <p class="profile-location">Đà Nẵng</p>
-                    <p class="profile-status">Độc thân</p>
+                    <h3></h3>
+                    <p class="profile-location"></p>
+                    <p class="profile-status"></p>
                 </div>
                 <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
             </div>
-            <div class="profile-card" onclick="viewProfile(7)">
+            <div class="profile-card" onclick="viewProfile(1)">
                 <div class="profile-avatar-wrapper">
-                    <img src="https://i.pravatar.cc/200?img=25" alt="Đinh Yến Nhi">
+                    <img src="" alt="">
                 </div>
                 <div class="profile-info">
-                    <h3>Đinh Yến Nhi, 1997</h3>
-                    <p class="profile-location">Hà Nội</p>
-                    <p class="profile-status">Độc thân</p>
+                    <h3></h3>
+                    <p class="profile-location"></p>
+                    <p class="profile-status"></p>
                 </div>
                 <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
             </div>
-            <div class="profile-card" onclick="viewProfile(8)">
+            <div class="profile-card" onclick="viewProfile(1)">
                 <div class="profile-avatar-wrapper">
-                    <img src="https://i.pravatar.cc/200?img=30" alt="Bùi Thanh Tùng">
+                    <img src="" alt="">
                 </div>
                 <div class="profile-info">
-                    <h3>Bùi Thanh Tùng, 1993</h3>
-                    <p class="profile-location">TP.HCM</p>
-                    <p class="profile-status">Độc thân</p>
+                    <h3></h3>
+                    <p class="profile-location"></p>
+                    <p class="profile-status"></p>
                 </div>
                 <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
             </div>
-        </div>
+            <div class="profile-card" onclick="viewProfile(1)">
+                <div class="profile-avatar-wrapper">
+                    <img src="" alt="">
+                </div>
+                <div class="profile-info">
+                    <h3></h3>
+                    <p class="profile-location"></p>
+                    <p class="profile-status"></p>
+                </div>
+                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
+            </div>
+            <div class="profile-card" onclick="viewProfile(1)">
+                <div class="profile-avatar-wrapper">
+                    <img src="" alt="">
+                </div>
+                <div class="profile-info">
+                    <h3></h3>
+                    <p class="profile-location"></p>
+                    <p class="profile-status"></p>
+                </div>
+                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
+            </div>
+            <div class="profile-card" onclick="viewProfile(1)">
+                <div class="profile-avatar-wrapper">
+                    <img src="" alt="">
+                </div>
+                <div class="profile-info">
+                    <h3></h3>
+                    <p class="profile-location"></p>
+                    <p class="profile-status"></p>
+                </div>
+                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
+            </div>
+            <div class="profile-card" onclick="viewProfile(1)">
+                <div class="profile-avatar-wrapper">
+                    <img src="" alt="">
+                </div>
+                <div class="profile-info">
+                    <h3></h3>
+                    <p class="profile-location"></p>
+                    <p class="profile-status"></p>
+                </div>
+                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
+            </div>
     </section>
 
     <!-- Footer -->
     <footer class="main-footer">
         <div class="footer-container">
             <div class="footer-top">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="footer-logo">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#5BC0DE"/>
-                </svg>
                 <div class="footer-links">
                     <a href="#">Về chúng tôi</a>
                     <a href="#">Hỗ trợ</a>
@@ -231,7 +283,6 @@ $currentUserId = getCurrentUserId();
                 </button>
             </div>
             <div class="modal-body">
-                <input type="text" class="modal-search-input" placeholder="Tìm kiếm nâng cao">
 
                 <form id="searchForm">
                     <div class="modal-form-grid">
@@ -294,7 +345,7 @@ $currentUserId = getCurrentUserId();
                         <div class="modal-form-group">
                             <label>Tuổi</label>
                             <select class="modal-form-select" id="age">
-                                <option value="">18 đến 30</option>
+                                <option value="">Tất cả</option>
                                 <option value="18-25">18 đến 25</option>
                                 <option value="25-30">25 đến 30</option>
                                 <option value="30-35">30 đến 35</option>

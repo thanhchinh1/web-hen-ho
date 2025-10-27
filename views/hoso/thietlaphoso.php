@@ -242,7 +242,29 @@ $currentUserId = getCurrentUserId();
                                 <button type="button" class="interest-tag" data-interest="Chơi game">Chơi game</button>
                                 <button type="button" class="interest-tag" data-interest="Thiền">Thiền</button>
                                 <button type="button" class="interest-tag" data-interest="Vẽ">Vẽ</button>
+                                <button type="button" class="interest-tag" data-interest="Khiêu vũ">Khiêu vũ</button>
+                                <button type="button" class="interest-tag" data-interest="Ca hát">Ca hát</button>
+                                <button type="button" class="interest-tag" data-interest="Tập gym">Tập gym</button>
+                                <button type="button" class="interest-tag" data-interest="Bơi lội">Bơi lội</button>
+                                <button type="button" class="interest-tag" data-interest="Leo núi">Leo núi</button>
+                                <button type="button" class="interest-tag" data-interest="Cắm trại">Cắm trại</button>
+                                <button type="button" class="interest-tag" data-interest="Mua sắm">Mua sắm</button>
+                                <button type="button" class="interest-tag" data-interest="Thời trang">Thời trang</button>
+                                <button type="button" class="interest-tag" data-interest="Viết lách">Viết lách</button>
+                                <button type="button" class="interest-tag" data-interest="Thủ công mỹ nghệ">Thủ công mỹ nghệ</button>
+                                <button type="button" class="interest-tag" data-interest="Chơi nhạc cụ">Chơi nhạc cụ</button>
+                                <button type="button" class="interest-tag" data-interest="Xem thể thao">Xem thể thao</button>
+                                <button type="button" class="interest-tag" data-interest="Tình nguyện">Tình nguyện</button>
+                                <button type="button" class="interest-tag" data-interest="Sưu tầm">Sưu tầm</button>
+                                <button type="button" class="interest-tag" data-interest="Nghiên cứu khoa học">Nghiên cứu khoa học</button>
+                                <button type="button" class="interest-tag" data-interest="Chơi cờ">Chơi cờ</button>
                             </div>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <div class="form-group full-width">
+                            <label for="description">Mô tả</label>
+                            <textarea id="description" name="description" rows="5" maxlength="500" placeholder="Viết đôi nét về bản thân bạn..." required></textarea>
                         </div>
                     </div>
 
