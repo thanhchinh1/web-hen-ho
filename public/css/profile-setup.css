@@ -27,74 +27,65 @@ body {
 /* ===================================
    HEADER
    =================================== */
-.profile-header {
-    background: white;
-    padding: 15px 30px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* ===== HEADER giống trang chủ ===== */
+.main-header {
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     position: sticky;
     top: 0;
     z-index: 100;
+    width: 100%;
 }
 
-.header-content {
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
     display: flex;
-    gap: 30px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
 }
 
-.nav-link {
+.logo {
+    display: flex;
+    align-items: center;
     text-decoration: none;
-    color: #666;
-    font-size: 15px;
-    padding: 8px 15px;
-    border-radius: 6px;
-    transition: all 0.3s;
+    gap: 10px;
 }
 
-.nav-link:hover {
-    background: #F0F9FF;
-    color: #5BC0DE;
+.logo-icon {
+    width: 44px;
+    height: 44px;
+    display: block;
 }
 
-.nav-link.active {
-    color: #5BC0DE;
-    font-weight: 600;
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
 }
 
 .btn-logout {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 18px;
-    background: transparent;
-    border: 2px solid #E0E0E0;
-    border-radius: 20px;
-    color: #666;
-    font-size: 14px;
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #FF6B9D 0%, #FF8DB4 100%);
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
     cursor: pointer;
     transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(255,107,157,0.15);
 }
 
 .btn-logout:hover {
-    border-color: #FF6B9D;
-    color: #FF6B9D;
-    background: #FFF5F8;
-}
-
-.user-avatar-header {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid #E0E0E0;
-}
-
-.user-avatar-header img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    background: #FF6B9D;
+    box-shadow: 0 6px 20px rgba(255,107,157,0.25);
+    transform: translateY(-2px);
 }
 
 /* ===================================

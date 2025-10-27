@@ -17,17 +17,19 @@ $currentUserId = getCurrentUserId();
 <body>
     <div class="profile-setup-container">
         <!-- Header -->
-        <header class="profile-header">
-            <div class="header-content">
-                <a href="../trangchu/index.php" class="nav-link">Trang chủ</a>
-                <a href="#" class="nav-link active">Hồ sơ</a>
-            </div>
-            <button class="btn-logout" onclick="window.location.href='../../controller/logout.php'">
+        <header class="main-header">
+            <div class="header-container">
+            <a href="../trangchu/index.php" class="logo">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-icon">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#ff6b9d"/>
+                </svg>
+            </a>
+            <div class="nav-right">
+                <a href="../../controller/logout.php" class="btn-logout">
                 <i class="fas fa-sign-out-alt"></i>
                 Đăng Xuất
-            </button>
-            <div class="user-avatar-header">
-                <img src="https://i.pravatar.cc/100" alt="Avatar">
+                </a>
+            </div>
             </div>
         </header>
 
@@ -40,7 +42,7 @@ $currentUserId = getCurrentUserId();
                 <!-- Avatar Upload Section -->
                 <div class="avatar-section">
                     <div class="avatar-preview" id="avatarPreview">
-                        <img src="https://i.pravatar.cc/150" alt="Avatar" id="avatarImage">
+                        <img src="" alt="" id="avatarImage">
                     </div>
                     <button class="btn-upload-avatar" onclick="document.getElementById('avatarInput').click()">
                         <i class="fas fa-plus"></i>
@@ -59,15 +61,15 @@ $currentUserId = getCurrentUserId();
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="fullName">Tên đầy đủ</label>
-                                <input type="text" id="fullName" name="fullName" placeholder="Nguyễn Thị Mai" required>
+                                <input type="text" id="fullName" name="fullName" placeholder="Nhập tên đầy đủ" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="gender">Giới tính</label>
                                 <select id="gender" name="gender" required>
-                                    <option value="">Nữ</option>
+                                    <option value="" selected>Chọn giới tính</option>
                                     <option value="Nam">Nam</option>
-                                    <option value="Nữ" selected>Nữ</option>
+                                    <option value="Nữ">Nữ</option>
                                     <option value="Khác">Khác</option>
                                 </select>
                             </div>
@@ -75,33 +77,35 @@ $currentUserId = getCurrentUserId();
 
                         <div class="form-row">
                             <div class="form-group birthday-group">
-                                <label>Ngày sinh</label>
+                                <label for="birthday">Ngày sinh</label>
                                 <div class="birthday-inputs">
                                     <select id="day" name="day" required>
-                                        <option value="15">15</option>
+                                        <option value="" selected>Ngày</option>
                                         <?php for($i = 1; $i <= 31; $i++): ?>
-                                            <option value="<?= $i ?>" <?= $i == 15 ? 'selected' : '' ?>><?= $i ?></option>
+                                            <option value="<?= $i ?>"><?= $i ?></option>
                                         <?php endfor; ?>
                                     </select>
                                     <select id="month" name="month" required>
-                                        <option value="07">07</option>
+                                        <option value="" selected>Tháng</option>
                                         <?php for($i = 1; $i <= 12; $i++): ?>
-                                            <option value="<?= str_pad($i, 2, '0', STR_PAD_LEFT) ?>" <?= $i == 7 ? 'selected' : '' ?>><?= str_pad($i, 2, '0', STR_PAD_LEFT) ?></option>
+                                            <option value="<?= str_pad($i, 2, '0', STR_PAD_LEFT) ?>"><?= str_pad($i, 2, '0', STR_PAD_LEFT) ?></option>
                                         <?php endfor; ?>
                                     </select>
                                     <select id="year" name="year" required>
-                                        <option value="1998">1998</option>
-                                        <?php for($i = 2005; $i >= 1950; $i--): ?>
-                                            <option value="<?= $i ?>" <?= $i == 1998 ? 'selected' : '' ?>><?= $i ?></option>
+                                        <option value="" selected>Năm</option>
+                                        <?php for($i = date('Y') - 18; $i >= 1950; $i--): ?>
+                                            <option value="<?= $i ?>"><?= $i ?></option>
                                         <?php endfor; ?>
                                     </select>
                                 </div>
+                            </div>
                             </div>
 
                             <div class="form-group">
                                 <label for="maritalStatus">Tình trạng hôn nhân</label>
                                 <select id="maritalStatus" name="maritalStatus" required>
-                                    <option value="Độc thân" selected>Độc thân</option>
+                                    <option value="">Chọn tình trạng</option>
+                                    <option value="Độc thân">Độc thân</option>
                                     <option value="Đã ly hôn">Đã ly hôn</option>
                                     <option value="Góa">Góa</option>
                                 </select>
@@ -111,12 +115,12 @@ $currentUserId = getCurrentUserId();
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="weight">Cân nặng (kg)</label>
-                                <input type="number" id="weight" name="weight" placeholder="55" value="55" required>
+                                <input type="number" id="weight" name="weight" placeholder="Nhập cân nặng" min="30" max="200" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="height">Chiều cao (cm)</label>
-                                <input type="number" id="height" name="height" placeholder="165" value="165" required>
+                                <input type="number" id="height" name="height" placeholder="Nhập chiều cao" min="100" max="250" required>
                             </div>
                         </div>
                     </div>
@@ -130,21 +134,21 @@ $currentUserId = getCurrentUserId();
                             <div class="form-group">
                                 <label for="goal">Mục tiêu</label>
                                 <select id="goal" name="goal" required>
-                                    <option value="">Phát triển bản thân</option>
+                                    <option value="" selected>Chọn mục tiêu</option>
                                     <option value="Hẹn hò nghiêm túc">Hẹn hò nghiêm túc</option>
                                     <option value="Kết bạn">Kết bạn</option>
                                     <option value="Kết hôn">Kết hôn</option>
-                                    <option value="Phát triển bản thân" selected>Phát triển bản thân</option>
+                                    <option value="Phát triển bản thân">Phát triển bản thân</option>
                                 </select>
                             </div>
 
                             <div class="form-group">
                                 <label for="education">Học vấn</label>
                                 <select id="education" name="education" required>
-                                    <option value="">Đại học</option>
+                                    <option value="" selected>Chọn học vấn</option>
                                     <option value="Trung học">Trung học</option>
                                     <option value="Cao đẳng">Cao đẳng</option>
-                                    <option value="Đại học" selected>Đại học</option>
+                                    <option value="Đại học">Đại học</option>
                                     <option value="Thạc sĩ">Thạc sĩ</option>
                                     <option value="Tiến sĩ">Tiến sĩ</option>
                                 </select>
@@ -155,12 +159,70 @@ $currentUserId = getCurrentUserId();
                             <div class="form-group full-width">
                                 <label for="location">Nơi ở</label>
                                 <select id="location" name="location" required>
-                                    <option value="">Hồ Chí Minh</option>
-                                    <option value="Hà Nội">Hà Nội</option>
-                                    <option value="Hồ Chí Minh" selected>Hồ Chí Minh</option>
-                                    <option value="Đà Nẵng">Đà Nẵng</option>
+                                    <option value="" selected>Chọn tỉnh/thành phố</option>
+                                    <option value="An Giang">An Giang</option>
+                                    <option value="Bà Rịa - Vũng Tàu">Bà Rịa - Vũng Tàu</option>
+                                    <option value="Bắc Giang">Bắc Giang</option>
+                                    <option value="Bắc Kạn">Bắc Kạn</option>
+                                    <option value="Bạc Liêu">Bạc Liêu</option>
+                                    <option value="Bắc Ninh">Bắc Ninh</option>
+                                    <option value="Bến Tre">Bến Tre</option>
+                                    <option value="Bình Định">Bình Định</option>
+                                    <option value="Bình Dương">Bình Dương</option>
+                                    <option value="Bình Phước">Bình Phước</option>
+                                    <option value="Bình Thuận">Bình Thuận</option>
+                                    <option value="Cà Mau">Cà Mau</option>
                                     <option value="Cần Thơ">Cần Thơ</option>
+                                    <option value="Cao Bằng">Cao Bằng</option>
+                                    <option value="Đà Nẵng">Đà Nẵng</option>
+                                    <option value="Đắk Lắk">Đắk Lắk</option>
+                                    <option value="Đắk Nông">Đắk Nông</option>
+                                    <option value="Điện Biên">Điện Biên</option>
+                                    <option value="Đồng Nai">Đồng Nai</option>
+                                    <option value="Đồng Tháp">Đồng Tháp</option>
+                                    <option value="Gia Lai">Gia Lai</option>
+                                    <option value="Hà Giang">Hà Giang</option>
+                                    <option value="Hà Nam">Hà Nam</option>
+                                    <option value="Hà Nội">Hà Nội</option>
+                                    <option value="Hà Tĩnh">Hà Tĩnh</option>
+                                    <option value="Hải Dương">Hải Dương</option>
                                     <option value="Hải Phòng">Hải Phòng</option>
+                                    <option value="Hậu Giang">Hậu Giang</option>
+                                    <option value="Hòa Bình">Hòa Bình</option>
+                                    <option value="Hưng Yên">Hưng Yên</option>
+                                    <option value="Khánh Hòa">Khánh Hòa</option>
+                                    <option value="Kiên Giang">Kiên Giang</option>
+                                    <option value="Kon Tum">Kon Tum</option>
+                                    <option value="Lai Châu">Lai Châu</option>
+                                    <option value="Lâm Đồng">Lâm Đồng</option>
+                                    <option value="Lạng Sơn">Lạng Sơn</option>
+                                    <option value="Lào Cai">Lào Cai</option>
+                                    <option value="Long An">Long An</option>
+                                    <option value="Nam Định">Nam Định</option>
+                                    <option value="Nghệ An">Nghệ An</option>
+                                    <option value="Ninh Bình">Ninh Bình</option>
+                                    <option value="Ninh Thuận">Ninh Thuận</option>
+                                    <option value="Phú Thọ">Phú Thọ</option>
+                                    <option value="Phú Yên">Phú Yên</option>
+                                    <option value="Quảng Bình">Quảng Bình</option>
+                                    <option value="Quảng Nam">Quảng Nam</option>
+                                    <option value="Quảng Ngãi">Quảng Ngãi</option>
+                                    <option value="Quảng Ninh">Quảng Ninh</option>
+                                    <option value="Quảng Trị">Quảng Trị</option>
+                                    <option value="Sóc Trăng">Sóc Trăng</option>
+                                    <option value="Sơn La">Sơn La</option>
+                                    <option value="Tây Ninh">Tây Ninh</option>
+                                    <option value="Thái Bình">Thái Bình</option>
+                                    <option value="Thái Nguyên">Thái Nguyên</option>
+                                    <option value="Thanh Hóa">Thanh Hóa</option>
+                                    <option value="Thừa Thiên Huế">Thừa Thiên Huế</option>
+                                    <option value="Tiền Giang">Tiền Giang</option>
+                                    <option value="TP Hồ Chí Minh">TP Hồ Chí Minh</option>
+                                    <option value="Trà Vinh">Trà Vinh</option>
+                                    <option value="Tuyên Quang">Tuyên Quang</option>
+                                    <option value="Vĩnh Long">Vĩnh Long</option>
+                                    <option value="Vĩnh Phúc">Vĩnh Phúc</option>
+                                    <option value="Yên Bái">Yên Bái</option>
                                 </select>
                             </div>
                         </div>
@@ -168,10 +230,10 @@ $currentUserId = getCurrentUserId();
                         <div class="form-group full-width">
                             <label>Sở thích</label>
                             <div class="interests-grid">
-                                <button type="button" class="interest-tag active" data-interest="Đọc sách">Đọc sách</button>
+                                <button type="button" class="interest-tag" data-interest="Đọc sách">Đọc sách</button>
                                 <button type="button" class="interest-tag" data-interest="Xem phim">Xem phim</button>
                                 <button type="button" class="interest-tag" data-interest="Nghe nhạc">Nghe nhạc</button>
-                                <button type="button" class="interest-tag active" data-interest="Du lịch">Du lịch</button>
+                                <button type="button" class="interest-tag" data-interest="Du lịch">Du lịch</button>
                                 <button type="button" class="interest-tag" data-interest="Thể thao">Thể thao</button>
                                 <button type="button" class="interest-tag" data-interest="Nấu ăn">Nấu ăn</button>
                                 <button type="button" class="interest-tag" data-interest="Chụp ảnh">Chụp ảnh</button>
