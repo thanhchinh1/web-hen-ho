@@ -27,6 +27,12 @@ unset($_SESSION['login_data']);
             <h1>Chào Mừng Trở Lại!</h1>
             <p>Vui lòng đăng nhập vào tài khoản của bạn để tiếp tục tìm kiếm người đặc biệt.</p>
             
+            <?php if (isset($_GET['redirect']) && $_GET['redirect'] === 'profile'): ?>
+                <div class="info-container" style="background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <i class="fas fa-info-circle"></i> Vui lòng đăng nhập để xem hồ sơ này
+                </div>
+            <?php endif; ?>
+            
             <?php if (!empty($errors)): ?>
                 <div class="error-container" style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 8px; margin: 10px 0;">
                     <ul style="margin: 0; padding-left: 20px;">
@@ -38,7 +44,7 @@ unset($_SESSION['login_data']);
             <?php endif; ?>
         </div>
 
-        <form action="../../controller/login.php" method="POST" id="loginForm">
+        <form action="../../controller/login.php<?php echo isset($_GET['redirect']) && isset($_GET['id']) ? '?redirect=' . htmlspecialchars($_GET['redirect']) . '&id=' . htmlspecialchars($_GET['id']) : ''; ?>" method="POST" id="loginForm">
             <div class="form-group">
                 <label for="email">Email/SĐT</label>
                 <div class="input-wrapper">

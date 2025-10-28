@@ -1,9 +1,24 @@
 <?php
 require_once '../../models/session.php';
+require_once '../../models/mProfile.php';
+
 requireLogin(); // Yêu cầu đăng nhập để truy cập trang này
 
 $currentUserEmail = getCurrentUserEmail();
 $currentUserId = getCurrentUserId();
+
+// Lấy thông tin hồ sơ người dùng hiện tại
+$profileModel = new Profile();
+$currentUserProfile = $profileModel->getProfile($currentUserId);
+
+// Nếu chưa thiết lập hồ sơ, chuyển đến trang thiết lập
+if (!$currentUserProfile) {
+    header('Location: ../hoso/thietlaphoso.php');
+    exit;
+}
+
+// Lấy danh sách hồ sơ để hiển thị
+$allProfiles = $profileModel->getAllProfiles(12);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -46,7 +61,7 @@ $currentUserId = getCurrentUserId();
                     Đăng Xuất
                 </a>
                 <div class="user-menu-wrapper" style="position: relative;">
-                    <img src="https://i.pravatar.cc/100?img=12" alt="User" class="user-avatar" id="userAvatar" style="cursor:pointer;">
+                    <img src="../../<?php echo htmlspecialchars($currentUserProfile['avt']); ?>" alt="User" class="user-avatar" id="userAvatar" style="cursor:pointer;">
                     <div class="user-dropdown" id="userDropdown" style="display:none;">
                         <a href="../hoso/thietlaphoso.php" class="user-dropdown-item vip">
                             <i class="fas fa-crown"></i>
@@ -117,139 +132,27 @@ $currentUserId = getCurrentUserId();
         </div>
 
         <div class="profiles-grid">
-            <div class="profile-card" onclick="viewProfile(1)">
-                <div class="profile-avatar-wrapper">
-                    <img src="" alt="">
+            <?php foreach ($allProfiles as $profile): ?>
+                <?php 
+                    // Bỏ qua hiển thị chính mình
+                    if ($profile['maNguoiDung'] == $currentUserId) continue;
+                    
+                    $age = $profileModel->calculateAge($profile['ngaySinh']);
+                    $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt']) : 'https://i.pravatar.cc/200';
+                ?>
+                <div class="profile-card" onclick="viewProfile(<?php echo $profile['maNguoiDung']; ?>)">
+                    <div class="profile-avatar-wrapper">
+                        <img src="<?php echo $avatarSrc; ?>" alt="<?php echo htmlspecialchars($profile['ten']); ?>">
+                    </div>
+                    <div class="profile-info">
+                        <h3><?php echo htmlspecialchars($profile['ten']); ?>, <?php echo $age; ?></h3>
+                        <p class="profile-location"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($profile['noiSong']); ?></p>
+                        <p class="profile-status"><?php echo htmlspecialchars($profile['mucTieuPhatTrien']); ?></p>
+                    </div>
+                    <button class="btn-like" onclick="event.stopPropagation(); likeProfile(<?php echo $profile['maNguoiDung']; ?>)"><i class="fas fa-heart"></i></button>
                 </div>
-                <div class="profile-info">
-                    <h3></h3>
-                    <p class="profile-location"></p>
-                    <p class="profile-status"></p>
-                </div>
-                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
-            </div>
-            <div class="profile-card" onclick="viewProfile(1)">
-                <div class="profile-avatar-wrapper">
-                    <img src="" alt="">
-                </div>
-                <div class="profile-info">
-                    <h3></h3>
-                    <p class="profile-location"></p>
-                    <p class="profile-status"></p>
-                </div>
-                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
-            </div>
-            <div class="profile-card" onclick="viewProfile(1)">
-                <div class="profile-avatar-wrapper">
-                    <img src="" alt="">
-                </div>
-                <div class="profile-info">
-                    <h3></h3>
-                    <p class="profile-location"></p>
-                    <p class="profile-status"></p>
-                </div>
-                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
-            </div>
-            <div class="profile-card" onclick="viewProfile(1)">
-                <div class="profile-avatar-wrapper">
-                    <img src="" alt="">
-                </div>
-                <div class="profile-info">
-                    <h3></h3>
-                    <p class="profile-location"></p>
-                    <p class="profile-status"></p>
-                </div>
-                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
-            </div>
-            <div class="profile-card" onclick="viewProfile(1)">
-                <div class="profile-avatar-wrapper">
-                    <img src="" alt="">
-                </div>
-                <div class="profile-info">
-                    <h3></h3>
-                    <p class="profile-location"></p>
-                    <p class="profile-status"></p>
-                </div>
-                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
-            </div>
-            <div class="profile-card" onclick="viewProfile(1)">
-                <div class="profile-avatar-wrapper">
-                    <img src="" alt="">
-                </div>
-                <div class="profile-info">
-                    <h3></h3>
-                    <p class="profile-location"></p>
-                    <p class="profile-status"></p>
-                </div>
-                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
-            </div>
-            <div class="profile-card" onclick="viewProfile(1)">
-                <div class="profile-avatar-wrapper">
-                    <img src="" alt="">
-                </div>
-                <div class="profile-info">
-                    <h3></h3>
-                    <p class="profile-location"></p>
-                    <p class="profile-status"></p>
-                </div>
-                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
-            </div>
-            <div class="profile-card" onclick="viewProfile(1)">
-                <div class="profile-avatar-wrapper">
-                    <img src="" alt="">
-                </div>
-                <div class="profile-info">
-                    <h3></h3>
-                    <p class="profile-location"></p>
-                    <p class="profile-status"></p>
-                </div>
-                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
-            </div>
-            <div class="profile-card" onclick="viewProfile(1)">
-                <div class="profile-avatar-wrapper">
-                    <img src="" alt="">
-                </div>
-                <div class="profile-info">
-                    <h3></h3>
-                    <p class="profile-location"></p>
-                    <p class="profile-status"></p>
-                </div>
-                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
-            </div>
-            <div class="profile-card" onclick="viewProfile(1)">
-                <div class="profile-avatar-wrapper">
-                    <img src="" alt="">
-                </div>
-                <div class="profile-info">
-                    <h3></h3>
-                    <p class="profile-location"></p>
-                    <p class="profile-status"></p>
-                </div>
-                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
-            </div>
-            <div class="profile-card" onclick="viewProfile(1)">
-                <div class="profile-avatar-wrapper">
-                    <img src="" alt="">
-                </div>
-                <div class="profile-info">
-                    <h3></h3>
-                    <p class="profile-location"></p>
-                    <p class="profile-status"></p>
-                </div>
-                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
-            </div>
-            <div class="profile-card" onclick="viewProfile(1)">
-                <div class="profile-avatar-wrapper">
-                    <img src="" alt="">
-                </div>
-                <div class="profile-info">
-                    <h3></h3>
-                    <p class="profile-location"></p>
-                    <p class="profile-status"></p>
-                </div>
-                <button class="btn-like" onclick="event.stopPropagation()"><i class="fas fa-heart"></i></button>
-            </div>
-    </section>
+            <?php endforeach; ?>
+        </div>
 
     <!-- Footer -->
     <footer class="main-footer">
@@ -425,15 +328,16 @@ $currentUserId = getCurrentUserId();
         }
 
         // Like button animation
-        document.querySelectorAll('.btn-like').forEach(button => {
-            button.addEventListener('click', function() {
-                const notification = document.createElement('div');
-                notification.textContent = 'Đã thích! 💙';
-                notification.style.cssText = 'position:fixed;top:100px;left:50%;transform:translateX(-50%);background:#FF6B9D;color:white;padding:15px 30px;border-radius:25px;font-size:16px;font-weight:600;box-shadow:0 5px 20px rgba(255,107,157,0.3);z-index:10000';
-                document.body.appendChild(notification);
-                setTimeout(() => notification.remove(), 2000);
-            });
-        });
+        function likeProfile(userId) {
+            const notification = document.createElement('div');
+            notification.textContent = 'Đã thích! 💙';
+            notification.style.cssText = 'position:fixed;top:100px;left:50%;transform:translateX(-50%);background:#FF6B9D;color:white;padding:15px 30px;border-radius:25px;font-size:16px;font-weight:600;box-shadow:0 5px 20px rgba(255,107,157,0.3);z-index:10000';
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 2000);
+            
+            // TODO: Gửi request lên server để lưu like
+            console.log('Liked user:', userId);
+        }
     </script>
 </body>
 </html>

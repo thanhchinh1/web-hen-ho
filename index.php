@@ -8,6 +8,18 @@
     <link rel="stylesheet" href="public/css/landing.css">
 </head>
 <body class="landing-page">
+    <script>
+        // Chuyển hướng đến trang chủ công khai
+        window.location.href = 'views/trangchu/public.php';
+    </script>
+    
+    <!-- Nội dung dự phòng nếu JavaScript bị tắt -->
+    <div style="text-align: center; padding: 50px;">
+        <h1>Đang chuyển hướng...</h1>
+        <p>Nếu không tự động chuyển, <a href="views/trangchu/public.php">nhấp vào đây</a></p>
+    </div>
+</body>
+</html>
     <!-- Header -->
     <header class="landing-header">
         <nav class="landing-nav">

@@ -31,7 +31,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['user_email'] = $email;
             $_SESSION['is_logged_in'] = true;
             
-            // Chuyển hướng đến trang chủ
+            // Kiểm tra xem user đã có hồ sơ chưa
+            require_once '../models/mProfile.php';
+            $profileModel = new Profile();
+            $hasProfile = $profileModel->hasProfile($userId);
+            
+            if (!$hasProfile) {
+                // Chưa có hồ sơ -> chuyển đến trang thiết lập hồ sơ
+                header('Location: ../views/hoso/thietlaphoso.php');
+                exit();
+            }
+            
+            // Kiểm tra xem có yêu cầu redirect đến profile không
+            if (isset($_GET['redirect']) && $_GET['redirect'] === 'profile' && isset($_GET['id'])) {
+                $profileId = intval($_GET['id']);
+                header('Location: ../views/hoso/xemnguoikhac.php?id=' . $profileId);
+                exit();
+            }
+            
+            // Mặc định chuyển đến trang chủ
             header('Location: ../views/trangchu/index.php');
             exit();
         } else {

@@ -313,14 +313,115 @@ $currentUserId = getCurrentUserId();
         function handleSubmit(event) {
             event.preventDefault();
             
+            // Kiểm tra avatar đã upload chưa
+            const avatarInput = document.getElementById('avatarInput');
+            if (!avatarInput.files || avatarInput.files.length === 0) {
+                showNotification('Vui lòng tải lên ảnh đại diện!', 'error');
+                return;
+            }
+            
             // Get selected interests
             const selectedInterests = [];
             document.querySelectorAll('.interest-tag.active').forEach(tag => {
                 selectedInterests.push(tag.dataset.interest);
             });
             
-            // Show success notification
+            // Kiểm tra sở thích không được bỏ trống
+            if (selectedInterests.length === 0) {
+                showNotification('Vui lòng chọn ít nhất một sở thích!', 'error');
+                return;
+            }
+            
+            // Tạo FormData
+            const formData = new FormData();
+            formData.append('avatar', avatarInput.files[0]);
+            formData.append('fullName', document.getElementById('fullName').value);
+            formData.append('gender', document.getElementById('gender').value);
+            formData.append('day', document.getElementById('day').value);
+            formData.append('month', document.getElementById('month').value);
+            formData.append('year', document.getElementById('year').value);
+            formData.append('maritalStatus', document.getElementById('maritalStatus').value);
+            formData.append('weight', document.getElementById('weight').value);
+            formData.append('height', document.getElementById('height').value);
+            formData.append('goal', document.getElementById('goal').value);
+            formData.append('education', document.getElementById('education').value);
+            formData.append('location', document.getElementById('location').value);
+            formData.append('interests', selectedInterests.join(', '));
+            formData.append('description', document.getElementById('description').value);
+            
+            // Hiển thị loading
+            showNotification('Đang xử lý...', 'loading');
+            
+            // Gửi request
+            fetch('../../controller/profile_setup.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = '../trangchu/index.php';
+                    }, 1500);
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Có lỗi xảy ra, vui lòng thử lại!', 'error');
+            });
+        }
+        
+        // Hàm hiển thị thông báo
+        function showNotification(message, type) {
+            // Xóa notification cũ nếu có
+            const oldNotif = document.querySelector('.custom-notification');
+            if (oldNotif) oldNotif.remove();
+            
             const notification = document.createElement('div');
+            notification.className = 'custom-notification';
+            
+            let icon = '';
+            let color = '';
+            let showCloseButton = false;
+            let autoCloseTime = 0;
+            
+            if (type === 'success') {
+                icon = '<i class="fas fa-check-circle"></i>';
+                color = '#28a745';
+                showCloseButton = false;
+                autoCloseTime = 1500; // Tự động đóng sau 1.5 giây
+            } else if (type === 'error') {
+                icon = '<i class="fas fa-exclamation-circle"></i>';
+                color = '#dc3545';
+                showCloseButton = true; // Hiển thị nút đóng cho lỗi
+                autoCloseTime = 0; // Không tự động đóng
+            } else if (type === 'loading') {
+                icon = '<i class="fas fa-spinner fa-spin"></i>';
+                color = '#5BC0DE';
+                showCloseButton = false;
+                autoCloseTime = 0; // Không tự động đóng
+            }
+            
+            const closeButtonHTML = showCloseButton ? `
+                <button onclick="this.closest('.custom-notification').remove()" style="
+                    margin-top: 20px;
+                    padding: 10px 30px;
+                    background: ${color};
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                " onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                    Đóng
+                </button>
+            ` : '';
+            
             notification.innerHTML = `
                 <div style="
                     position: fixed;
@@ -334,11 +435,11 @@ $currentUserId = getCurrentUserId();
                     z-index: 10000;
                     text-align: center;
                 ">
-                    <i class="fas fa-check-circle" style="font-size: 48px; color: #28a745; margin-bottom: 15px;"></i>
-                    <h3 style="margin: 0 0 10px 0; color: #2C3E50;">Lưu thành công!</h3>
-                    <p style="margin: 0; color: #666;">Đang chuyển đến trang chủ...</p>
+                    <div style="font-size: 48px; color: ${color}; margin-bottom: 15px;">${icon}</div>
+                    <h3 style="margin: 0; color: #2C3E50;">${message}</h3>
+                    ${closeButtonHTML}
                 </div>
-                <div style="
+                <div onclick="${showCloseButton ? 'this.parentElement.remove()' : ''}" style="
                     position: fixed;
                     top: 0;
                     left: 0;
@@ -346,14 +447,19 @@ $currentUserId = getCurrentUserId();
                     bottom: 0;
                     background: rgba(0,0,0,0.5);
                     z-index: 9999;
+                    ${showCloseButton ? 'cursor: pointer;' : ''}
                 "></div>
             `;
             document.body.appendChild(notification);
             
-            // Redirect to home page after 2 seconds
-            setTimeout(() => {
-                window.location.href = '../trangchu/index.php';
-            }, 2000);
+            // Tự động xóa nếu có thời gian
+            if (autoCloseTime > 0) {
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, autoCloseTime);
+            }
         }
     </script>
 </body>

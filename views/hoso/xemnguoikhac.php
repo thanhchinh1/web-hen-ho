@@ -1,3 +1,34 @@
+<?php
+require_once '../../models/session.php';
+require_once '../../models/mProfile.php';
+
+requireLogin(); // Yêu cầu đăng nhập để xem hồ sơ
+
+$currentUserId = getCurrentUserId();
+
+// Lấy ID người dùng cần xem từ URL
+$profileId = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+if ($profileId === 0 || $profileId === $currentUserId) {
+    // Không có ID hoặc đang xem chính mình
+    header('Location: index.php');
+    exit;
+}
+
+// Lấy thông tin hồ sơ
+$profileModel = new Profile();
+$profile = $profileModel->getProfile($profileId);
+
+if (!$profile) {
+    // Không tìm thấy hồ sơ
+    header('Location: ../trangchu/index.php');
+    exit;
+}
+
+$age = $profileModel->calculateAge($profile['ngaySinh']);
+$avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt']) : 'https://i.pravatar.cc/300';
+$interests = explode(', ', $profile['soThich']);
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -19,7 +50,7 @@
                 <a href="../trangchu/index.php" class="nav-link">Trang chủ</a>
             </div>
             <div class="header-right">
-                <a href="../dangnhap/index.php" class="btn-logout">
+                <a href="../../controller/logout.php" class="btn-logout">
                     <i class="fas fa-sign-out-alt"></i>
                     Đăng Xuất
                 </a>
@@ -38,9 +69,9 @@
             <!-- Profile Header Section -->
             <div class="profile-hero">
                 <div class="profile-avatar-section">
-                    <img src="https://i.pravatar.cc/300?img=45" alt="Linh Nguyễn" class="profile-avatar" id="userAvatar">
-                    <h1 class="profile-name" id="userName">Linh Nguyễn</h1>
-                    <p class="profile-info" id="userBasicInfo">Sinh năm 1995 • Hồ Chí Minh • Độc thân</p>
+                    <img src="<?php echo $avatarSrc; ?>" alt="<?php echo htmlspecialchars($profile['ten']); ?>" class="profile-avatar" id="userAvatar">
+                    <h1 class="profile-name" id="userName"><?php echo htmlspecialchars($profile['ten']); ?></h1>
+                    <p class="profile-info" id="userBasicInfo"><?php echo $age; ?> tuổi • <?php echo htmlspecialchars($profile['noiSong']); ?> • <?php echo htmlspecialchars($profile['tinhTrangHonNhan']); ?></p>
                 </div>
 
                 <!-- Action Buttons -->
@@ -72,57 +103,50 @@
                         <div class="info-item">
                             <i class="fas fa-venus-mars"></i>
                             <span class="info-label">Giới tính:</span>
-                            <span class="info-value">Nữ</span>
+                            <span class="info-value"><?php echo htmlspecialchars($profile['gioiTinh']); ?></span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-calendar-alt"></i>
-                            <span class="info-label">Ngày sinh:</span>
-                            <span class="info-value">01/01/1995</span>
+                            <span class="info-label">Tuổi:</span>
+                            <span class="info-value"><?php echo $age; ?> tuổi</span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-map-marker-alt"></i>
                             <span class="info-label">Thành phố:</span>
-                            <span class="info-value">Thành phố Hồ Chí Minh</span>
+                            <span class="info-value"><?php echo htmlspecialchars($profile['noiSong']); ?></span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-heart"></i>
                             <span class="info-label">Tình trạng hôn nhân:</span>
-                            <span class="info-value">Độc thân</span>
+                            <span class="info-value"><?php echo htmlspecialchars($profile['tinhTrangHonNhan']); ?></span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-weight"></i>
+                            <span class="info-label">Cân nặng:</span>
+                            <span class="info-value"><?php echo htmlspecialchars($profile['canNang']); ?> kg</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-ruler-vertical"></i>
+                            <span class="info-label">Chiều cao:</span>
+                            <span class="info-value"><?php echo htmlspecialchars($profile['chieuCao']); ?> cm</span>
                         </div>
                     </div>
                 </section>
 
                 <!-- Career & Education -->
                 <section class="detail-section">
-                    <h2 class="section-title">Nghề nghiệp & Học vấn</h2>
+                    <h2 class="section-title">Học vấn & Mục tiêu</h2>
                     
-                    <div class="subsection">
-                        <h3 class="subsection-title">
-                            <i class="fas fa-briefcase"></i>
-                            Nghề nghiệp
-                        </h3>
-                        <div class="career-item">
-                            <h4>Quản lý dự án</h4>
-                            <p>Công ty Công nghệ ABC (2018 - Hiện tại)</p>
-                        </div>
-                        <div class="career-item">
-                            <h4>Phân tích dự liệu</h4>
-                            <p>Tập đoàn Xây dựng XYZ (2015 - 2018)</p>
-                        </div>
-                    </div>
-
-                    <div class="subsection">
-                        <h3 class="subsection-title">
+                    <div class="info-list">
+                        <div class="info-item">
                             <i class="fas fa-graduation-cap"></i>
-                            Học vấn
-                        </h3>
-                        <div class="education-item">
-                            <h4>Cử nhân Quản trị kinh doanh</h4>
-                            <p>Đại học Kinh tế Quốc dân (2011 - 2015)</p>
+                            <span class="info-label">Học vấn:</span>
+                            <span class="info-value"><?php echo htmlspecialchars($profile['hocVan']); ?></span>
                         </div>
-                        <div class="education-item">
-                            <h4>Chứng chỉ Kỹ năng mềm</h4>
-                            <p>Trung tâm Phát triển Kỹ năng Thanh niên (2014)</p>
+                        <div class="info-item">
+                            <i class="fas fa-bullseye"></i>
+                            <span class="info-label">Mục tiêu:</span>
+                            <span class="info-value"><?php echo htmlspecialchars($profile['mucTieuPhatTrien']); ?></span>
                         </div>
                     </div>
                 </section>
@@ -131,12 +155,11 @@
                 <section class="detail-section">
                     <h2 class="section-title">Sở thích</h2>
                     <div class="interests-tags">
-                        <span class="interest-tag">Đọc sách</span>
-                        <span class="interest-tag">Du lịch</span>
-                        <span class="interest-tag">Nấu ăn</span>
-                        <span class="interest-tag">Chụp ảnh</span>
-                        <span class="interest-tag">Yoga</span>
-                        <span class="interest-tag">Âm nhạc</span>
+                        <?php foreach ($interests as $interest): ?>
+                            <?php if (!empty(trim($interest))): ?>
+                                <span class="interest-tag"><?php echo htmlspecialchars(trim($interest)); ?></span>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
                     </div>
                 </section>
 
@@ -144,20 +167,7 @@
                 <section class="detail-section">
                     <h2 class="section-title">Về tôi</h2>
                     <p class="about-text">
-                        Xin chào! Tôi là một người yêu thích khám phá những điều mới mẻ trong cuộc sống. 
-                        Tôi thích đi du lịch, khám phá các nền văn hóa khác nhau và thưởng thức ẩm thực địa phương. 
-                        Trong thời gian rảnh, tôi thường đọc sách, tập yoga và nấu ăn. 
-                        Tôi đang tìm kiếm một người bạn đồng hành chân thành để cùng nhau chia sẻ những khoảnh khắc đẹp trong cuộc sống.
-                    </p>
-                </section>
-
-                <!-- Looking For -->
-                <section class="detail-section">
-                    <h2 class="section-title">Tôi đang tìm kiếm</h2>
-                    <p class="about-text">
-                        Một người chân thành, có trách nhiệm và yêu thương gia đình. 
-                        Người có cùng sở thích về du lịch và khám phá. 
-                        Độ tuổi từ 28-35, có công việc ổn định.
+                        <?php echo nl2br(htmlspecialchars($profile['moTa'])); ?>
                     </p>
                 </section>
             </div>
@@ -165,8 +175,25 @@
     </div>
 
     <script>
-        // Get user ID from URL
-        const urlParams = new URLSearchParams(window.location.search);
+        // Like button
+        document.querySelector('.btn-like').addEventListener('click', function() {
+            const profileId = <?php echo $profileId; ?>;
+            alert('Tính năng thả tim sẽ sớm được cập nhật!');
+        });
+        
+        // Report button
+        document.querySelector('.btn-report').addEventListener('click', function() {
+            if (confirm('Bạn có chắc muốn báo cáo hồ sơ này?')) {
+                alert('Báo cáo đã được gửi. Cảm ơn bạn!');
+            }
+        });
+        
+        // Block button
+        document.querySelector('.btn-block').addEventListener('click', function() {
+            if (confirm('Bạn có chắc muốn chặn người dùng này?')) {
+                alert('Đã chặn người dùng này!');
+            }
+        });
         const userId = urlParams.get('id');
 
         // Sample user data

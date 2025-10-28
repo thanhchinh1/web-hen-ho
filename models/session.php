@@ -52,7 +52,18 @@ function getCurrentUserEmail() {
 // Hàm chuyển hướng user đã đăng nhập về trang chủ
 function redirectIfLoggedIn($redirectTo = '../../views/trangchu/index.php') {
     if (isLoggedIn()) {
-        header('Location: ' . $redirectTo);
+        // Kiểm tra xem user đã có hồ sơ chưa
+        require_once __DIR__ . '/mProfile.php';
+        $profileModel = new Profile();
+        $hasProfile = $profileModel->hasProfile($_SESSION['user_id']);
+        
+        if ($hasProfile) {
+            // Đã có hồ sơ -> chuyển đến trang chủ
+            header('Location: ' . $redirectTo);
+        } else {
+            // Chưa có hồ sơ -> chuyển đến trang thiết lập hồ sơ
+            header('Location: ../../views/hoso/thietlaphoso.php');
+        }
         exit();
     }
 }
