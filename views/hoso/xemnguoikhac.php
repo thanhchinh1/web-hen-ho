@@ -1,6 +1,7 @@
 <?php
 require_once '../../models/session.php';
 require_once '../../models/mProfile.php';
+require_once '../../models/mLike.php';
 
 requireLogin(); // Yêu cầu đăng nhập để xem hồ sơ
 
@@ -28,6 +29,9 @@ if (!$profile) {
 $age = $profileModel->calculateAge($profile['ngaySinh']);
 $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt']) : 'https://i.pravatar.cc/300';
 $interests = explode(', ', $profile['soThich']);
+
+$likeModel = new LikeModel();
+$isLiked = $likeModel->isLiked($currentUserId, $profileId);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -76,9 +80,9 @@ $interests = explode(', ', $profile['soThich']);
 
                 <!-- Action Buttons -->
                 <div class="profile-actions">
-                    <button class="btn-action btn-like">
-                        <i class="far fa-heart"></i>
-                        Thả tim
+                    <button class="btn-action btn-like <?php echo $isLiked ? 'active' : ''; ?>" onclick="toggleProfileLike(<?php echo $profileId; ?>, this)" aria-pressed="<?php echo $isLiked ? 'true' : 'false'; ?>">
+                        <i class="<?php echo $isLiked ? 'fas' : 'far'; ?> fa-heart"></i>
+                        <span class="btn-text"><?php echo $isLiked ? 'Đã thích' : 'Thả tim'; ?></span>
                     </button>
                     <button class="btn-action btn-report">
                         <i class="far fa-flag"></i>
@@ -175,132 +179,113 @@ $interests = explode(', ', $profile['soThich']);
     </div>
 
     <script>
-        // Like button
-        document.querySelector('.btn-like').addEventListener('click', function() {
-            const profileId = <?php echo $profileId; ?>;
-            alert('Tính năng thả tim sẽ sớm được cập nhật!');
-        });
-        
-        // Report button
-        document.querySelector('.btn-report').addEventListener('click', function() {
+        const reportButton = document.querySelector('.btn-report');
+        const blockButton = document.querySelector('.btn-block');
+
+        reportButton.addEventListener('click', function () {
             if (confirm('Bạn có chắc muốn báo cáo hồ sơ này?')) {
-                alert('Báo cáo đã được gửi. Cảm ơn bạn!');
+                showToast('Đã gửi báo cáo. Cảm ơn bạn!', 'info');
             }
         });
-        
-        // Block button
-        document.querySelector('.btn-block').addEventListener('click', function() {
+
+        blockButton.addEventListener('click', function () {
             if (confirm('Bạn có chắc muốn chặn người dùng này?')) {
-                alert('Đã chặn người dùng này!');
-            }
-        });
-        const userId = urlParams.get('id');
-
-        // Sample user data
-        const users = {
-            1: {
-                name: 'Linh Nguyễn',
-                avatar: 'https://i.pravatar.cc/300?img=45',
-                birth: '01/01/1995',
-                city: 'TP.HCM',
-                status: 'Độc thân',
-                gender: 'Nữ'
-            },
-            2: {
-                name: 'Trần Văn Hưng',
-                avatar: 'https://i.pravatar.cc/300?img=33',
-                birth: '15/05/1992',
-                city: 'TP.HCM',
-                status: 'Độc thân',
-                gender: 'Nam'
-            },
-            3: {
-                name: 'Lê Thu Thảo',
-                avatar: 'https://i.pravatar.cc/300?img=28',
-                birth: '20/08/1998',
-                city: 'Đà Nẵng',
-                status: 'Độc thân',
-                gender: 'Nữ'
-            },
-            4: {
-                name: 'Phạm Minh Đức',
-                avatar: 'https://i.pravatar.cc/300?img=52',
-                birth: '10/03/1990',
-                city: 'Hà Nội',
-                status: 'Độc thân',
-                gender: 'Nam'
-            }
-        };
-
-        // Load user data
-        if (userId && users[userId]) {
-            const user = users[userId];
-            document.getElementById('userAvatar').src = user.avatar;
-            document.getElementById('userName').textContent = user.name;
-            document.getElementById('userBasicInfo').textContent = 
-                `Sinh năm ${user.birth.split('/')[2]} • ${user.city} • ${user.status}`;
-            
-            // Update gender in info list
-            document.querySelector('.info-value').textContent = user.gender;
-            document.querySelectorAll('.info-value')[1].textContent = user.birth;
-            document.querySelectorAll('.info-value')[2].textContent = 'Thành phố ' + user.city;
-        }
-
-        // Like button
-        document.querySelector('.btn-like').addEventListener('click', function() {
-            const icon = this.querySelector('i');
-            if (icon.classList.contains('far')) {
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-                this.style.background = 'linear-gradient(135deg, #FF6B9D 0%, #FF8DB4 100%)';
-                this.style.color = 'white';
-                showNotification('Đã thích! 💖');
-            } else {
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-                this.style.background = 'white';
-                this.style.color = '#FF6B9D';
-                showNotification('Đã bỏ thích');
-            }
-        });
-
-        // Report button
-        document.querySelector('.btn-report').addEventListener('click', function() {
-            if (confirm('Bạn có chắc muốn báo cáo người dùng này?')) {
-                showNotification('Đã gửi báo cáo');
-            }
-        });
-
-        // Block button
-        document.querySelector('.btn-block').addEventListener('click', function() {
-            if (confirm('Bạn có chắc muốn chặn người dùng này?')) {
-                showNotification('Đã chặn người dùng');
+                showToast('Đã chặn người dùng.', 'success');
                 setTimeout(() => {
                     window.location.href = '../trangchu/index.php';
                 }, 1500);
             }
         });
 
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.textContent = message;
-            notification.style.cssText = `
+        function toggleProfileLike(userId, button) {
+            if (!button) return;
+
+            const formData = new FormData();
+            formData.append('user_id', userId);
+
+            button.disabled = true;
+
+            fetch('../../controller/like_toggle.php', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        showToast(data.message, 'error');
+                        return;
+                    }
+
+                    updateProfileLikeButton(button, data.liked);
+                    showToast(data.message, data.liked ? 'success' : 'info');
+                })
+                .catch(() => {
+                    showToast('Không thể kết nối tới máy chủ. Vui lòng thử lại!', 'error');
+                })
+                .finally(() => {
+                    button.disabled = false;
+                });
+        }
+
+        function updateProfileLikeButton(button, liked) {
+            const icon = button.querySelector('i');
+            const text = button.querySelector('.btn-text');
+
+            button.classList.toggle('active', liked);
+            button.setAttribute('aria-pressed', liked ? 'true' : 'false');
+
+            if (icon) {
+                if (liked) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                }
+            }
+
+            if (text) {
+                text.textContent = liked ? 'Đã thích' : 'Thả tim';
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const existing = document.querySelector('.toast-notification');
+            if (existing) {
+                existing.remove();
+            }
+
+            const colors = {
+                success: '#28a745',
+                error: '#dc3545',
+                info: '#5BC0DE'
+            };
+
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.textContent = message;
+            toast.style.cssText = `
                 position: fixed;
                 top: 100px;
                 left: 50%;
                 transform: translateX(-50%);
-                background: #FF6B9D;
-                color: white;
-                padding: 15px 30px;
-                border-radius: 25px;
-                font-size: 16px;
+                padding: 14px 28px;
+                border-radius: 999px;
+                font-size: 15px;
                 font-weight: 600;
-                box-shadow: 0 5px 20px rgba(255,107,157,0.3);
-                z-index: 10000;
-                animation: slideDown 0.3s ease;
+                color: #fff;
+                background: ${colors[type] || colors.info};
+                box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+                z-index: 11000;
+                animation: fadeInDown 0.2s ease;
             `;
-            document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 2000);
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'fadeOutUp 0.2s ease forwards';
+                toast.addEventListener('animationend', () => toast.remove());
+            }, 1800);
         }
     </script>
 </body>

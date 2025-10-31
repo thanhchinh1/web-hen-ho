@@ -350,10 +350,20 @@ body {
     margin: 15px auto 0;
 }
 
+.btn-like.liked {
+    background: linear-gradient(135deg, #FF6B9D 0%, #FF8DB4 100%);
+    color: #fff;
+    box-shadow: 0 10px 22px rgba(255, 107, 157, 0.3);
+}
+
 .btn-like:hover {
     background: #FF6B9D;
     color: white;
     transform: scale(1.1);
+}
+
+.btn-like.liked:hover {
+    transform: scale(1.05);
 }
 
 /* ===================================
@@ -376,6 +386,28 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+@keyframes fadeOutUp {
+    from {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+    to {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+    }
 }
 
 .footer-logo {

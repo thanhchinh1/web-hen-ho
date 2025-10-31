@@ -1,6 +1,7 @@
 <?php
 require_once '../../models/session.php';
 require_once '../../models/mProfile.php';
+require_once '../../models/mLike.php';
 
 requireLogin(); // Yêu cầu đăng nhập để truy cập trang này
 
@@ -19,6 +20,10 @@ if (!$currentUserProfile) {
 
 // Lấy danh sách hồ sơ để hiển thị
 $allProfiles = $profileModel->getAllProfiles(12);
+
+// Lấy danh sách người dùng mà tài khoản hiện tại đã thích
+$likeModel = new LikeModel();
+$likedUserIds = $likeModel->getLikedUserIds($currentUserId);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -133,12 +138,13 @@ $allProfiles = $profileModel->getAllProfiles(12);
 
         <div class="profiles-grid">
             <?php foreach ($allProfiles as $profile): ?>
-                <?php 
+                <?php
                     // Bỏ qua hiển thị chính mình
                     if ($profile['maNguoiDung'] == $currentUserId) continue;
-                    
+
                     $age = $profileModel->calculateAge($profile['ngaySinh']);
                     $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt']) : 'https://i.pravatar.cc/200';
+                    $isLiked = in_array($profile['maNguoiDung'], $likedUserIds);
                 ?>
                 <div class="profile-card" onclick="viewProfile(<?php echo $profile['maNguoiDung']; ?>)">
                     <div class="profile-avatar-wrapper">
@@ -149,7 +155,9 @@ $allProfiles = $profileModel->getAllProfiles(12);
                         <p class="profile-location"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($profile['noiSong']); ?></p>
                         <p class="profile-status"><?php echo htmlspecialchars($profile['mucTieuPhatTrien']); ?></p>
                     </div>
-                    <button class="btn-like" onclick="event.stopPropagation(); likeProfile(<?php echo $profile['maNguoiDung']; ?>)"><i class="fas fa-heart"></i></button>
+                    <button class="btn-like <?php echo $isLiked ? 'liked' : ''; ?>" onclick="event.stopPropagation(); likeProfile(<?php echo $profile['maNguoiDung']; ?>, this)" aria-pressed="<?php echo $isLiked ? 'true' : 'false'; ?>">
+                        <i class="<?php echo $isLiked ? 'fas' : 'far'; ?> fa-heart"></i>
+                    </button>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -287,6 +295,8 @@ $allProfiles = $profileModel->getAllProfiles(12);
             }
         });
 
+        const likedProfiles = new Set(<?php echo json_encode($likedUserIds); ?>);
+
         // Perform search
         function performSearch() {
             const gender = document.getElementById('gender').value;
@@ -327,16 +337,96 @@ $allProfiles = $profileModel->getAllProfiles(12);
             window.location.href = '../hoso/xemnguoikhac.php?id=' + userId;
         }
 
-        // Like button animation
-        function likeProfile(userId) {
-            const notification = document.createElement('div');
-            notification.textContent = 'Đã thích! 💙';
-            notification.style.cssText = 'position:fixed;top:100px;left:50%;transform:translateX(-50%);background:#FF6B9D;color:white;padding:15px 30px;border-radius:25px;font-size:16px;font-weight:600;box-shadow:0 5px 20px rgba(255,107,157,0.3);z-index:10000';
-            document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 2000);
-            
-            // TODO: Gửi request lên server để lưu like
-            console.log('Liked user:', userId);
+        function likeProfile(userId, button) {
+            if (!button) return;
+
+            const formData = new FormData();
+            formData.append('user_id', userId);
+
+            button.disabled = true;
+
+            fetch('../../controller/like_toggle.php', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        showToast(data.message, 'error');
+                        return;
+                    }
+
+                    updateLikeButtonState(button, data.liked);
+
+                    if (data.liked) {
+                        likedProfiles.add(userId);
+                    } else {
+                        likedProfiles.delete(userId);
+                    }
+
+                    showToast(data.message, data.liked ? 'success' : 'info');
+                })
+                .catch(() => {
+                    showToast('Không thể kết nối tới máy chủ. Vui lòng thử lại!', 'error');
+                })
+                .finally(() => {
+                    button.disabled = false;
+                });
+        }
+
+        function updateLikeButtonState(button, liked) {
+            const icon = button.querySelector('i');
+            button.classList.toggle('liked', liked);
+            button.setAttribute('aria-pressed', liked ? 'true' : 'false');
+
+            if (!icon) return;
+
+            if (liked) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const existing = document.querySelector('.toast-notification');
+            if (existing) {
+                existing.remove();
+            }
+
+            const colors = {
+                success: '#28a745',
+                error: '#dc3545',
+                info: '#5BC0DE'
+            };
+
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 14px 28px;
+                border-radius: 999px;
+                font-size: 15px;
+                font-weight: 600;
+                color: #fff;
+                background: ${colors[type] || colors.info};
+                box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+                z-index: 11000;
+                animation: fadeInDown 0.2s ease;
+            `;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'fadeOutUp 0.2s ease forwards';
+                toast.addEventListener('animationend', () => toast.remove());
+            }, 1800);
         }
     </script>
 </body>
