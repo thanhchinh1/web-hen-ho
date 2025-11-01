@@ -27,6 +27,18 @@ body {
     z-index: 100;
 }
 
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    margin-left: 0;
+}
+.logo-icon {
+    width: 45px;
+    height: 45px;
+}
+
 .header-left {
     display: flex;
     align-items: center;
@@ -75,6 +87,27 @@ body {
 .btn-logout:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(255,107,157,0.3);
+}
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    text-decoration: none;
+    font-size: 15px;
+    padding: 8px 15px;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    color: #5BC0DE;
+    background: #F0F9FF;
+}
+
+.nav-item i {
+    font-size: 18px;
 }
 
 /* ===== BACK BUTTON ===== */

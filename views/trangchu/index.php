@@ -34,7 +34,7 @@ $allProfiles = $profileModel->getAllProfiles(12);
     <!-- Header -->
     <header class="main-header">
         <div class="header-container">
-            <a href="#" class="logo">
+            <a href="../trangchu/index.php" class="logo">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-icon">
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#ff6b9d"/>
                 </svg>
@@ -63,26 +63,30 @@ $allProfiles = $profileModel->getAllProfiles(12);
                 <div class="user-menu-wrapper" style="position: relative;">
                     <img src="../../<?php echo htmlspecialchars($currentUserProfile['avt']); ?>" alt="User" class="user-avatar" id="userAvatar" style="cursor:pointer;">
                     <div class="user-dropdown" id="userDropdown" style="display:none;">
-                        <a href="../hoso/thietlaphoso.php" class="user-dropdown-item vip">
-                            <i class="fas fa-crown"></i>
-                            Nâng cấp tài khoản
+                        <a href="../hoso/index.php" class="user-dropdown-item">
+                            <i class="fas fa-user"></i>
+                            Hồ sơ của tôi
                         </a>
                         <a href="../hoso/chinhsua.php" class="user-dropdown-item">
                             <i class="fas fa-edit"></i>
                             Chỉnh sửa hồ sơ
                         </a>
-                        <a href="../thich/nguoithichban.php" class="user-dropdown-item vip">
+                     
+                        <a href="../thich/nguoithichban.php" class="user-dropdown-item">
                             <i class="fas fa-heart"></i>
                             Xem danh sách thích bạn
                         </a>
-                        <a href="../thich/nguoibanthich.php" class="user-dropdown-item vip">
+                        <a href="../thich/nguoibanthich.php" class="user-dropdown-item">
                             <i class="fas fa-user-friends"></i>
                             Xem danh sách người bạn thích
                         </a>
-                        <div class="dropdown-divider"></div>
                         <a href="../chan/danhsach.php" class="user-dropdown-item">
                             <i class="fas fa-ban"></i>
                             Danh sách chặn
+                        </a>
+                           <a href="../hoso/thietlaphoso.php" class="user-dropdown-item vip">
+                            <i class="fas fa-crown"></i>
+                            Nâng cấp tài khoản
                         </a>
                     </div>
                 </div>

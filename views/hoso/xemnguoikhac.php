@@ -42,12 +42,16 @@ $interests = explode(', ', $profile['soThich']);
     <div class="profile-container">
         <!-- Header -->
         <header class="profile-header">
-            <div class="header-left">
-                <i class="fas fa-users"></i>
-                <span class="logo-text">Mạng Xã Hội</span>
-            </div>
+           <a href="../trangchu/index.php" class="logo">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-icon">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#ff6b9d"/>
+                </svg>
+            </a>
             <div class="header-center">
-                <a href="../trangchu/index.php" class="nav-link">Trang chủ</a>
+                <a href="../trangchu/index.php" class="nav-item active">
+                    <i class="fas fa-home"></i>
+                    Trang chủ
+                </a>
             </div>
             <div class="header-right">
                 <a href="../../controller/logout.php" class="btn-logout">
@@ -76,7 +80,7 @@ $interests = explode(', ', $profile['soThich']);
 
                 <!-- Action Buttons -->
                 <div class="profile-actions">
-                    <button class="btn-action btn-like">
+                    <button class="btn-action btn-like" onclick="likeProfile(<?php echo $profileId; ?>)">
                         <i class="far fa-heart"></i>
                         Thả tim
                     </button>
@@ -175,11 +179,23 @@ $interests = explode(', ', $profile['soThich']);
     </div>
 
     <script>
-        // Like button
-        document.querySelector('.btn-like').addEventListener('click', function() {
-            const profileId = <?php echo $profileId; ?>;
-            alert('Tính năng thả tim sẽ sớm được cập nhật!');
-        });
+        // Like button AJAX
+        function likeProfile(likedUserId) {
+            fetch('../../controller/thich.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'action=like&likedUserId=' + likedUserId
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Đã thích!');
+                    // Có thể reload hoặc cập nhật giao diện
+                } else {
+                    showNotification('Bạn đã thả tim hoặc lỗi!');
+                }
+            });
+        }
         
         // Report button
         document.querySelector('.btn-report').addEventListener('click', function() {
