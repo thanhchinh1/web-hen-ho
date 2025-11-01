@@ -6,8 +6,18 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(135deg, #E3F2FD 0%, #F3E5F5 100%);
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8edf2 100%);
     min-height: 100vh;
+}
+
+/* Main page wrapper with frame */
+.page-wrapper {
+    max-width: 1600px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    overflow: hidden;
 }
 
 .profile-container {
@@ -25,6 +35,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
+    border-radius: 20px 20px 0 0;
 }
 
 .logo {
@@ -130,19 +141,20 @@ body {
 
 /* ===== BACK BUTTON ===== */
 .back-button-container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 15px 20px 0;
+    position: fixed;
+    top: 100px;
+    left: 30px;
+    z-index: 100;
 }
 
 .btn-back {
-    width: 45px;
-    height: 45px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     background: linear-gradient(135deg, #5BC0DE 0%, #4AA3C1 100%);
     border: none;
     color: white;
-    font-size: 18px;
+    font-size: 20px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -152,8 +164,8 @@ body {
 }
 
 .btn-back:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(91,192,222,0.4);
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(91,192,222,0.5);
 }
 
 /* ===== PROFILE CONTENT ===== */
@@ -441,6 +453,13 @@ body {
 }
 
 /* Responsive */
+@media (max-width: 1650px) {
+    .page-wrapper {
+        margin: 10px;
+        border-radius: 15px;
+    }
+}
+
 @media (max-width: 768px) {
     .profile-header {
         padding: 10px 15px;
@@ -504,6 +523,15 @@ body {
 }
 
 @media (max-width: 576px) {
+    .page-wrapper {
+        margin: 5px;
+        border-radius: 10px;
+    }
+    
+    .profile-header {
+        border-radius: 10px 10px 0 0;
+    }
+    
     .back-button-container {
         padding: 20px 15px 0;
     }

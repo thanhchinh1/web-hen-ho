@@ -53,6 +53,13 @@ $interests = explode(', ', $profile['soThich']);
             </div>
         </header>
 
+        <!-- Back button -->
+        <div class="back-button-container">
+            <button class="btn-back" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+        </div>
+
         <!-- Main Content -->
         <div class="profile-main">
             <div class="profile-card">

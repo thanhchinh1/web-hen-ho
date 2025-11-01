@@ -31,6 +31,7 @@ $allProfiles = $profileModel->getAllProfiles(12);
     <link rel="stylesheet" href="../../public/css/search-modal.css">
 </head>
 <body>
+    <div class="page-wrapper">
     <!-- Header -->
     <header class="main-header">
         <div class="header-container">
@@ -342,5 +343,6 @@ $allProfiles = $profileModel->getAllProfiles(12);
             console.log('Liked user:', userId);
         }
     </script>
+    </div>
 </body>
 </html>

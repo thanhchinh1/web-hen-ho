@@ -27,6 +27,7 @@ $interests = explode(', ', $profile['soThich']);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <div class="page-wrapper">
     <header class="profile-header">
         <a href="../trangchu/index.php" class="logo">
             <img src="../../public/img/logo.jpg" alt="Kết Nối Yêu Thương">
@@ -40,6 +41,14 @@ $interests = explode(', ', $profile['soThich']);
             </a>
         </div>
     </header>
+
+    <!-- Back button -->
+    <div class="back-button-container">
+        <button class="btn-back" onclick="window.history.back()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+    </div>
+
     <div class="profile-content">
         <div class="profile-hero">
             <div class="profile-avatar-section">
@@ -103,6 +112,7 @@ $interests = explode(', ', $profile['soThich']);
                 </div>
             </section>
         </div>
+    </div>
     </div>
 </body>
 </html>
