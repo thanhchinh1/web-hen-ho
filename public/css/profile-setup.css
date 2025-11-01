@@ -50,13 +50,31 @@ body {
     display: flex;
     align-items: center;
     text-decoration: none;
-    gap: 10px;
+    gap: 8px;
 }
 
 .logo-icon {
-    width: 44px;
-    height: 44px;
+    width: 60px;
+    height: 60px;
     display: block;
+}
+
+/* Make <img> logos match the SVG logo size and be responsive */
+.logo img {
+    display: block;
+    max-height: 60px;
+    width: auto;
+}
+
+.logo-text {
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #FF6B9D 0%, #FF8DB4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: 'Segoe UI', sans-serif;
+    letter-spacing: 0.5px;
 }
 
 .nav-right {
