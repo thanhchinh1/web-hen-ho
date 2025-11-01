@@ -86,7 +86,7 @@ CREATE TABLE `HoSo` (
   `maNguoiDung` int(11) DEFAULT NULL,
   `ten` varchar(100) DEFAULT NULL,
   `ngaySinh` date DEFAULT NULL,
-  `gioiTinh` enum('Nam','Nu','Khac') DEFAULT NULL,
+  `gioiTinh` enum('Nam','Nữ','Khac') DEFAULT NULL,
   `tinhTrangHonNhan` varchar(50) DEFAULT NULL,
   `canNang` float DEFAULT NULL,
   `chieuCao` float DEFAULT NULL,

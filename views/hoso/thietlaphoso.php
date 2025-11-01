@@ -1,9 +1,23 @@
 <?php
-require_once '../../models/session.php';
-requireLogin(); // Yêu cầu đăng nhập để truy cập trang này
+require_once '../../models/mSession.php';
+require_once '../../models/mProfile.php';
 
-$currentUserEmail = getCurrentUserEmail();
-$currentUserId = getCurrentUserId();
+Session::start();
+
+// Kiểm tra đăng nhập
+if (!Session::isLoggedIn()) {
+    header('Location: ../dangnhap/login.php');
+    exit;
+}
+
+// Kiểm tra xem đã có hồ sơ chưa
+$userId = Session::getUserId();
+$profileModel = new Profile();
+if ($profileModel->hasProfile($userId)) {
+    // Đã có hồ sơ, chuyển đến trang chủ
+    header('Location: ../trangchu/index.php');
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -24,7 +38,7 @@ $currentUserId = getCurrentUserId();
                 <span class="logo-text">DuyenHub</span>
             </a>
             <div class="nav-right">
-                <a href="../../controller/logout.php" class="btn-logout">
+                <a href="../../controller/cLogout.php" class="btn-logout">
                 <i class="fas fa-sign-out-alt"></i>
                 Đăng Xuất
                 </a>
@@ -290,6 +304,19 @@ $currentUserId = getCurrentUserId();
     </div>
 
     <script>
+        // Ngăn người dùng quay lại và tự động đăng xuất khi bấm Back
+        (function() {
+            if (window.history && window.history.pushState) {
+                // Thay thế history để khi back sẽ đăng xuất
+                window.history.pushState('forward', null, window.location.href);
+                
+                window.addEventListener('popstate', function() {
+                    // Khi bấm nút Back, đăng xuất và về trang chủ
+                    window.location.href = '../../controller/logout.php';
+                });
+            }
+        })();
+
         // Preview avatar before upload
         function previewAvatar(event) {
             const file = event.target.files[0];
@@ -353,7 +380,7 @@ $currentUserId = getCurrentUserId();
             showNotification('Đang xử lý...', 'loading');
             
             // Gửi request
-            fetch('../../controller/profile_setup.php', {
+            fetch('../../controller/cProfile_setup.php', {
                 method: 'POST',
                 body: formData
             })

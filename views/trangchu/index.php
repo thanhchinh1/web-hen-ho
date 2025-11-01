@@ -1,25 +1,32 @@
 <?php
-require_once '../../models/session.php';
+require_once '../../models/mSession.php';
 require_once '../../models/mProfile.php';
 
-requireLogin(); // Yêu cầu đăng nhập để truy cập trang này
+Session::start();
 
-$currentUserEmail = getCurrentUserEmail();
-$currentUserId = getCurrentUserId();
+// Kiểm tra đăng nhập
+if (!Session::isLoggedIn()) {
+    header('Location: ../dangnhap/login.php');
+    exit;
+}
 
-// Lấy thông tin hồ sơ người dùng hiện tại
+$currentUserId = Session::getUserId();
 $profileModel = new Profile();
-$currentUserProfile = $profileModel->getProfile($currentUserId);
 
-// Nếu chưa thiết lập hồ sơ, chuyển đến trang thiết lập
-if (!$currentUserProfile) {
+// Kiểm tra xem đã có hồ sơ chưa
+if (!$profileModel->hasProfile($currentUserId)) {
+    // Chưa có hồ sơ -> chuyển đến trang thiết lập hồ sơ
     header('Location: ../hoso/thietlaphoso.php');
     exit;
 }
 
+// Lấy hồ sơ của người dùng hiện tại
+$currentUserProfile = $profileModel->getProfile($currentUserId);
+
 // Lấy danh sách hồ sơ để hiển thị
 $allProfiles = $profileModel->getAllProfiles(12);
 ?>
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -56,7 +63,7 @@ $allProfiles = $profileModel->getAllProfiles(12);
             </nav>
 
             <div class="nav-right">
-                <a href="../../controller/logout.php" class="btn-logout">
+                <a href="../../controller/cLogout.php" class="btn-logout">
                     <i class="fas fa-sign-out-alt"></i>
                     Đăng Xuất
                 </a>

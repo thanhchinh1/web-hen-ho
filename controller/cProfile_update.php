@@ -1,14 +1,16 @@
 <?php
-session_start();
+require_once '../models/mSession.php';
 require_once '../models/mProfile.php';
 
+Session::start();
+
 // Kiểm tra đăng nhập
-if (!isset($_SESSION['user_id'])) {
+if (!Session::isLoggedIn()) {
     echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập!']);
     exit;
 }
 
-$userId = $_SESSION['user_id'];
+$userId = Session::getUserId();
 $profile = new Profile();
 
 // Kiểm tra request method

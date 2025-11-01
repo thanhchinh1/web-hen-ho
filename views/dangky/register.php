@@ -1,12 +1,15 @@
 <?php
-require_once '../../models/session.php';
-redirectIfLoggedIn(); // Chuyển về trang chủ nếu đã đăng nhập
+require_once '../../models/mSession.php';
 
-$errors = isset($_SESSION['register_errors']) ? $_SESSION['register_errors'] : [];
-$formData = isset($_SESSION['register_data']) ? $_SESSION['register_data'] : [];
+Session::start();
+
+// Lấy lỗi và dữ liệu form từ session
+$errors = Session::get('register_errors', []);
+$formData = Session::get('register_data', []);
+
 // Xóa errors và data sau khi đã lấy
-unset($_SESSION['register_errors']);
-unset($_SESSION['register_data']);
+Session::delete('register_errors');
+Session::delete('register_data');
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -38,7 +41,7 @@ unset($_SESSION['register_data']);
             <?php endif; ?>
         </div>
 
-        <form action="../../controller/register.php" method="POST" id="registerForm">
+        <form action="../../controller/cRegister.php" method="POST" id="registerForm">
             <div class="form-group">
                 <label for="email">Email/SĐT</label>
                 <div class="input-wrapper">

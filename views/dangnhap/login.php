@@ -1,12 +1,23 @@
 <?php
-require_once '../../models/session.php';
-redirectIfLoggedIn(); // Chuyển về trang chủ nếu đã đăng nhập
+require_once '../../models/mSession.php';
 
-$errors = isset($_SESSION['login_errors']) ? $_SESSION['login_errors'] : [];
-$formData = isset($_SESSION['login_data']) ? $_SESSION['login_data'] : [];
-// Xóa errors và data sau khi đã lấy
-unset($_SESSION['login_errors']);
-unset($_SESSION['login_data']);
+Session::start();
+
+// Lấy thông báo thành công từ đăng ký (nếu có)
+$successMessage = Session::get('register_success', '');
+Session::delete('register_success');
+
+// Lấy email đã đăng ký (để tự động điền vào form)
+$registeredEmail = Session::get('registered_email', '');
+Session::delete('registered_email');
+
+// Lấy lỗi đăng nhập (nếu có)
+$errors = Session::get('login_errors', []);
+Session::delete('login_errors');
+
+// Lấy dữ liệu form đã nhập
+$formData = Session::get('login_data', []);
+Session::delete('login_data');
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -27,6 +38,12 @@ unset($_SESSION['login_data']);
             <h1>Chào Mừng Trở Lại!</h1>
             <p>Vui lòng đăng nhập vào tài khoản của bạn để tiếp tục tìm kiếm người đặc biệt.</p>
             
+            <?php if (!empty($successMessage)): ?>
+                <div class="success-container" style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($successMessage); ?>
+                </div>
+            <?php endif; ?>
+            
             <?php if (isset($_GET['redirect']) && $_GET['redirect'] === 'profile'): ?>
                 <div class="info-container" style="background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; padding: 15px; border-radius: 8px; margin: 10px 0;">
                     <i class="fas fa-info-circle"></i> Vui lòng đăng nhập để xem hồ sơ này
@@ -44,7 +61,7 @@ unset($_SESSION['login_data']);
             <?php endif; ?>
         </div>
 
-        <form action="../../controller/login.php<?php echo isset($_GET['redirect']) && isset($_GET['id']) ? '?redirect=' . htmlspecialchars($_GET['redirect']) . '&id=' . htmlspecialchars($_GET['id']) : ''; ?>" method="POST" id="loginForm">
+        <form action="../../controller/cLogin.php<?php echo isset($_GET['redirect']) && isset($_GET['id']) ? '?redirect=' . htmlspecialchars($_GET['redirect']) . '&id=' . htmlspecialchars($_GET['id']) : ''; ?>" method="POST" id="loginForm">
             <div class="form-group">
                 <label for="email">Email/SĐT</label>
                 <div class="input-wrapper">
@@ -54,7 +71,7 @@ unset($_SESSION['login_data']);
                         name="email" 
                         class="form-control" 
                         placeholder="email@example.com"
-                        value="<?php echo isset($formData['email']) ? htmlspecialchars($formData['email']) : ''; ?>"
+                        value="<?php echo !empty($registeredEmail) ? htmlspecialchars($registeredEmail) : (isset($formData['email']) ? htmlspecialchars($formData['email']) : ''); ?>"
                         required
                     >
                 </div>

@@ -1,10 +1,16 @@
 <?php
-require_once '../../models/session.php';
+require_once '../../models/mSession.php';
 require_once '../../models/mProfile.php';
 
-requireLogin(); // Yêu cầu đăng nhập
+Session::start();
 
-$currentUserId = getCurrentUserId();
+// Kiểm tra đăng nhập
+if (!Session::isLoggedIn()) {
+    header('Location: ../dangnhap/login.php');
+    exit;
+}
+
+$currentUserId = Session::getUserId();
 $profileModel = new Profile();
 $profile = $profileModel->getProfile($currentUserId);
 
@@ -35,7 +41,7 @@ $interests = explode(', ', $profile['soThich']);
         </a>
         
         <div class="header-right">
-            <a href="../../controller/logout.php" class="btn-logout">
+            <a href="../../controller/cLogout.php" class="btn-logout">
                 <i class="fas fa-sign-out-alt"></i>
                 Đăng Xuất
             </a>
