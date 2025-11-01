@@ -74,7 +74,6 @@ $interests = explode(', ', $profile['soThich']);
                 <div class="profile-avatar-section">
                     <img src="<?php echo $avatarSrc; ?>" alt="<?php echo htmlspecialchars($profile['ten']); ?>" class="profile-avatar" id="userAvatar">
                     <h1 class="profile-name" id="userName"><?php echo htmlspecialchars($profile['ten']); ?></h1>
-                    <p class="profile-info" id="userBasicInfo"><?php echo $age; ?> tuổi • <?php echo htmlspecialchars($profile['noiSong']); ?> • <?php echo htmlspecialchars($profile['tinhTrangHonNhan']); ?></p>
                 </div>
 
                 <!-- Action Buttons -->
@@ -105,32 +104,32 @@ $interests = explode(', ', $profile['soThich']);
                     <div class="info-list">
                         <div class="info-item">
                             <i class="fas fa-venus-mars"></i>
-                            <span class="info-label">Giới tính:</span>
+                            <span class="info-label">Giới tính</span>
                             <span class="info-value"><?php echo htmlspecialchars($profile['gioiTinh']); ?></span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-calendar-alt"></i>
-                            <span class="info-label">Tuổi:</span>
+                            <span class="info-label">Tuổi</span>
                             <span class="info-value"><?php echo $age; ?> tuổi</span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span class="info-label">Thành phố:</span>
+                            <span class="info-label">Thành phố</span>
                             <span class="info-value"><?php echo htmlspecialchars($profile['noiSong']); ?></span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-heart"></i>
-                            <span class="info-label">Tình trạng hôn nhân:</span>
+                            <span class="info-label">Tình trạng hôn nhân</span>
                             <span class="info-value"><?php echo htmlspecialchars($profile['tinhTrangHonNhan']); ?></span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-weight"></i>
-                            <span class="info-label">Cân nặng:</span>
+                            <span class="info-label">Cân nặng</span>
                             <span class="info-value"><?php echo htmlspecialchars($profile['canNang']); ?> kg</span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-ruler-vertical"></i>
-                            <span class="info-label">Chiều cao:</span>
+                            <span class="info-label">Chiều cao</span>
                             <span class="info-value"><?php echo htmlspecialchars($profile['chieuCao']); ?> cm</span>
                         </div>
                     </div>
@@ -143,12 +142,12 @@ $interests = explode(', ', $profile['soThich']);
                     <div class="info-list">
                         <div class="info-item">
                             <i class="fas fa-graduation-cap"></i>
-                            <span class="info-label">Học vấn:</span>
+                            <span class="info-label">Học vấn</span>
                             <span class="info-value"><?php echo htmlspecialchars($profile['hocVan']); ?></span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-bullseye"></i>
-                            <span class="info-label">Mục tiêu:</span>
+                            <span class="info-label">Mục tiêu</span>
                             <span class="info-value"><?php echo htmlspecialchars($profile['mucTieuPhatTrien']); ?></span>
                         </div>
                     </div>
@@ -211,41 +210,6 @@ $interests = explode(', ', $profile['soThich']);
         });
         const userId = urlParams.get('id');
 
-        // Sample user data
-        const users = {
-            1: {
-                name: 'Linh Nguyễn',
-                avatar: 'https://i.pravatar.cc/300?img=45',
-                birth: '01/01/1995',
-                city: 'TP.HCM',
-                status: 'Độc thân',
-                gender: 'Nữ'
-            },
-            2: {
-                name: 'Trần Văn Hưng',
-                avatar: 'https://i.pravatar.cc/300?img=33',
-                birth: '15/05/1992',
-                city: 'TP.HCM',
-                status: 'Độc thân',
-                gender: 'Nam'
-            },
-            3: {
-                name: 'Lê Thu Thảo',
-                avatar: 'https://i.pravatar.cc/300?img=28',
-                birth: '20/08/1998',
-                city: 'Đà Nẵng',
-                status: 'Độc thân',
-                gender: 'Nữ'
-            },
-            4: {
-                name: 'Phạm Minh Đức',
-                avatar: 'https://i.pravatar.cc/300?img=52',
-                birth: '10/03/1990',
-                city: 'Hà Nội',
-                status: 'Độc thân',
-                gender: 'Nam'
-            }
-        };
 
         // Load user data
         if (userId && users[userId]) {

@@ -16,6 +16,7 @@ $allProfiles = $profileModel->getAllProfiles(12);
     <link rel="stylesheet" href="public/css/home.css">
 </head>
 <body>
+    <div class="page-wrapper">
     <!-- Header -->
     <header class="main-header">
         <div class="header-container">
@@ -45,15 +46,113 @@ $allProfiles = $profileModel->getAllProfiles(12);
                 <p>Kết Nối Yêu Thương là nơi bạn có thể tìm thấy những người phù hợp, chia sẻ sở thích và bắt đầu những câu chuyện tình yêu đẹp.</p>
             </div>
             <div class="hero-illustration">
-                <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="heart-illustration">
-                    <path d="M200,350 C120,290 50,220 50,150 C50,100 80,70 130,70 C160,70 180,85 200,110 C220,85 240,70 270,70 C320,70 350,100 350,150 C350,220 280,290 200,350 Z" fill="#FFE5EC" stroke="#FF6B9D" stroke-width="3"/>
-                    <circle cx="160" cy="180" r="35" fill="#FFD7BA"/>
-                    <path d="M160,145 Q145,135 150,155 Q155,145 160,145 Q165,145 170,155 Q175,135 160,145 Z" fill="#5C3D2E"/>
-                    <rect x="145" y="200" width="30" height="45" rx="5" fill="#98D8C8"/>
-                    <circle cx="240" cy="180" r="35" fill="#FFD7BA"/>
-                    <path d="M240,145 Q225,135 230,155 Q235,145 240,145 Q245,145 250,155 Q255,135 240,145 Z" fill="#2C1810"/>
-                    <rect x="225" y="200" width="30" height="45" rx="5" fill="#5BC0DE"/>
-                    <circle cx="200" cy="200" r="5" fill="#FF1744"/>
+                <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" class="heart-illustration">
+                    <!-- Decorative background circles -->
+                    <defs>
+                        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FF6B9D;stop-opacity:0.3" />
+                            <stop offset="100%" style="stop-color:#FF8DB4;stop-opacity:0.1" />
+                        </linearGradient>
+                        <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FFE5EC;stop-opacity:0.8" />
+                            <stop offset="100%" style="stop-color:#FFF0F5;stop-opacity:0.4" />
+                        </linearGradient>
+                        <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FF6B9D;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#FF4081;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    
+                    <!-- Background decorative elements -->
+                    <circle cx="80" cy="80" r="40" fill="url(#grad1)" opacity="0.6">
+                        <animate attributeName="r" values="40;45;40" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="420" cy="100" r="30" fill="url(#grad2)" opacity="0.5">
+                        <animate attributeName="r" values="30;35;30" dur="4s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="70" cy="380" r="35" fill="url(#grad1)" opacity="0.4">
+                        <animate attributeName="r" values="35;40;35" dur="3.5s" repeatCount="indefinite"/>
+                    </circle>
+                    
+                    <!-- Main large heart in background -->
+                    <path d="M250,420 C170,360 100,290 100,220 C100,170 130,140 180,140 C210,140 230,155 250,180 C270,155 290,140 320,140 C370,140 400,170 400,220 C400,290 330,360 250,420 Z" 
+                          fill="url(#grad2)" opacity="0.3"/>
+                    
+                    <!-- Couple silhouettes - Modern minimalist style -->
+                    <!-- Female figure (left) -->
+                    <g id="female">
+                        <!-- Head -->
+                        <circle cx="200" cy="200" r="35" fill="#FFB6C1"/>
+                        <!-- Hair -->
+                        <path d="M200,165 Q165,165 165,200 Q165,220 180,225 Q180,210 200,210 Q220,210 220,225 Q235,220 235,200 Q235,165 200,165 Z" 
+                              fill="#8B4513"/>
+                        <!-- Body/Dress -->
+                        <path d="M200,235 L180,260 Q175,320 185,350 L215,350 Q225,320 220,260 Z" 
+                              fill="#FF6B9D" opacity="0.9"/>
+                        <!-- Arms -->
+                        <path d="M180,250 Q160,260 165,280" stroke="#FFB6C1" stroke-width="8" fill="none" stroke-linecap="round"/>
+                        <path d="M220,250 Q235,260 240,270" stroke="#FFB6C1" stroke-width="8" fill="none" stroke-linecap="round"/>
+                    </g>
+                    
+                    <!-- Male figure (right) -->
+                    <g id="male">
+                        <!-- Head -->
+                        <circle cx="300" cy="195" r="38" fill="#F4C2A5"/>
+                        <!-- Hair -->
+                        <path d="M300,157 Q265,157 265,190 Q265,175 280,175 Q290,165 300,165 Q310,165 320,175 Q335,175 335,190 Q335,157 300,157 Z" 
+                              fill="#2C1810"/>
+                        <!-- Body/Shirt -->
+                        <rect x="275" y="233" width="50" height="80" rx="8" fill="#5BC0DE" opacity="0.9"/>
+                        <path d="M275,233 L280,253 L295,243 L300,253 L305,243 L320,253 L325,233 Z" 
+                              fill="#4A9FBF"/>
+                        <!-- Arms -->
+                        <path d="M275,245 Q260,255 255,270" stroke="#F4C2A5" stroke-width="9" fill="none" stroke-linecap="round"/>
+                        <path d="M325,245 Q340,250 340,265" stroke="#F4C2A5" stroke-width="9" fill="none" stroke-linecap="round"/>
+                        <!-- Pants -->
+                        <rect x="280" y="313" width="20" height="37" rx="5" fill="#34495E"/>
+                        <rect x="300" y="313" width="20" height="37" rx="5" fill="#34495E"/>
+                    </g>
+                    
+                    <!-- Connecting heart between couple -->
+                    <path d="M250,280 C235,270 225,260 225,245 C225,235 230,230 237,230 C242,230 246,233 250,238 C254,233 258,230 263,230 C270,230 275,235 275,245 C275,260 265,270 250,280 Z" 
+                          fill="url(#heartGrad)">
+                        <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+                    </path>
+                    
+                    <!-- Floating hearts animation -->
+                    <g class="floating-hearts">
+                        <path d="M100,350 C95,345 90,340 90,333 C90,328 93,325 97,325 C100,325 102,327 104,330 C106,327 108,325 111,325 C115,325 118,328 118,333 C118,340 113,345 104,350 Z" 
+                              fill="#FF6B9D" opacity="0.6">
+                            <animateTransform attributeName="transform" type="translate" values="0,0; -10,-40; -15,-80" dur="4s" repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="0.6;0.3;0" dur="4s" repeatCount="indefinite"/>
+                        </path>
+                        
+                        <path d="M380,320 C375,315 370,310 370,303 C370,298 373,295 377,295 C380,295 382,297 384,300 C386,297 388,295 391,295 C395,295 398,298 398,303 C398,310 393,315 384,320 Z" 
+                              fill="#FFB6C1" opacity="0.5">
+                            <animateTransform attributeName="transform" type="translate" values="0,0; 10,-50; 15,-100" dur="5s" repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="0.5;0.2;0" dur="5s" repeatCount="indefinite"/>
+                        </path>
+                        
+                        <path d="M140,280 C137,277 134,274 134,269 C134,265 136,263 139,263 C141,263 143,264 144,266 C145,264 147,263 149,263 C152,263 154,265 154,269 C154,274 151,277 144,280 Z" 
+                              fill="#FF8DB4" opacity="0.7">
+                            <animateTransform attributeName="transform" type="translate" values="0,0; -5,-60; -8,-120" dur="6s" repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="0.7;0.3;0" dur="6s" repeatCount="indefinite"/>
+                        </path>
+                    </g>
+                    
+                    <!-- Sparkles -->
+                    <circle cx="150" cy="150" r="3" fill="#FFD700" opacity="0.8">
+                        <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="350" cy="170" r="2.5" fill="#FFD700" opacity="0.8">
+                        <animate attributeName="opacity" values="0;1;0" dur="2.5s" repeatCount="indefinite" begin="0.5s"/>
+                    </circle>
+                    <circle cx="180" cy="320" r="2" fill="#FFD700" opacity="0.8">
+                        <animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite" begin="1s"/>
+                    </circle>
+                    <circle cx="380" cy="280" r="3" fill="#FFD700" opacity="0.8">
+                        <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="1.5s"/>
+                    </circle>
                 </svg>
             </div>
         </div>
@@ -174,4 +273,5 @@ $allProfiles = $profileModel->getAllProfiles(12);
             document.body.appendChild(notification);
         }
     </script>
+    </div>
 </body>

@@ -48,7 +48,6 @@ $interests = explode(', ', $profile['soThich']);
                 <img src="<?php echo $avatarSrc; ?>" alt="Avatar" class="profile-avatar">
             </div>
             <h2 class="profile-name"><?php echo htmlspecialchars($profile['ten']); ?></h2>
-            <p class="profile-info"><?php echo $age; ?> tuổi • <?php echo htmlspecialchars($profile['noiSong']); ?> • <?php echo htmlspecialchars($profile['tinhTrangHonNhan']); ?></p>
         </div>
         <div class="profile-details">
             <section class="detail-section">
@@ -56,37 +55,37 @@ $interests = explode(', ', $profile['soThich']);
                 <div class="info-list">
                     <div class="info-item">
                         <i class="fas fa-venus-mars"></i>
-                        <span class="info-label">Giới tính:</span>
+                        <span class="info-label">Giới tính</span>
                         <span class="info-value"><?php echo htmlspecialchars($profile['gioiTinh']); ?></span>
                     </div>
                     <div class="info-item">
                         <i class="fas fa-calendar-alt"></i>
-                        <span class="info-label">Tuổi:</span>
+                        <span class="info-label">Tuổi</span>
                         <span class="info-value"><?php echo $age; ?> tuổi</span>
                     </div>
                     <div class="info-item">
                         <i class="fas fa-map-marker-alt"></i>
-                        <span class="info-label">Thành phố:</span>
+                        <span class="info-label">Thành phố</span>
                         <span class="info-value"><?php echo htmlspecialchars($profile['noiSong']); ?></span>
                     </div>
                     <div class="info-item">
                         <i class="fas fa-heart"></i>
-                        <span class="info-label">Tình trạng hôn nhân:</span>
+                        <span class="info-label">Tình trạng hôn nhân</span>
                         <span class="info-value"><?php echo htmlspecialchars($profile['tinhTrangHonNhan']); ?></span>
                     </div>
                     <div class="info-item">
                         <i class="fas fa-graduation-cap"></i>
-                        <span class="info-label">Học vấn:</span>
+                        <span class="info-label">Học vấn</span>
                         <span class="info-value"><?php echo htmlspecialchars($profile['hocVan']); ?></span>
                     </div>
                     <div class="info-item">
                         <i class="fas fa-weight"></i>
-                        <span class="info-label">Cân nặng:</span>
+                        <span class="info-label">Cân nặng</span>
                         <span class="info-value"><?php echo htmlspecialchars($profile['canNang']); ?> kg</span>
                     </div>
                     <div class="info-item">
                         <i class="fas fa-ruler-vertical"></i>
-                        <span class="info-label">Chiều cao:</span>
+                        <span class="info-label">Chiều cao</span>
                         <span class="info-value"><?php echo htmlspecialchars($profile['chieuCao']); ?> cm</span>
                     </div>
                 </div>
