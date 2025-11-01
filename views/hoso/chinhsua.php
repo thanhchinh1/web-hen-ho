@@ -126,7 +126,8 @@ $interests = explode(', ', $profile['soThich']);
                                     <option value="">Chọn tình trạng</option>
                                     <option value="Độc thân" <?php echo $profile['tinhTrangHonNhan'] == 'Độc thân' ? 'selected' : ''; ?>>Độc thân</option>
                                     <option value="Đã ly hôn" <?php echo $profile['tinhTrangHonNhan'] == 'Đã ly hôn' ? 'selected' : ''; ?>>Đã ly hôn</option>
-                                    <option value="Góa" <?php echo $profile['tinhTrangHonNhan'] == 'Góa' ? 'selected' : ''; ?>>Góa</option>
+                                    <option value="Mẹ đơn thân" <?php echo $profile['tinhTrangHonNhan'] == 'Mẹ đơn thân' ? 'selected' : ''; ?>>Mẹ đơn thân</option>
+                                    <option value="Cha đơn thân" <?php echo $profile['tinhTrangHonNhan'] == 'Cha đơn thân' ? 'selected' : ''; ?>>Cha đơn thân</option>
                                 </select>
                             </div>
                         </div>
@@ -154,10 +155,10 @@ $interests = explode(', ', $profile['soThich']);
                                 <label for="goal">Mục tiêu</label>
                                 <select id="goal" name="goal" required>
                                     <option value="">Chọn mục tiêu</option>
-                                    <option value="Hẹn hò nghiêm túc" <?php echo $profile['mucTieuPhatTrien'] == 'Hẹn hò nghiêm túc' ? 'selected' : ''; ?>>Hẹn hò nghiêm túc</option>
+                                    <option value="Hẹn hò" <?php echo $profile['mucTieuPhatTrien'] == 'Hẹn hò' ? 'selected' : ''; ?>>Hẹn hò</option>
                                     <option value="Kết bạn" <?php echo $profile['mucTieuPhatTrien'] == 'Kết bạn' ? 'selected' : ''; ?>>Kết bạn</option>
                                     <option value="Kết hôn" <?php echo $profile['mucTieuPhatTrien'] == 'Kết hôn' ? 'selected' : ''; ?>>Kết hôn</option>
-                                    <option value="Phát triển bản thân" <?php echo $profile['mucTieuPhatTrien'] == 'Phát triển bản thân' ? 'selected' : ''; ?>>Phát triển bản thân</option>
+                                    <option value="Tìm hiểu" <?php echo $profile['mucTieuPhatTrien'] == 'Tìm hiểu' ? 'selected' : ''; ?>>Tìm hiểu</option>
                                 </select>
                             </div>
 

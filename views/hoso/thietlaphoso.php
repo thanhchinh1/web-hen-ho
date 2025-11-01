@@ -106,7 +106,8 @@ $currentUserId = getCurrentUserId();
                                     <option value="">Chọn tình trạng</option>
                                     <option value="Độc thân">Độc thân</option>
                                     <option value="Đã ly hôn">Đã ly hôn</option>
-                                    <option value="Góa">Góa</option>
+                                    <option value="Mẹ đơn thân">Mẹ đơn thân</option>
+                                    <option value="Cha đơn thân">Cha đơn thân</option>
                                 </select>
                             </div>
                         </div>
@@ -134,10 +135,10 @@ $currentUserId = getCurrentUserId();
                                 <label for="goal">Mục tiêu</label>
                                 <select id="goal" name="goal" required>
                                     <option value="" selected>Chọn mục tiêu</option>
-                                    <option value="Hẹn hò nghiêm túc">Hẹn hò nghiêm túc</option>
                                     <option value="Kết bạn">Kết bạn</option>
-                                    <option value="Kết hôn">Kết hôn</option>
-                                    <option value="Phát triển bản thân">Phát triển bản thân</option>
+                                    <option value="Tìm hiểu">Tìm hiểu</option> 
+                                    <option value="Hẹn hò">Hẹn hò</option>  
+                                    <option value="Kết hôn">Kết hôn</option>  
                                 </select>
                             </div>
 

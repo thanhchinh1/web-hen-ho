@@ -32,9 +32,7 @@ $interests = explode(', ', $profile['soThich']);
             <img src="../../public/img/logo.jpg" alt="Kết Nối Yêu Thương">
             <span class="logo-text">DuyenHub</span>
         </a>
-        <div class="header-center">
-            <a href="../trangchu/index.php" class="nav-link">Trang chủ</a>
-        </div>
+        
         <div class="header-right">
             <a href="../../controller/logout.php" class="btn-logout">
                 <i class="fas fa-sign-out-alt"></i>

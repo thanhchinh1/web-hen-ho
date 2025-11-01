@@ -50,9 +50,10 @@ unset($_SESSION['register_data']);
                         placeholder="Nhập email hoặc số điện thoại"
                         value="<?php echo isset($formData['email']) ? htmlspecialchars($formData['email']) : ''; ?>"
                         required
+                        pattern="(?:(?:032|033|034|035|036|037|038|039|096|097|098|081|082|083|084|085|091|094|070|076|077|078|079|090|093)\\d{7})|(?:[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})"
                     >
                 </div>
-                <span class="error-message">Vui lòng nhập email hoặc số điện thoại hợp lệ</span>
+                <span class="error-message">Vui lòng nhập email hợp lệ hoặc số điện thoại hợp lệ</span>
             </div>
 
             <div class="form-group">
@@ -198,7 +199,8 @@ unset($_SESSION['register_data']);
             // Validate email/phone
             const email = document.getElementById('email').value.trim();
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            const phoneRegex = /^[0-9]{10,11}$/;
+            // Phone must be 10 digits and start with one of the allowed Vietnamese prefixes
+            const phoneRegex = /^(?:032|033|034|035|036|037|038|039|096|097|098|081|082|083|084|085|091|094|070|076|077|078|079|090|093)\d{7}$/;
             
             if (!emailRegex.test(email) && !phoneRegex.test(email)) {
                 document.getElementById('email').closest('.form-group').classList.add('error');
