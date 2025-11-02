@@ -1,5 +1,17 @@
 <?php
 require_once '../models/mSession.php';
+require_once '../models/mUser.php';
+
+Session::start();
+
+// Lấy userId trước khi hủy session
+$userId = Session::get('user_id');
+
+// Cập nhật trạng thái offline trước khi đăng xuất
+if ($userId) {
+    $userModel = new User();
+    $userModel->updateOfflineStatus($userId);
+}
 
 // Hủy session và đăng xuất
 Session::destroy();

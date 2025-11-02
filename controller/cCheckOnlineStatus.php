@@ -4,14 +4,15 @@
  * Dùng để cập nhật real-time trong chat
  */
 
-session_start();
+require_once '../models/mSession.php';
 require_once '../models/mDbconnect.php';
 require_once '../models/mUser.php';
 
+Session::start();
 header('Content-Type: application/json');
 
 // Kiểm tra đăng nhập
-if (!isset($_SESSION['maNguoiDung'])) {
+if (!Session::isLoggedIn()) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Chưa đăng nhập']);
     exit;
@@ -29,20 +30,34 @@ $userId = intval($_GET['userId']);
 try {
     $userModel = new User();
     
-    $isOnline = $userModel->isUserOnline($userId);
+    // Tối ưu: Gộp 2 query thành 1
     $lastActivity = $userModel->getLastActivity($userId);
     
+    $isOnline = false;
     $lastSeenText = '';
-    if ($isOnline) {
-        $lastSeenText = 'online';
-    } elseif ($lastActivity && $lastActivity['minutesAgo'] !== null) {
-        $minutes = $lastActivity['minutesAgo'];
-        if ($minutes < 60) {
-            $lastSeenText = $minutes . ' phút trước';
-        } elseif ($minutes < 1440) {
-            $lastSeenText = floor($minutes / 60) . ' giờ trước';
-        } else {
-            $lastSeenText = floor($minutes / 1440) . ' ngày trước';
+    
+    if ($lastActivity) {
+        // Kiểm tra online
+        if ($lastActivity['lanHoatDongCuoi'] === null) {
+            // Đã logout
+            $isOnline = false;
+            $lastSeenText = 'Không hoạt động';
+        } elseif ($lastActivity['minutesAgo'] !== null) {
+            if ($lastActivity['minutesAgo'] <= 5) {
+                // Online
+                $isOnline = true;
+                $lastSeenText = 'online';
+            } else {
+                // Offline - hiển thị thời gian
+                $minutes = $lastActivity['minutesAgo'];
+                if ($minutes < 60) {
+                    $lastSeenText = $minutes . ' phút trước';
+                } elseif ($minutes < 1440) {
+                    $lastSeenText = floor($minutes / 60) . ' giờ trước';
+                } else {
+                    $lastSeenText = floor($minutes / 1440) . ' ngày trước';
+                }
+            }
         }
     }
     

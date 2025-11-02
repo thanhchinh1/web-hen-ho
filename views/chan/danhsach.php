@@ -29,30 +29,101 @@ $blockedUsers = $blockModel->getBlockedUsers($currentUserId);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Danh sách chặn - WebHenHo</title>
-    <link rel="stylesheet" href="/public/css/blocked-list.css">
+    <link rel="stylesheet" href="/public/css/home.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .blocked-container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        
+        .page-header {
+            margin-bottom: 30px;
+        }
+        
+        .page-header h1 {
+            color: #e94057;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .blocked-list {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .blocked-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+        
+        .blocked-item:hover {
+            background: #f9f9f9;
+        }
+        
+        .blocked-item:last-child {
+            border-bottom: none;
+        }
+        
+        .blocked-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+        
+        .blocked-info {
+            flex: 1;
+        }
+        
+        .blocked-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .blocked-date {
+            font-size: 14px;
+            color: #999;
+        }
+        
+        .btn-unblock {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn-unblock:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+    </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="profile-header">
-        <a href="../trangchu/index.php" class="logo">
-            <img src="/public/img/logo.jpg" alt="Kết Nối Yêu Thương">
-            <span class="logo-text">DuyenHub</span>
-        </a>
-        
-    </header>
-    
-    <!-- Back button -->
-    <div class="back-button-container">
-        <button class="btn-back" onclick="window.location.href='../trangchu/index.php'">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-    </div>
+    <?php include __DIR__ . '/../layouts/header.php'; ?>
     
     <div class="blocked-container">
         <div class="page-header">
-            <h1> Danh sách chặn</h1>
-            
+            <h1><i class="fas fa-ban"></i> Danh sách chặn</h1>
+            <p style="color: #666;">Người dùng bạn đã chặn</p>
         </div>
         
         <?php if (empty($blockedUsers)): ?>
