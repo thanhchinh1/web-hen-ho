@@ -3,6 +3,8 @@ require_once 'mDbconnect.php';
 
 class User {
     private $conn;
+    private $onlineStatusCache = []; // Cache trạng thái online
+    private $cacheTimeout = 30; // Cache 30 giây
     
     public function __construct() {
         $db = clsConnect::getInstance();
@@ -54,6 +56,9 @@ class User {
                 if ($user['trangThaiNguoiDung'] === 'banned' || $user['trangThaiNguoiDung'] === 'locked') {
                     return ['status' => 'banned', 'message' => 'Tài khoản của bạn đã bị khóa do vi phạm chính sách. Vui lòng liên hệ admin để biết thêm chi tiết.'];
                 }
+                
+                // Cập nhật thời gian hoạt động khi đăng nhập thành công
+                $this->updateOnlineStatus($user['maNguoiDung']);
                 
                 return [
                     'status' => 'success', 
@@ -116,10 +121,22 @@ class User {
     
     /**
      * Kiểm tra user có online không (hoạt động trong 5 phút gần đây)
+     * Có cache để tối ưu performance
      */
     public function isUserOnline($userId) {
+        // Kiểm tra cache
+        $cacheKey = 'online_' . $userId;
+        if (isset($this->onlineStatusCache[$cacheKey])) {
+            $cached = $this->onlineStatusCache[$cacheKey];
+            // Nếu cache chưa hết hạn (30 giây)
+            if ((time() - $cached['time']) < $this->cacheTimeout) {
+                return $cached['value'];
+            }
+        }
+        
         $stmt = $this->conn->prepare("
-            SELECT TIMESTAMPDIFF(MINUTE, lanHoatDongCuoi, NOW()) as minutesAgo
+            SELECT lanHoatDongCuoi,
+                   TIMESTAMPDIFF(MINUTE, lanHoatDongCuoi, NOW()) as minutesAgo
             FROM nguoidung 
             WHERE maNguoiDung = ?
         ");
@@ -127,12 +144,25 @@ class User {
         $stmt->execute();
         $result = $stmt->get_result();
         
+        $isOnline = false;
         if ($result->num_rows > 0) {
             $data = $result->fetch_assoc();
-            // Online nếu hoạt động trong vòng 5 phút
-            return $data['minutesAgo'] !== null && $data['minutesAgo'] <= 5;
+            // Nếu lanHoatDongCuoi là NULL (đã đăng xuất), return false
+            if ($data['lanHoatDongCuoi'] === null) {
+                $isOnline = false;
+            } else {
+                // Online nếu hoạt động trong vòng 5 phút
+                $isOnline = $data['minutesAgo'] !== null && $data['minutesAgo'] <= 5;
+            }
         }
-        return false;
+        
+        // Lưu vào cache
+        $this->onlineStatusCache[$cacheKey] = [
+            'value' => $isOnline,
+            'time' => time()
+        ];
+        
+        return $isOnline;
     }
     
     /**
@@ -153,6 +183,32 @@ class User {
             return $result->fetch_assoc();
         }
         return null;
+    }
+    
+    /**
+     * Cập nhật trạng thái online khi đăng nhập
+     */
+    public function updateOnlineStatus($userId) {
+        $stmt = $this->conn->prepare("
+            UPDATE nguoidung 
+            SET lanHoatDongCuoi = NOW() 
+            WHERE maNguoiDung = ?
+        ");
+        $stmt->bind_param("i", $userId);
+        return $stmt->execute();
+    }
+    
+    /**
+     * Cập nhật trạng thái offline khi đăng xuất
+     */
+    public function updateOfflineStatus($userId) {
+        $stmt = $this->conn->prepare("
+            UPDATE nguoidung 
+            SET lanHoatDongCuoi = NULL
+            WHERE maNguoiDung = ?
+        ");
+        $stmt->bind_param("i", $userId);
+        return $stmt->execute();
     }
 }
 ?>

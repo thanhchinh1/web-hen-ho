@@ -4,17 +4,19 @@
  * Endpoint này được gọi định kỳ từ JavaScript để cập nhật thời gian hoạt động cuối
  */
 
-session_start();
+require_once '../models/mSession.php';
 require_once '../models/mDbconnect.php';
 
+Session::start();
+
 // Kiểm tra đăng nhập
-if (!isset($_SESSION['maNguoiDung'])) {
+if (!Session::isLoggedIn()) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Chưa đăng nhập']);
     exit;
 }
 
-$maNguoiDung = $_SESSION['maNguoiDung'];
+$maNguoiDung = Session::getUserId();
 
 // Cập nhật thời gian hoạt động cuối
 try {

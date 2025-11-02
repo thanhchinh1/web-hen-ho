@@ -324,33 +324,42 @@ if ($matchedUserId) {
                                 echo $age . ' tuổi • ' . htmlspecialchars($selectedMatch['noiSong']);
                                 ?>
                             </p>
-                            <?php 
-                            $isOnline = $userModel->isUserOnline($selectedMatch['maNguoiDung']);
-                            if ($isOnline): 
-                            ?>
-                                <p style="font-size: 11px; color: #28a745; margin: 4px 0 0 0; font-weight: 600;">
-                                    <i class="fas fa-circle" style="font-size: 8px;"></i> Đang hoạt động
-                                </p>
-                            <?php else:
-                                $lastActivity = $userModel->getLastActivity($selectedMatch['maNguoiDung']);
-                                if ($lastActivity && $lastActivity['minutesAgo'] !== null):
-                                    $minutes = $lastActivity['minutesAgo'];
-                                    $lastSeenText = '';
-                                    if ($minutes < 60) {
-                                        $lastSeenText = $minutes . ' phút trước';
-                                    } elseif ($minutes < 1440) {
-                                        $lastSeenText = floor($minutes / 60) . ' giờ trước';
-                                    } else {
-                                        $lastSeenText = floor($minutes / 1440) . ' ngày trước';
-                                    }
-                            ?>
-                                <p style="font-size: 11px; color: #95a5a6; margin: 4px 0 0 0; font-style: italic;">
-                                    <i class="far fa-clock"></i> Hoạt động <?php echo $lastSeenText; ?>
-                                </p>
-                            <?php 
-                                endif;
-                            endif; 
-                            ?>
+                            <!-- Trạng thái online sẽ được cập nhật bởi JavaScript -->
+                            <p class="online-status-text" style="font-size: 11px; margin: 4px 0 0 0;">
+                                <?php 
+                                $isOnline = $userModel->isUserOnline($selectedMatch['maNguoiDung']);
+                                if ($isOnline): 
+                                ?>
+                                    <span style="color: #28a745; font-weight: 600;">
+                                        <i class="fas fa-circle" style="font-size: 8px;"></i> Đang hoạt động
+                                    </span>
+                                <?php else:
+                                    $lastActivity = $userModel->getLastActivity($selectedMatch['maNguoiDung']);
+                                    if ($lastActivity && $lastActivity['lanHoatDongCuoi'] !== null && $lastActivity['minutesAgo'] !== null):
+                                        $minutes = $lastActivity['minutesAgo'];
+                                        $lastSeenText = '';
+                                        if ($minutes < 60) {
+                                            $lastSeenText = $minutes . ' phút trước';
+                                        } elseif ($minutes < 1440) {
+                                            $lastSeenText = floor($minutes / 60) . ' giờ trước';
+                                        } else {
+                                            $lastSeenText = floor($minutes / 1440) . ' ngày trước';
+                                        }
+                                ?>
+                                    <span style="color: #95a5a6; font-style: italic;">
+                                        <i class="far fa-clock"></i> Hoạt động <?php echo $lastSeenText; ?>
+                                    </span>
+                                <?php 
+                                    else:
+                                ?>
+                                    <span style="color: #95a5a6; font-style: italic;">
+                                        Không hoạt động
+                                    </span>
+                                <?php 
+                                    endif;
+                                endif; 
+                                ?>
+                            </p>
                         </div>
                     </div>
                     <button class="btn-close" onclick="window.location.href='../trangchu/index.php'">
@@ -623,31 +632,18 @@ if ($matchedUserId) {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Tìm header status element
-                    const headerDiv = document.querySelector('.chat-header .chat-user-info > div');
-                    if (!headerDiv) return;
+                    // Tìm element hiển thị status (đã có sẵn trong PHP)
+                    const statusElement = document.querySelector('.online-status-text');
+                    if (!statusElement) return;
                     
-                    // Xóa status cũ
-                    const oldStatus = headerDiv.querySelector('.online-status-text');
-                    if (oldStatus) oldStatus.remove();
-                    
-                    // Thêm status mới
-                    const statusP = document.createElement('p');
-                    statusP.className = 'online-status-text';
-                    statusP.style.fontSize = '11px';
-                    statusP.style.margin = '4px 0 0 0';
-                    
+                    // Cập nhật nội dung
                     if (data.isOnline) {
-                        statusP.style.color = '#28a745';
-                        statusP.style.fontWeight = '600';
-                        statusP.innerHTML = '<i class="fas fa-circle" style="font-size: 8px;"></i> Đang hoạt động';
-                    } else if (data.lastSeen) {
-                        statusP.style.color = '#95a5a6';
-                        statusP.style.fontStyle = 'italic';
-                        statusP.innerHTML = '<i class="far fa-clock"></i> Hoạt động ' + data.lastSeen;
+                        statusElement.innerHTML = '<span style="color: #28a745; font-weight: 600;"><i class="fas fa-circle" style="font-size: 8px;"></i> Đang hoạt động</span>';
+                    } else if (data.lastSeen && data.lastSeen !== '') {
+                        statusElement.innerHTML = '<span style="color: #95a5a6; font-style: italic;"><i class="far fa-clock"></i> Hoạt động ' + data.lastSeen + '</span>';
+                    } else {
+                        statusElement.innerHTML = '<span style="color: #95a5a6; font-style: italic;">Không hoạt động</span>';
                     }
-                    
-                    headerDiv.appendChild(statusP);
                     
                     // Cập nhật chấm online trong sidebar
                     updateSidebarOnlineStatus(partnerUserId, data.isOnline);

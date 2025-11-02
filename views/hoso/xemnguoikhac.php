@@ -74,7 +74,6 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hồ sơ <?php echo htmlspecialchars($profile['ten']); ?> - WebHenHo</title>
     <link rel="stylesheet" href="/public/css/profile.css">
-    <link rel="stylesheet" href="/public/css/view-profile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -654,6 +653,47 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
             }
         }
     </script>
+    <style>
+        .btn-like.liked {
+            background: linear-gradient(135deg, #e94057 0%, #ff6b9d 100%) !important;
+            color: white !important;
+        }
+        
+        .btn-matched {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+            color: white !important;
+            cursor: pointer;
+        }
+        
+        .btn-matched:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ea87a 100%) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            10%, 30% { transform: scale(0.9); }
+            20%, 40%, 60%, 80% { transform: scale(1.1); }
+            50%, 70% { transform: scale(1.05); }
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+    </style>
     </div>
     </div>
 </body>

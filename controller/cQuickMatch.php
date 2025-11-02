@@ -32,15 +32,24 @@ if (!$vipModel->isVIP($userId)) {
 
 $quickMatch = new QuickMatch();
 
+// Debug logging
+error_log("=== QUICK MATCH DEBUG ===");
+error_log("User ID: " . $userId);
+error_log("Action: " . $action);
+
 try {
     switch ($action) {
         case 'start':
+            error_log("Starting search for user " . $userId);
             // Bắt đầu tìm kiếm
             $result = $quickMatch->startSearching($userId);
+            
+            error_log("Start result: " . print_r($result, true));
             
             if ($result && isset($result['success'])) {
                 // Tìm thấy match ngay
                 $partner = $quickMatch->getPartnerInfo($userId, $result['partnerId']);
+                error_log("Found match immediately! Partner: " . $result['partnerId']);
                 echo json_encode([
                     'status' => 'matched',
                     'matchId' => $result['matchId'],
@@ -49,6 +58,7 @@ try {
                 ]);
             } else {
                 // Đang tìm kiếm
+                error_log("No immediate match, searching...");
                 echo json_encode([
                     'status' => 'searching',
                     'message' => 'Đang tìm kiếm người phù hợp...'
@@ -57,12 +67,16 @@ try {
             break;
             
         case 'check':
+            error_log("Checking match status for user " . $userId);
             // Kiểm tra trạng thái tìm kiếm (polling)
             $result = $quickMatch->checkForMatch($userId);
+            
+            error_log("Check result: " . print_r($result, true));
             
             if (isset($result['success']) && $result['success']) {
                 // Tìm thấy match
                 $partner = $quickMatch->getPartnerInfo($userId, $result['partnerId']);
+                error_log("Match found! Partner: " . $result['partnerId']);
                 echo json_encode([
                     'status' => 'matched',
                     'matchId' => $result['matchId'],
@@ -71,12 +85,14 @@ try {
                 ]);
             } elseif (isset($result['searching']) && $result['searching']) {
                 // Vẫn đang tìm
+                error_log("Still searching... Duration: " . $result['duration']);
                 echo json_encode([
                     'status' => 'searching',
                     'duration' => $result['duration']
                 ]);
             } else {
                 // Không tìm thấy
+                error_log("Not found");
                 echo json_encode([
                     'status' => 'not_found',
                     'message' => 'Không tìm thấy người phù hợp'

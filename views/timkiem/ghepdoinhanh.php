@@ -393,6 +393,7 @@ if (!$vipModel->isVIP($userId)) {
             }, 1000);
 
             // Gửi request bắt đầu tìm kiếm
+            console.log('🔍 Bắt đầu tìm kiếm...');
             fetch('../../controller/cQuickMatch.php', {
                 method: 'POST',
                 headers: {
@@ -400,26 +401,44 @@ if (!$vipModel->isVIP($userId)) {
                 },
                 body: 'action=start'
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('📡 Response status:', response.status);
+                return response.text().then(text => {
+                    console.log('📄 Response text:', text);
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('❌ JSON parse error:', e);
+                        throw new Error('Invalid JSON: ' + text);
+                    }
+                });
+            })
             .then(data => {
+                console.log('✅ Data received:', data);
                 if (data.status === 'matched') {
-                    // Tìm thấy ngay
+                    console.log('💕 Tìm thấy match ngay!');
                     showMatch(data);
                 } else if (data.status === 'searching') {
-                    // Bắt đầu polling
+                    console.log('⏳ Đang tìm kiếm, bắt đầu polling...');
                     startPolling();
+                } else if (data.error) {
+                    console.error('❌ Error từ server:', data.error, data.message);
+                    alert(data.message || 'Có lỗi xảy ra!');
+                    location.reload();
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra, vui lòng thử lại!');
+                console.error('❌ Catch error:', error);
+                alert('Có lỗi xảy ra: ' + error.message);
                 location.reload();
             });
         }
 
         function startPolling() {
+            console.log('📊 Bắt đầu polling mỗi 2 giây...');
             // Kiểm tra trạng thái mỗi 2 giây
             searchInterval = setInterval(() => {
+                console.log('🔄 Polling check...');
                 fetch('../../controller/cQuickMatch.php', {
                     method: 'POST',
                     headers: {
@@ -429,18 +448,23 @@ if (!$vipModel->isVIP($userId)) {
                 })
                 .then(response => response.json())
                 .then(data => {
+                    console.log('📊 Polling response:', data);
                     if (data.status === 'matched') {
+                        console.log('💕 Match found!');
                         showMatch(data);
                     } else if (data.status === 'not_found') {
+                        console.log('😢 Không tìm thấy');
                         // Không tìm thấy sau thời gian polling
                         clearInterval(searchInterval);
                         clearInterval(timerInterval);
                         alert('Không tìm thấy người phù hợp. Vui lòng thử lại sau!');
                         location.reload();
+                    } else if (data.status === 'searching') {
+                        console.log('⏳ Vẫn đang tìm... (duration: ' + data.duration + 's)');
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    console.error('❌ Polling error:', error);
                 });
             }, 2000);
         }
