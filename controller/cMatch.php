@@ -21,7 +21,15 @@ if (!Session::isLoggedIn()) {
 
 $currentUserId = Session::getUserId();
 
-// Chỉ chấp nhận POST request
+// Xử lý GET request cho action=count
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'count') {
+    $matchModel = new MatchModel();
+    $matches = $matchModel->getMyMatches($currentUserId);
+    echo json_encode(['count' => count($matches)]);
+    exit;
+}
+
+// Chỉ chấp nhận POST request cho các action khác
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Invalid request method']);
     exit;

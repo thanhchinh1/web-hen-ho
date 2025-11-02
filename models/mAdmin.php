@@ -107,6 +107,18 @@ class Admin {
      * Log hành động admin
      */
     public function logAction($adminId, $action, $details = null) {
+        // Kiểm tra xem adminId có tồn tại trong bảng Admin không
+        $checkStmt = $this->conn->prepare("SELECT maAdmin FROM Admin WHERE maAdmin = ?");
+        $checkStmt->bind_param("i", $adminId);
+        $checkStmt->execute();
+        $result = $checkStmt->get_result();
+        
+        // Chỉ ghi log nếu admin tồn tại trong bảng Admin
+        if ($result->num_rows === 0) {
+            // Admin từ bảng NguoiDung - bỏ qua việc ghi log
+            return true;
+        }
+        
         $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         
         $stmt = $this->conn->prepare("

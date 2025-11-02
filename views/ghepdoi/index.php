@@ -274,5 +274,38 @@ $matches = $matchModel->getMyMatches($userId);
     </div>
 
     <?php include '../layouts/footer.php'; ?>
+    
+    <script>
+        // Polling để kiểm tra match mới (từ ghép đôi nhanh)
+        let lastMatchCount = <?php echo count($matches); ?>;
+        
+        function checkForNewMatches() {
+            fetch('../../controller/cMatch.php?action=count')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.count > lastMatchCount) {
+                        console.log('🎉 Có match mới! Đang reload...');
+                        // Có match mới - reload trang
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking matches:', error);
+                });
+        }
+        
+        // Kiểm tra mỗi 3 giây
+        setInterval(checkForNewMatches, 3000);
+        
+        // Lắng nghe sự kiện từ localStorage (khi ghép đôi nhanh thành công ở tab khác)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'new_match') {
+                console.log('🎉 Phát hiện match mới từ tab khác!');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+            }
+        });
+    </script>
 </body>
 </html>

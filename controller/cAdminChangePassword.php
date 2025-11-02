@@ -4,8 +4,11 @@ require_once '../models/mAdmin.php';
 
 Session::start();
 
-// Kiểm tra đăng nhập admin
-if (!Session::get('is_admin')) {
+// Kiểm tra đăng nhập admin (hỗ trợ cả admin từ bảng Admin và bảng NguoiDung)
+$isAdminSession = Session::get('is_admin'); // Admin từ bảng Admin
+$userRole = Session::get('user_role'); // Admin từ bảng NguoiDung
+
+if (!$isAdminSession && $userRole !== 'admin') {
     Session::setFlash('admin_error', 'Vui lòng đăng nhập');
     header('Location: ../views/admin/dangnhap.php');
     exit;
@@ -16,7 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$adminId = Session::get('admin_id');
+// Lấy adminId phù hợp
+if ($isAdminSession) {
+    $adminId = Session::get('admin_id');
+} else {
+    $adminId = Session::get('user_id');
+}
 
 // Get form data
 $oldPassword = $_POST['old_password'] ?? '';

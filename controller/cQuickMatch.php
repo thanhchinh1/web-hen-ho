@@ -41,29 +41,16 @@ try {
     switch ($action) {
         case 'start':
             error_log("Starting search for user " . $userId);
-            // Bắt đầu tìm kiếm
+            // Bắt đầu tìm kiếm - CHỈ INSERT vào DB, KHÔNG tìm ngay
             $result = $quickMatch->startSearching($userId);
             
             error_log("Start result: " . print_r($result, true));
             
-            if ($result && isset($result['success'])) {
-                // Tìm thấy match ngay
-                $partner = $quickMatch->getPartnerInfo($userId, $result['partnerId']);
-                error_log("Found match immediately! Partner: " . $result['partnerId']);
-                echo json_encode([
-                    'status' => 'matched',
-                    'matchId' => $result['matchId'],
-                    'partner' => $partner,
-                    'score' => $result['score']
-                ]);
-            } else {
-                // Đang tìm kiếm
-                error_log("No immediate match, searching...");
-                echo json_encode([
-                    'status' => 'searching',
-                    'message' => 'Đang tìm kiếm người phù hợp...'
-                ]);
-            }
+            // LUÔN TRẢ VỀ STATUS SEARCHING
+            echo json_encode([
+                'status' => 'searching',
+                'message' => 'Đang chờ thu thập người dùng... (5s)'
+            ]);
             break;
             
         case 'check':

@@ -492,6 +492,11 @@ if (!$vipModel->isVIP($userId)) {
             matchId = data.matchId;
             const partner = data.partner;
             
+            // LƯU VÀO LOCALSTORAGE để trigger update cho trang "Đã ghép đôi"
+            localStorage.setItem('new_match', Date.now());
+            // Xóa sau 1 giây để có thể trigger lại lần sau
+            setTimeout(() => localStorage.removeItem('new_match'), 1000);
+            
             // Hiển thị màn hình match
             document.getElementById('searchingScreen').style.display = 'none';
             document.getElementById('matchScreen').classList.add('active');

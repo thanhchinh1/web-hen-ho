@@ -4,14 +4,25 @@ require_once '../models/mAdmin.php';
 
 Session::start();
 
-// Kiểm tra đăng nhập admin
-if (!Session::get('is_admin')) {
+// Kiểm tra đăng nhập admin (hỗ trợ cả admin từ bảng Admin và bảng NguoiDung)
+$isAdminSession = Session::get('is_admin'); // Admin từ bảng Admin
+$userRole = Session::get('user_role'); // Admin từ bảng NguoiDung
+
+if (!$isAdminSession && $userRole !== 'admin') {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
-$adminId = Session::get('admin_id');
-$adminRole = Session::get('admin_role');
+// Lấy thông tin admin
+if ($isAdminSession) {
+    // Admin từ bảng Admin
+    $adminId = Session::get('admin_id');
+    $adminRole = Session::get('admin_role');
+} else {
+    // Admin từ bảng NguoiDung (có toàn quyền)
+    $adminId = Session::get('user_id');
+    $adminRole = 'super_admin'; // Gán quyền super_admin cho admin từ bảng NguoiDung
+}
 
 // Chỉ super_admin và moderator mới được phép
 if ($adminRole === 'support') {

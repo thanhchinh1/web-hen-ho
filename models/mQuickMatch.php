@@ -14,6 +14,7 @@ class QuickMatch {
     
     /**
      * Bắt đầu tìm kiếm ghép đôi
+     * BATCH MATCHING: Chờ 5 giây rồi ghép tất cả cùng lúc
      */
     public function startSearching($userId) {
         // Hủy các tìm kiếm cũ của user này
@@ -21,24 +22,27 @@ class QuickMatch {
         
         // CẬP NHẬT thời gian hoạt động cuối để đánh dấu user đang online
         $updateStmt = $this->conn->prepare("
-            UPDATE NguoiDung 
+            UPDATE nguoidung 
             SET lanHoatDongCuoi = NOW() 
             WHERE maNguoiDung = ?
         ");
         $updateStmt->bind_param("i", $userId);
         $updateStmt->execute();
         
-        // Tạo yêu cầu tìm kiếm mới
+        // Tạo yêu cầu tìm kiếm mới với timestamp batch
+        // Batch ID = timestamp làm tròn đến 5 giây
+        // VD: 10:00:00-10:00:04 → batch 10:00:00
+        //     10:00:05-10:00:09 → batch 10:00:05
         $stmt = $this->conn->prepare("
-            INSERT INTO TimKiemGhepDoi (maNguoiDung, trangThai, thoiDiemBatDau) 
+            INSERT INTO timkiemghepdoi (maNguoiDung, trangThai, thoiDiemBatDau) 
             VALUES (?, 'searching', NOW())
         ");
         $stmt->bind_param("i", $userId);
         $result = $stmt->execute();
         
         if ($result) {
-            // Thử tìm match ngay lập tức
-            return $this->tryFindMatch($userId);
+            // KHÔNG TÌM NGAY - Chờ batch matching sau 5 giây
+            return ['status' => 'waiting', 'message' => 'Đang chờ thu thập người dùng...'];
         }
         
         return false;
@@ -50,7 +54,7 @@ class QuickMatch {
     public function cancelSearching($userId) {
         // XÓA HOÀN TOÀN bản ghi thay vì chỉ update trạng thái
         $stmt = $this->conn->prepare("
-            DELETE FROM TimKiemGhepDoi 
+            DELETE FROM timkiemghepdoi 
             WHERE maNguoiDung = ? AND trangThai = 'searching'
         ");
         $stmt->bind_param("i", $userId);
@@ -63,7 +67,7 @@ class QuickMatch {
     public function getSearchStatus($userId) {
         $stmt = $this->conn->prepare("
             SELECT maTimKiem, trangThai, thoiDiemBatDau 
-            FROM TimKiemGhepDoi 
+            FROM timkiemghepdoi 
             WHERE maNguoiDung = ? AND trangThai = 'searching'
             ORDER BY thoiDiemBatDau DESC 
             LIMIT 1
@@ -76,76 +80,138 @@ class QuickMatch {
     
     /**
      * Thử tìm người phù hợp trong hàng đợi
-     * CHỈ TÌM NGƯỜI ĐANG SEARCHING (cùng bấm ghép đôi nhanh)
+     * SỬ DỤNG THUẬT TOÁN GREEDY TOÀN CỤC - Ưu tiên cặp có điểm cao nhất
      */
     private function tryFindMatch($userId) {
         error_log("=== TRY FIND MATCH FOR USER $userId ===");
         
-        // CHỈ tìm người ĐANG TÌM KIẾM trong bảng TimKiemGhepDoi
-        // KHÔNG tìm người online bình thường
-        $stmt = $this->conn->prepare("
-            SELECT DISTINCT tk.maNguoiDung 
-            FROM TimKiemGhepDoi tk
-            INNER JOIN HoSo h ON tk.maNguoiDung = h.maNguoiDung
-            INNER JOIN NguoiDung n ON tk.maNguoiDung = n.maNguoiDung
-            WHERE tk.trangThai = 'searching'
-            AND n.trangThaiNguoiDung = 'active'
-            AND tk.maNguoiDung != ?
-            AND tk.thoiDiemBatDau >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
-        ");
-        $stmt->bind_param("i", $userId);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        // BẮT ĐẦU TRANSACTION
+        $this->conn->begin_transaction();
         
-        $searchingUsers = [];
-        while ($row = $result->fetch_assoc()) {
-            $searchingUsers[] = $row['maNguoiDung'];
-        }
-        
-        error_log("Người đang tìm kiếm (bấm ghép đôi nhanh): " . print_r($searchingUsers, true));
-        
-        if (empty($searchingUsers)) {
-            error_log("❌ KHÔNG CÓ AI ĐANG BẤM GHÉP ĐÔI NHANH!");
-            return false; // Không có ai đang searching
-        }
-        
-        error_log("Danh sách ứng viên: " . print_r($searchingUsers, true));
-        
-        // Lọc bỏ người đã match và bị chặn
-        $excludedUsers = $this->getExcludedUsers($userId);
-        error_log("Người bị loại trừ: " . print_r($excludedUsers, true));
-        
-        $candidateUsers = array_diff($searchingUsers, $excludedUsers);
-        
-        if (empty($candidateUsers)) {
-            error_log("❌ SAU KHI LỌC - KHÔNG CÒN AI!");
-            return false; // Không còn ai phù hợp
-        }
-        
-        error_log("Danh sách sau khi lọc: " . print_r($candidateUsers, true));
-        
-        // Tính độ phù hợp với từng người
-        $bestMatch = null;
-        $highestScore = 30; // Ngưỡng tối thiểu để ghép đôi (30%)
-        
-        foreach ($candidateUsers as $candidateId) {
-            $score = $this->matching->calculateCompatibility($userId, $candidateId);
-            error_log("Độ phù hợp với user $candidateId: $score%");
+        try {
+            // BƯỚC 1: LOCK và lấy TẤT CẢ người đang tìm kiếm
+            $stmt = $this->conn->prepare("
+                SELECT tk.maNguoiDung, tk.maTimKiem
+                FROM timkiemghepdoi tk
+                INNER JOIN hoso h ON tk.maNguoiDung = h.maNguoiDung
+                INNER JOIN nguoidung n ON tk.maNguoiDung = n.maNguoiDung
+                WHERE tk.trangThai = 'searching'
+                AND n.trangThaiNguoiDung = 'active'
+                AND tk.thoiDiemBatDau >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+                FOR UPDATE  -- LOCK các record này
+            ");
+            $stmt->execute();
+            $result = $stmt->get_result();
             
-            if ($score > $highestScore) {
-                $highestScore = $score;
-                $bestMatch = $candidateId;
+            $allSearchingUsers = [];
+            while ($row = $result->fetch_assoc()) {
+                $allSearchingUsers[] = $row['maNguoiDung'];
             }
+            
+            error_log("Tất cả người đang tìm kiếm: " . print_r($allSearchingUsers, true));
+            
+            if (count($allSearchingUsers) < 2) {
+                $this->conn->rollback();
+                error_log("❌ Ít hơn 2 người - không thể ghép đôi!");
+                return false;
+            }
+            
+            // BƯỚC 2: Tính điểm TẤT CẢ các cặp có thể
+            error_log("🔢 Tính điểm tất cả các cặp...");
+            $allPairs = [];
+            $processedUsers = [];
+            
+            for ($i = 0; $i < count($allSearchingUsers); $i++) {
+                $user1 = $allSearchingUsers[$i];
+                
+                // Kiểm tra user1 đã bị loại trừ chưa
+                $excluded1 = $this->getExcludedUsers($user1);
+                
+                for ($j = $i + 1; $j < count($allSearchingUsers); $j++) {
+                    $user2 = $allSearchingUsers[$j];
+                    
+                    // Kiểm tra 2 user có loại trừ nhau không
+                    $excluded2 = $this->getExcludedUsers($user2);
+                    
+                    if (in_array($user2, $excluded1) || in_array($user1, $excluded2)) {
+                        error_log("  ⛔ Skip: User $user1 <-> $user2 (bị loại trừ)");
+                        continue;
+                    }
+                    
+                    // Tính điểm 2 chiều và lấy trung bình
+                    $score1to2 = $this->matching->calculateCompatibility($user1, $user2);
+                    $score2to1 = $this->matching->calculateCompatibility($user2, $user1);
+                    $avgScore = ($score1to2 + $score2to1) / 2;
+                    
+                    error_log("  📊 User $user1 <-> $user2: {$score1to2}% / {$score2to1}% = Avg {$avgScore}%");
+                    
+                    if ($avgScore >= 30) { // Ngưỡng tối thiểu
+                        $allPairs[] = [
+                            'user1' => $user1,
+                            'user2' => $user2,
+                            'score' => $avgScore
+                        ];
+                    }
+                }
+            }
+            
+            if (empty($allPairs)) {
+                $this->conn->rollback();
+                error_log("❌ Không có cặp nào đủ điều kiện!");
+                return false;
+            }
+            
+            // BƯỚC 3: SẮP XẾP các cặp theo điểm GIẢM DẦN
+            usort($allPairs, function($a, $b) {
+                return $b['score'] <=> $a['score']; // Điểm cao nhất lên đầu
+            });
+            
+            error_log("📋 Danh sách cặp (đã sắp xếp):");
+            foreach ($allPairs as $idx => $pair) {
+                error_log("  " . ($idx+1) . ". User {$pair['user1']} <-> {$pair['user2']}: {$pair['score']}%");
+            }
+            
+            // BƯỚC 4: CHỌN CẶP TỐT NHẤT có chứa user hiện tại
+            $bestPairForCurrentUser = null;
+            
+            foreach ($allPairs as $pair) {
+                // Tìm cặp tốt nhất có chứa user hiện tại
+                if ($pair['user1'] == $userId || $pair['user2'] == $userId) {
+                    $bestPairForCurrentUser = $pair;
+                    break; // Đã tìm thấy cặp tốt nhất
+                }
+            }
+            
+            if (!$bestPairForCurrentUser) {
+                $this->conn->rollback();
+                error_log("❌ Không tìm thấy cặp phù hợp cho user $userId");
+                return false;
+            }
+            
+            // BƯỚC 5: Tạo match cho cặp tốt nhất
+            $partnerId = ($bestPairForCurrentUser['user1'] == $userId) 
+                ? $bestPairForCurrentUser['user2'] 
+                : $bestPairForCurrentUser['user1'];
+            
+            error_log("✅ CẶP TỐT NHẤT: User $userId <-> $partnerId ({$bestPairForCurrentUser['score']}%)");
+            
+            $result = $this->createMatchInTransaction($userId, $partnerId, $bestPairForCurrentUser['score']);
+            
+            if ($result) {
+                // COMMIT transaction
+                $this->conn->commit();
+                return $result;
+            } else {
+                $this->conn->rollback();
+                return false;
+            }
+            
+        } catch (Exception $e) {
+            // Rollback nếu có lỗi
+            $this->conn->rollback();
+            error_log("❌ ERROR in tryFindMatch: " . $e->getMessage());
+            return false;
         }
-        
-        // Nếu tìm thấy người phù hợp, tạo match
-        if ($bestMatch) {
-            error_log("✅ TÌM THẤY MATCH! User $bestMatch với điểm $highestScore%");
-            return $this->createMatch($userId, $bestMatch, $highestScore);
-        }
-        
-        error_log("❌ KHÔNG TÌM THẤY AI ĐỦ ĐIỀU KIỆN (điểm cao nhất: $highestScore%)");
-        return false;
     }
     
     /**
@@ -156,7 +222,7 @@ class QuickMatch {
         
         // Người đã chặn
         $stmt = $this->conn->prepare("
-            SELECT maNguoiBiChan FROM ChanNguoiDung WHERE maNguoiChan = ?
+            SELECT maNguoiBiChan FROM channguoidung WHERE maNguoiChan = ?
         ");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
@@ -167,7 +233,7 @@ class QuickMatch {
         
         // Người đã bị chặn mình
         $stmt = $this->conn->prepare("
-            SELECT maNguoiChan FROM ChanNguoiDung WHERE maNguoiBiChan = ?
+            SELECT maNguoiChan FROM channguoidung WHERE maNguoiBiChan = ?
         ");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
@@ -178,9 +244,9 @@ class QuickMatch {
         
         // Người đã match (chỉ loại người đã match thành công)
         $stmt = $this->conn->prepare("
-            SELECT maNguoiB FROM GhepDoi WHERE maNguoiA = ? AND trangThaiGhepDoi = 'matched'
+            SELECT maNguoiB FROM ghepdoi WHERE maNguoiA = ? AND trangThaiGhepDoi = 'matched'
             UNION
-            SELECT maNguoiA FROM GhepDoi WHERE maNguoiB = ? AND trangThaiGhepDoi = 'matched'
+            SELECT maNguoiA FROM ghepdoi WHERE maNguoiB = ? AND trangThaiGhepDoi = 'matched'
         ");
         $stmt->bind_param("ii", $userId, $userId);
         $stmt->execute();
@@ -193,14 +259,91 @@ class QuickMatch {
     }
     
     /**
-     * Tạo ghép đôi giữa 2 người
+     * Tạo ghép đôi giữa 2 người (SỬ DỤNG TRONG TRANSACTION)
+     */
+    private function createMatchInTransaction($userId1, $userId2, $compatibilityScore) {
+        error_log("🔄 createMatchInTransaction: User $userId1 <-> User $userId2");
+        
+        // Kiểm tra xem đã có ghép đôi chưa (với LOCK)
+        $stmt = $this->conn->prepare("
+            SELECT maGhepDoi FROM ghepdoi 
+            WHERE ((maNguoiA = ? AND maNguoiB = ?) OR (maNguoiA = ? AND maNguoiB = ?))
+            AND trangThaiGhepDoi = 'matched'
+            LIMIT 1
+            FOR UPDATE
+        ");
+        $stmt->bind_param("iiii", $userId1, $userId2, $userId2, $userId1);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            error_log("⚠️ Match đã tồn tại!");
+            $row = $result->fetch_assoc();
+            
+            // XÓA record tìm kiếm của cả 2
+            $this->deleteSearchRecordInTransaction($userId1);
+            $this->deleteSearchRecordInTransaction($userId2);
+            
+            return [
+                'success' => true,
+                'matchId' => $row['maGhepDoi'],
+                'partnerId' => $userId2,
+                'score' => $compatibilityScore
+            ];
+        }
+        
+        error_log("✨ Tạo match mới...");
+        
+        // Tạo ghép đôi mới
+        $stmt = $this->conn->prepare("
+            INSERT INTO ghepdoi (maNguoiA, maNguoiB, thoiDiemGhepDoi, trangThaiGhepDoi) 
+            VALUES (?, ?, NOW(), 'matched')
+        ");
+        $stmt->bind_param("ii", $userId1, $userId2);
+        
+        if ($stmt->execute()) {
+            $matchId = $this->conn->insert_id;
+            error_log("✅ Match created! ID: $matchId");
+            
+            // XÓA record tìm kiếm của cả 2 người
+            $this->deleteSearchRecordInTransaction($userId1);
+            $this->deleteSearchRecordInTransaction($userId2);
+            
+            // Tạo tin nhắn chào mừng
+            $this->createWelcomeMessage($matchId, $userId1, $userId2, $compatibilityScore);
+            
+            return [
+                'success' => true,
+                'matchId' => $matchId,
+                'partnerId' => $userId2,
+                'score' => $compatibilityScore
+            ];
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Xóa record tìm kiếm TRONG TRANSACTION
+     */
+    private function deleteSearchRecordInTransaction($userId) {
+        $stmt = $this->conn->prepare("
+            DELETE FROM timkiemghepdoi 
+            WHERE maNguoiDung = ? AND trangThai = 'searching'
+        ");
+        $stmt->bind_param("i", $userId);
+        return $stmt->execute();
+    }
+    
+    /**
+     * Tạo ghép đôi giữa 2 người (LEGACY - không dùng transaction)
      */
     private function createMatch($userId1, $userId2, $compatibilityScore) {
         error_log("🔄 createMatch: User $userId1 <-> User $userId2");
         
         // Kiểm tra xem đã có ghép đôi chưa
         $stmt = $this->conn->prepare("
-            SELECT maGhepDoi FROM GhepDoi 
+            SELECT maGhepDoi FROM ghepdoi 
             WHERE ((maNguoiA = ? AND maNguoiB = ?) OR (maNguoiA = ? AND maNguoiB = ?))
             AND trangThaiGhepDoi = 'matched'
             LIMIT 1
@@ -228,7 +371,7 @@ class QuickMatch {
         
         // Tạo ghép đôi mới
         $stmt = $this->conn->prepare("
-            INSERT INTO GhepDoi (maNguoiA, maNguoiB, thoiDiemGhepDoi, trangThaiGhepDoi) 
+            INSERT INTO ghepdoi (maNguoiA, maNguoiB, thoiDiemGhepDoi, trangThaiGhepDoi) 
             VALUES (?, ?, NOW(), 'matched')
         ");
         $stmt->bind_param("ii", $userId1, $userId2);
@@ -261,7 +404,7 @@ class QuickMatch {
      */
     private function updateSearchStatus($userId, $status) {
         $stmt = $this->conn->prepare("
-            UPDATE TimKiemGhepDoi 
+            UPDATE timkiemghepdoi 
             SET trangThai = ?, thoiDiemKetThuc = NOW() 
             WHERE maNguoiDung = ? AND trangThai = 'searching'
         ");
@@ -276,7 +419,7 @@ class QuickMatch {
         $message = "🎉 Chúc mừng! Bạn đã được ghép đôi với độ phù hợp {$score}%! Hãy bắt đầu cuộc trò chuyện nhé! 💕";
         
         $stmt = $this->conn->prepare("
-            INSERT INTO TinNhan (maGhepDoi, maNguoiGui, noiDung, thoiDiemGui) 
+            INSERT INTO tinnhan (maGhepDoi, maNguoiGui, noiDung, thoiDiemGui) 
             VALUES (?, NULL, ?, NOW())
         ");
         $stmt->bind_param("is", $matchId, $message);
@@ -285,14 +428,15 @@ class QuickMatch {
     
     /**
      * Kiểm tra xem có match mới không (dùng cho polling)
+     * BATCH MATCHING: Sau 5 giây, ghép tất cả người dùng cùng batch
      */
     public function checkForMatch($userId) {
         error_log("🔄 checkForMatch for user $userId");
         
-        // BƯỚC 1: Kiểm tra xem đã có match nào được tạo chưa (do user khác tạo)
+        // BƯỚC 1: Kiểm tra xem đã có match nào được tạo chưa
         $stmt = $this->conn->prepare("
             SELECT maGhepDoi, maNguoiA, maNguoiB, thoiDiemGhepDoi
-            FROM GhepDoi 
+            FROM ghepdoi 
             WHERE (maNguoiA = ? OR maNguoiB = ?)
             AND trangThaiGhepDoi = 'matched'
             ORDER BY thoiDiemGhepDoi DESC
@@ -303,11 +447,11 @@ class QuickMatch {
         $result = $stmt->get_result();
         
         if ($result->num_rows > 0) {
-            // ĐÃ CÓ MATCH! (do user khác tạo trong lúc đang tìm kiếm)
+            // ĐÃ CÓ MATCH!
             $matchData = $result->fetch_assoc();
             $partnerId = ($matchData['maNguoiA'] == $userId) ? $matchData['maNguoiB'] : $matchData['maNguoiA'];
             
-            error_log("✅ Tìm thấy match đã tồn tại! Match ID: {$matchData['maGhepDoi']}, Partner: $partnerId");
+            error_log("✅ Tìm thấy match! Match ID: {$matchData['maGhepDoi']}, Partner: $partnerId");
             
             // Xóa record tìm kiếm
             $this->cancelSearching($userId);
@@ -324,7 +468,7 @@ class QuickMatch {
             ];
         }
         
-        // BƯỚC 2: Kiểm tra trạng thái tìm kiếm hiện tại
+        // BƯỚC 2: Kiểm tra trạng thái tìm kiếm
         $status = $this->getSearchStatus($userId);
         
         if (!$status) {
@@ -332,20 +476,173 @@ class QuickMatch {
             return ['searching' => false];
         }
         
-        // BƯỚC 3: Thử tìm match mới
-        $match = $this->tryFindMatch($userId);
+        error_log("📊 Search status: " . print_r($status, true));
+        
+        // BƯỚC 3: Kiểm tra đã đủ 5 giây chưa
+        // SỬ DỤNG MySQL để tính thời gian tránh lỗi timezone
+        $stmt = $this->conn->prepare("
+            SELECT TIMESTAMPDIFF(SECOND, ?, NOW()) as duration
+        ");
+        $stmt->bind_param("s", $status['thoiDiemBatDau']);
+        $stmt->execute();
+        $durationResult = $stmt->get_result()->fetch_assoc();
+        $searchDuration = $durationResult['duration'];
+        
+        error_log("⏱️ Thời gian tìm kiếm: {$searchDuration}s (MySQL)");
+        
+        if ($searchDuration < 5) {
+            // CHƯA ĐỦ 5 GIÂY - Tiếp tục chờ
+            error_log("⏳ Chờ batch matching... ({$searchDuration}/5s)");
+            return [
+                'searching' => true,
+                'waiting' => true,
+                'duration' => $searchDuration,
+                'message' => 'Đang thu thập người dùng... (' . (5 - $searchDuration) . 's)'
+            ];
+        }
+        
+        // BƯỚC 4: ĐỦ 5 GIÂY - Thực hiện BATCH MATCHING
+        error_log("🎯 ĐỦ 5 GIÂY - Bắt đầu batch matching!");
+        
+        $match = $this->performBatchMatching($userId);
         
         if ($match) {
-            error_log("✅ Tìm thấy match mới!");
+            error_log("✅ Batch matching thành công!");
             return array_merge(['searching' => false], $match);
         }
         
-        // BƯỚC 4: Vẫn đang tìm kiếm
-        error_log("⏳ Vẫn đang tìm...");
+        // BƯỚC 5: Không tìm thấy sau 5 giây
+        error_log("❌ Không tìm thấy ai phù hợp sau 5 giây");
+        $this->cancelSearching($userId);
+        
         return [
-            'searching' => true,
-            'duration' => time() - strtotime($status['thoiDiemBatDau'])
+            'searching' => false,
+            'success' => false,
+            'message' => 'Không tìm thấy người phù hợp'
         ];
+    }
+    
+    /**
+     * Thực hiện batch matching - Ghép TẤT CẢ người dùng đã chờ đủ 5 giây
+     */
+    private function performBatchMatching($userId) {
+        error_log("=== BATCH MATCHING ===");
+        
+        // BẮT ĐẦU TRANSACTION
+        $this->conn->begin_transaction();
+        
+        try {
+            // Lấy TẤT CẢ người đã tìm kiếm >= 5 giây
+            $stmt = $this->conn->prepare("
+                SELECT tk.maNguoiDung
+                FROM timkiemghepdoi tk
+                INNER JOIN nguoidung n ON tk.maNguoiDung = n.maNguoiDung
+                WHERE tk.trangThai = 'searching'
+                AND n.trangThaiNguoiDung = 'active'
+                AND tk.thoiDiemBatDau <= DATE_SUB(NOW(), INTERVAL 5 SECOND)
+                FOR UPDATE
+            ");
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $batchUsers = [];
+            while ($row = $result->fetch_assoc()) {
+                $batchUsers[] = $row['maNguoiDung'];
+            }
+            
+            error_log("👥 Batch users (>= 5s): " . print_r($batchUsers, true));
+            
+            if (count($batchUsers) < 2) {
+                $this->conn->rollback();
+                error_log("❌ Ít hơn 2 người trong batch");
+                return false;
+            }
+            
+            // Tính điểm TẤT CẢ các cặp
+            $allPairs = [];
+            
+            for ($i = 0; $i < count($batchUsers); $i++) {
+                $user1 = $batchUsers[$i];
+                $excluded1 = $this->getExcludedUsers($user1);
+                
+                for ($j = $i + 1; $j < count($batchUsers); $j++) {
+                    $user2 = $batchUsers[$j];
+                    $excluded2 = $this->getExcludedUsers($user2);
+                    
+                    // Kiểm tra loại trừ
+                    if (in_array($user2, $excluded1) || in_array($user1, $excluded2)) {
+                        continue;
+                    }
+                    
+                    // Tính điểm trung bình 2 chiều
+                    $score1to2 = $this->matching->calculateCompatibility($user1, $user2);
+                    $score2to1 = $this->matching->calculateCompatibility($user2, $user1);
+                    $avgScore = ($score1to2 + $score2to1) / 2;
+                    
+                    if ($avgScore >= 30) {
+                        $allPairs[] = [
+                            'user1' => $user1,
+                            'user2' => $user2,
+                            'score' => $avgScore
+                        ];
+                    }
+                }
+            }
+            
+            if (empty($allPairs)) {
+                $this->conn->rollback();
+                error_log("❌ Không có cặp nào đủ điều kiện");
+                return false;
+            }
+            
+            // Sắp xếp theo điểm giảm dần
+            usort($allPairs, function($a, $b) {
+                return $b['score'] <=> $a['score'];
+            });
+            
+            error_log("📊 Tất cả các cặp (sorted):");
+            foreach ($allPairs as $idx => $pair) {
+                error_log("  " . ($idx+1) . ". User {$pair['user1']} <-> {$pair['user2']}: {$pair['score']}%");
+            }
+            
+            // Tìm cặp tốt nhất có chứa userId
+            $bestPairForCurrentUser = null;
+            
+            foreach ($allPairs as $pair) {
+                if ($pair['user1'] == $userId || $pair['user2'] == $userId) {
+                    $bestPairForCurrentUser = $pair;
+                    break;
+                }
+            }
+            
+            if (!$bestPairForCurrentUser) {
+                $this->conn->rollback();
+                error_log("❌ Không tìm thấy cặp cho user $userId");
+                return false;
+            }
+            
+            // Tạo match
+            $partnerId = ($bestPairForCurrentUser['user1'] == $userId) 
+                ? $bestPairForCurrentUser['user2'] 
+                : $bestPairForCurrentUser['user1'];
+            
+            error_log("✅ CẶP TỐT NHẤT: User $userId <-> $partnerId ({$bestPairForCurrentUser['score']}%)");
+            
+            $result = $this->createMatchInTransaction($userId, $partnerId, $bestPairForCurrentUser['score']);
+            
+            if ($result) {
+                $this->conn->commit();
+                return $result;
+            } else {
+                $this->conn->rollback();
+                return false;
+            }
+            
+        } catch (Exception $e) {
+            $this->conn->rollback();
+            error_log("❌ ERROR in performBatchMatching: " . $e->getMessage());
+            return false;
+        }
     }
     
     /**
@@ -355,8 +652,8 @@ class QuickMatch {
         $stmt = $this->conn->prepare("
             SELECT h.*, n.tenDangNhap,
                    TIMESTAMPDIFF(YEAR, h.ngaySinh, CURDATE()) as tuoi
-            FROM HoSo h
-            INNER JOIN NguoiDung n ON h.maNguoiDung = n.maNguoiDung
+            FROM hoso h
+            INNER JOIN nguoidung n ON h.maNguoiDung = n.maNguoiDung
             WHERE h.maNguoiDung = ?
         ");
         $stmt->bind_param("i", $partnerId);
@@ -371,7 +668,7 @@ class QuickMatch {
     public function cleanupOldSearches() {
         // XÓA các bản ghi quá cũ thay vì update
         $stmt = $this->conn->prepare("
-            DELETE FROM TimKiemGhepDoi 
+            DELETE FROM timkiemghepdoi 
             WHERE trangThai = 'searching' 
             AND thoiDiemBatDau < DATE_SUB(NOW(), INTERVAL 5 MINUTE)
         ");
