@@ -1,12 +1,26 @@
 <?php
-require_once '../../models/session.php';
-redirectIfLoggedIn(); // Chuyển về trang chủ nếu đã đăng nhập
+require_once '../../models/mSession.php';
 
-$errors = isset($_SESSION['register_errors']) ? $_SESSION['register_errors'] : [];
-$formData = isset($_SESSION['register_data']) ? $_SESSION['register_data'] : [];
+Session::start();
+
+// Chuyển về trang chủ nếu đã đăng nhập
+if (Session::isLoggedIn()) {
+    header('Location: ../trangchu/index.php');
+    exit;
+}
+
+$errors = Session::get('register_errors', []);
+$formData = Session::get('register_data', []);
 // Xóa errors và data sau khi đã lấy
-unset($_SESSION['register_errors']);
-unset($_SESSION['register_data']);
+Session::delete('register_errors');
+Session::delete('register_data');
+
+// Lấy action và targetUser từ URL nếu có
+$action = $_GET['action'] ?? '';
+$targetUser = $_GET['targetUser'] ?? '';
+
+// Lấy thông báo success nếu có
+$successMessage = Session::getFlash('register_success');
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -27,6 +41,12 @@ unset($_SESSION['register_data']);
             <h1>Đăng ký tài khoản</h1>
             <p>Hãy tham gia cộng đồng của chúng tôi để tìm thấy tình yêu!</p>
             
+            <?php if ($action === 'like' && !empty($targetUser)): ?>
+                <div class="info-container" style="background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <i class="fas fa-heart"></i> Đăng ký để thích hồ sơ này
+                </div>
+            <?php endif; ?>
+            
             <?php if (!empty($errors)): ?>
                 <div class="error-container" style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 8px; margin: 10px 0;">
                     <ul style="margin: 0; padding-left: 20px;">
@@ -38,7 +58,20 @@ unset($_SESSION['register_data']);
             <?php endif; ?>
         </div>
 
-        <form action="../../controller/register.php" method="POST" id="registerForm">
+        <?php
+        // Build form action URL with params
+        $formAction = '../../controller/cRegister.php';
+        $params = [];
+        if ($action === 'like' && !empty($targetUser)) {
+            $params[] = 'action=' . urlencode($action);
+            $params[] = 'targetUser=' . urlencode($targetUser);
+        }
+        if (!empty($params)) {
+            $formAction .= '?' . implode('&', $params);
+        }
+        ?>
+
+        <form action="<?php echo $formAction; ?>" method="POST" id="registerForm">
             <div class="form-group">
                 <label for="email">Email/SĐT</label>
                 <div class="input-wrapper">
@@ -125,8 +158,21 @@ unset($_SESSION['register_data']);
             </button>
         </div>
 
+        <?php
+        // Build login link with params
+        $loginLink = '../dangnhap/login.php';
+        $loginParams = [];
+        if ($action === 'like' && !empty($targetUser)) {
+            $loginParams[] = 'action=' . urlencode($action);
+            $loginParams[] = 'targetUser=' . urlencode($targetUser);
+        }
+        if (!empty($loginParams)) {
+            $loginLink .= '?' . implode('&', $loginParams);
+        }
+        ?>
+
         <div class="login-link">
-            Đã có tài khoản? <a href="../dangnhap/login.php">Đăng nhập</a>
+            Đã có tài khoản? <a href="<?php echo $loginLink; ?>">Đăng nhập</a>
         </div>
     </div>
 

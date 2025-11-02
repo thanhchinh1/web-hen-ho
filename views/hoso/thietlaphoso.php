@@ -1,9 +1,15 @@
 <?php
-require_once '../../models/session.php';
-requireLogin(); // Yêu cầu đăng nhập để truy cập trang này
+require_once '../../models/mSession.php';
 
-$currentUserEmail = getCurrentUserEmail();
-$currentUserId = getCurrentUserId();
+Session::start();
+
+if (!Session::isLoggedIn()) {
+    header('Location: ../dangnhap/login.php');
+    exit;
+}
+
+$currentUserEmail = Session::getUserEmail();
+$currentUserId = Session::getUserId();
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -24,7 +30,7 @@ $currentUserId = getCurrentUserId();
                 <span class="logo-text">DuyenHub</span>
             </a>
             <div class="nav-right">
-                <a href="../../controller/logout.php" class="btn-logout">
+                <a href="../../controller/cLogout.php" class="btn-logout">
                 <i class="fas fa-sign-out-alt"></i>
                 Đăng Xuất
                 </a>
@@ -353,7 +359,7 @@ $currentUserId = getCurrentUserId();
             showNotification('Đang xử lý...', 'loading');
             
             // Gửi request
-            fetch('../../controller/profile_setup.php', {
+            fetch('../../controller/cProfile_setup.php', {
                 method: 'POST',
                 body: formData
             })
@@ -362,7 +368,9 @@ $currentUserId = getCurrentUserId();
                 if (data.success) {
                     showNotification(data.message, 'success');
                     setTimeout(() => {
-                        window.location.href = '../trangchu/index.php';
+                        // Sử dụng redirect từ server nếu có, nếu không thì mặc định về trang chủ
+                        const redirectUrl = data.redirect || '../trangchu/index.php';
+                        window.location.href = redirectUrl;
                     }, 1500);
                 } else {
                     showNotification(data.message, 'error');

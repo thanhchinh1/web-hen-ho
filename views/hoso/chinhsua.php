@@ -1,11 +1,16 @@
 <?php
-require_once '../../models/session.php';
+require_once '../../models/mSession.php';
 require_once '../../models/mProfile.php';
 
-requireLogin(); // Yêu cầu đăng nhập để truy cập trang này
+Session::start();
 
-$currentUserEmail = getCurrentUserEmail();
-$currentUserId = getCurrentUserId();
+if (!Session::isLoggedIn()) {
+    header('Location: ../dangnhap/login.php');
+    exit;
+}
+
+$currentUserEmail = Session::getUserEmail();
+$currentUserId = Session::getUserId();
 
 // Lấy thông tin hồ sơ hiện tại
 $profileModel = new Profile();
@@ -45,7 +50,7 @@ $interests = explode(', ', $profile['soThich']);
                 <span class="logo-text">DuyenHub</span>
             </a>
             <div class="nav-right">
-                <a href="../../controller/logout.php" class="btn-logout">
+                <a href="../../controller/cLogout.php" class="btn-logout">
                 <i class="fas fa-sign-out-alt"></i>
                 Đăng Xuất
                 </a>
@@ -302,7 +307,7 @@ $interests = explode(', ', $profile['soThich']);
             showNotification('Đang xử lý...', 'loading');
             
             // Gửi request
-            fetch('../../controller/profile_update.php', {
+            fetch('../../controller/cProfile_update.php', {
                 method: 'POST',
                 body: formData
             })

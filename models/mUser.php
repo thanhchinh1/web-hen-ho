@@ -5,14 +5,8 @@ class User {
     private $conn;
     
     public function __construct() {
-        $db = new clsConnect();
+        $db = clsConnect::getInstance();
         $this->conn = $db->connect();
-    }
-    
-    public function __destruct() {
-        if ($this->conn) {
-            $this->conn->close();
-        }
     }
     
     // Kiểm tra email/SĐT đã tồn tại chưa
@@ -46,18 +40,25 @@ class User {
     
     // Đăng nhập
     public function login($email, $password) {
-        $stmt = $this->conn->prepare("SELECT maNguoiDung, matKhau FROM nguoidung WHERE tenDangNhap = ?");
+        $stmt = $this->conn->prepare("SELECT maNguoiDung, matKhau, trangThaiNguoiDung FROM nguoidung WHERE tenDangNhap = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
         
         if ($result->num_rows == 1) {
             $user = $result->fetch_assoc();
+            
+            // Kiểm tra mật khẩu
             if (password_verify($password, $user['matKhau'])) {
-                return $user['maNguoiDung']; // Trả về ID của user
+                // Kiểm tra trạng thái tài khoản
+                if ($user['trangThaiNguoiDung'] === 'banned' || $user['trangThaiNguoiDung'] === 'locked') {
+                    return ['status' => 'banned', 'message' => 'Tài khoản của bạn đã bị khóa do vi phạm chính sách. Vui lòng liên hệ admin để biết thêm chi tiết.'];
+                }
+                
+                return ['status' => 'success', 'userId' => $user['maNguoiDung']]; // Trả về ID của user
             }
         }
-        return false;
+        return ['status' => 'error', 'message' => 'Email/Số điện thoại hoặc mật khẩu không đúng!'];
     }
     
     // Lấy thông tin người dùng theo ID
@@ -78,7 +79,76 @@ class User {
         $user = $result->fetch_assoc();
         
         // Kiểm tra trạng thái hoặc các trường quan trọng khác
-        return $user && $user['trangThaiNguoiDung'] === 'hoat_dong';
+        return $user && $user['trangThaiNguoiDung'] === 'active';
+    }
+    
+    /**
+     * Xác minh mật khẩu hiện tại của user
+     */
+    public function verifyPassword($userId, $password) {
+        $stmt = $this->conn->prepare("SELECT matKhau FROM nguoidung WHERE maNguoiDung = ?");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 1) {
+            $user = $result->fetch_assoc();
+            return password_verify($password, $user['matKhau']);
+        }
+        return false;
+    }
+    
+    /**
+     * Cập nhật mật khẩu mới
+     */
+    public function updatePassword($userId, $newPassword) {
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        
+        $stmt = $this->conn->prepare("UPDATE nguoidung SET matKhau = ? WHERE maNguoiDung = ?");
+        $stmt->bind_param("si", $hashedPassword, $userId);
+        
+        return $stmt->execute();
+    }
+    
+    /**
+     * Kiểm tra user có online không (hoạt động trong 5 phút gần đây)
+     */
+    public function isUserOnline($userId) {
+        $stmt = $this->conn->prepare("
+            SELECT TIMESTAMPDIFF(MINUTE, lanHoatDongCuoi, NOW()) as minutesAgo
+            FROM nguoidung 
+            WHERE maNguoiDung = ?
+        ");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            $data = $result->fetch_assoc();
+            // Online nếu hoạt động trong vòng 5 phút
+            return $data['minutesAgo'] !== null && $data['minutesAgo'] <= 5;
+        }
+        return false;
+    }
+    
+    /**
+     * Lấy thời gian hoạt động cuối của user
+     */
+    public function getLastActivity($userId) {
+        $stmt = $this->conn->prepare("
+            SELECT lanHoatDongCuoi,
+                   TIMESTAMPDIFF(MINUTE, lanHoatDongCuoi, NOW()) as minutesAgo
+            FROM nguoidung 
+            WHERE maNguoiDung = ?
+        ");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc();
+        }
+        return null;
     }
 }
 ?>

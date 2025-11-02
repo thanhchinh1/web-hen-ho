@@ -218,6 +218,9 @@ $allProfiles = $profileModel->getAllProfiles(12);
 
         // Like button - yêu cầu đăng nhập
         function likeProfile(userId) {
+            // Lưu hành động like vào sessionStorage
+            sessionStorage.setItem('pending_like_action', userId);
+            
             const notification = document.createElement('div');
             notification.innerHTML = `
                 <div style="
@@ -237,7 +240,7 @@ $allProfiles = $profileModel->getAllProfiles(12);
                     </div>
                     <h3 style="margin: 0 0 10px 0; color: #2C3E50;">Vui lòng đăng nhập</h3>
                     <p style="margin: 0 0 20px 0; color: #666;">Bạn cần đăng nhập để thích hồ sơ này</p>
-                    <button onclick="window.location.href='views/dangnhap/login.php'" style="
+                    <button onclick="window.location.href='views/dangnhap/login.php?action=like&targetUser=' + ${userId}" style="
                         padding: 10px 30px;
                         background: #FF6B9D;
                         color: white;
