@@ -1,6 +1,7 @@
 <?php
 require_once '../../models/mSession.php';
 require_once '../../models/mVIP.php';
+require_once '../../models/mProfile.php';
 
 Session::start();
 
@@ -15,6 +16,11 @@ $vipModel = new VIP();
 $isVIP = $vipModel->isVIP($userId);
 $currentPackage = $vipModel->getCurrentVIPPackage($userId);
 $daysRemaining = $vipModel->getDaysRemaining($userId);
+
+// Lấy profile để hiển thị avatar
+$profileModel = new Profile();
+$profile = $profileModel->getProfile($userId);
+$avatarPath = !empty($profile['avt']) ? $profile['avt'] : 'public/img/default-avatar.jpg';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -23,6 +29,7 @@ $daysRemaining = $vipModel->getDaysRemaining($userId);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nâng cấp VIP - DuyenHub</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../public/css/user-dropdown.css">
     <style>
         * {
             margin: 0;
@@ -298,10 +305,12 @@ $daysRemaining = $vipModel->getDaysRemaining($userId);
                 <img src="../../public/img/logo.jpg" alt="DuyenHub">
                 <span>DuyenHub</span>
             </a>
-            <a href="../trangchu/index.php" class="btn-back">
-                <i class="fas fa-arrow-left"></i>
-                Quay lại
-            </a>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <a href="../trangchu/index.php" class="btn-back">
+                    <i class="fas fa-arrow-left"></i>
+                    Quay lại
+                </a>
+            </div>
         </div>
     </header>
     
@@ -389,5 +398,6 @@ $daysRemaining = $vipModel->getDaysRemaining($userId);
             <?php endif; ?>
         </div>
     </div>
+    <script src="../../public/js/user-dropdown.js"></script>
 </body>
 </html>

@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Validate các trường bắt buộc (không bắt buộc avatar khi chỉnh sửa)
 $requiredFields = ['fullName', 'gender', 'day', 'month', 'year', 'maritalStatus', 
-                   'weight', 'height', 'goal', 'education', 'location', 'description'];
+                   'goal', 'education', 'location'];
 
 foreach ($requiredFields as $field) {
     if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
@@ -101,13 +101,13 @@ $data = [
     'ngaySinh' => $ngaySinh,
     'gioiTinh' => $_POST['gender'],
     'tinhTrangHonNhan' => $_POST['maritalStatus'],
-    'canNang' => floatval($_POST['weight']),
-    'chieuCao' => floatval($_POST['height']),
+    'canNang' => isset($_POST['weight']) && !empty($_POST['weight']) ? floatval($_POST['weight']) : null,
+    'chieuCao' => isset($_POST['height']) && !empty($_POST['height']) ? floatval($_POST['height']) : null,
     'mucTieuPhatTrien' => $_POST['goal'],
     'hocVan' => $_POST['education'],
     'noiSong' => $_POST['location'],
     'soThich' => $soThich,
-    'moTa' => trim($_POST['description'])
+    'moTa' => isset($_POST['bio']) && !empty(trim($_POST['bio'])) ? trim($_POST['bio']) : ''
 ];
 
 // Kiểm tra xem đã có hồ sơ chưa

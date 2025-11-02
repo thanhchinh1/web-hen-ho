@@ -22,7 +22,6 @@ $userId = Session::getUserId();
 // Kiểm tra VIP
 $vipModel = new VIP();
 if (!$vipModel->isVIP($userId)) {
-    Session::setFlash('error_message', 'Bạn cần nâng cấp tài khoản VIP để sử dụng tính năng Ghép đôi nhanh!');
     header('Location: ../goivip/index.php');
     exit;
 }

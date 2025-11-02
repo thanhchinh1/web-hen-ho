@@ -242,7 +242,7 @@ class Profile {
             SELECT h.*, n.maNguoiDung, n.tenDangNhap
             FROM HoSo h
             INNER JOIN NguoiDung n ON h.maNguoiDung = n.maNguoiDung
-            WHERE n.trangThaiNguoiDung = 'active'
+            WHERE n.trangThaiNguoiDung = 'active' AND n.role != 'admin'
         ";
         
         $params = [];
@@ -256,111 +256,81 @@ class Profile {
             $params = array_merge($params, $excludeUserIds);
         }
         
-        // Filter theo giới tính
-        if (!empty($filters['gender'])) {
-            $genderMap = [
-                'male' => 'Nam',
-                'female' => 'Nu',
-                'other' => 'Khac'
-            ];
-            if (isset($genderMap[$filters['gender']])) {
-                $sql .= " AND h.gioiTinh = ?";
-                $types .= 's';
-                $params[] = $genderMap[$filters['gender']];
-            }
+        // Filter theo giới tính (dùng giá trị database trực tiếp)
+        if (!empty($filters['gender']) && $filters['gender'] !== 'all') {
+            $sql .= " AND h.gioiTinh = ?";
+            $types .= 's';
+            $params[] = $filters['gender'];
         }
         
-        // Filter theo tình trạng hôn nhân
-        if (!empty($filters['status'])) {
-            $statusMap = [
-                'single' => 'Độc thân',
-                'divorced' => 'Đã ly hôn',
-                'widowed' => 'Góa',
-                'separated' => 'Ly thân'
-            ];
-            if (isset($statusMap[$filters['status']])) {
-                $sql .= " AND h.tinhTrangHonNhan = ?";
-                $types .= 's';
-                $params[] = $statusMap[$filters['status']];
-            }
+        // Filter theo tình trạng hôn nhân (dùng giá trị database trực tiếp)
+        if (!empty($filters['status']) && $filters['status'] !== 'all') {
+            $sql .= " AND h.tinhTrangHonNhan = ?";
+            $types .= 's';
+            $params[] = $filters['status'];
         }
         
-        // Filter theo mục tiêu
-        if (!empty($filters['purpose'])) {
-            $purposeMap = [
-                'relationship' => 'Hẹn hò',
-                'friendship' => 'Kết bạn',
-                'marriage' => 'Kết hôn',
-                'casual' => 'Tìm hiểu'
-            ];
-            if (isset($purposeMap[$filters['purpose']])) {
-                $sql .= " AND h.mucTieuPhatTrien = ?";
-                $types .= 's';
-                $params[] = $purposeMap[$filters['purpose']];
-            }
+        // Filter theo mục tiêu (dùng giá trị database trực tiếp)
+        if (!empty($filters['purpose']) && $filters['purpose'] !== 'all') {
+            $sql .= " AND h.mucTieuPhatTrien = ?";
+            $types .= 's';
+            $params[] = $filters['purpose'];
         }
         
-        // Filter theo thành phố
-        if (!empty($filters['city'])) {
-            $cityMap = [
-                'hcm' => 'TP. Hồ Chí Minh',
-                'hn' => 'Hà Nội',
-                'dn' => 'Đà Nẵng',
-                'hp' => 'Hải Phòng',
-                'ct' => 'Cần Thơ'
-            ];
-            if (isset($cityMap[$filters['city']])) {
-                $sql .= " AND h.noiSong LIKE ?";
-                $types .= 's';
-                $params[] = '%' . $cityMap[$filters['city']] . '%';
-            }
+        // Filter theo thành phố (dùng giá trị database trực tiếp)
+        if (!empty($filters['city']) && $filters['city'] !== 'all') {
+            $sql .= " AND h.noiSong = ?";
+            $types .= 's';
+            $params[] = $filters['city'];
         }
         
-        // Filter theo sở thích
-        if (!empty($filters['interest'])) {
-            $interestMap = [
-                'travel' => 'Du lịch',
-                'music' => 'Nghe nhạc',
-                'sport' => 'Thể thao',
-                'cooking' => 'Nấu ăn',
-                'reading' => 'Đọc sách',
-                'movie' => 'Xem phim'
-            ];
-            if (isset($interestMap[$filters['interest']])) {
-                $sql .= " AND h.soThich LIKE ?";
+        // Filter theo sở thích (có thể có nhiều sở thích)
+        if (!empty($filters['interests']) && is_array($filters['interests'])) {
+            $interestConditions = [];
+            foreach ($filters['interests'] as $interest) {
+                $interestConditions[] = "h.soThich LIKE ?";
                 $types .= 's';
-                $params[] = '%' . $interestMap[$filters['interest']] . '%';
+                $params[] = '%' . $interest . '%';
+            }
+            if (!empty($interestConditions)) {
+                $sql .= " AND (" . implode(' OR ', $interestConditions) . ")";
             }
         }
         
         // Filter theo độ tuổi
-        if (!empty($filters['age'])) {
+        if (!empty($filters['ageRange'])) {
             $now = new DateTime();
+            $minDate = null;
+            $maxDate = null;
             
-            switch ($filters['age']) {
+            switch ($filters['ageRange']) {
                 case '18-25':
-                    $maxDate = $now->modify('-18 years')->format('Y-m-d');
-                    $minDate = (new DateTime())->modify('-25 years')->format('Y-m-d');
+                    $maxDate = (clone $now)->modify('-18 years')->format('Y-m-d');
+                    $minDate = (clone $now)->modify('-26 years')->format('Y-m-d');
                     break;
-                case '25-30':
-                    $maxDate = (new DateTime())->modify('-25 years')->format('Y-m-d');
-                    $minDate = (new DateTime())->modify('-30 years')->format('Y-m-d');
+                case '26-30':
+                    $maxDate = (clone $now)->modify('-26 years')->format('Y-m-d');
+                    $minDate = (clone $now)->modify('-31 years')->format('Y-m-d');
                     break;
-                case '30-35':
-                    $maxDate = (new DateTime())->modify('-30 years')->format('Y-m-d');
-                    $minDate = (new DateTime())->modify('-35 years')->format('Y-m-d');
+                case '31-35':
+                    $maxDate = (clone $now)->modify('-31 years')->format('Y-m-d');
+                    $minDate = (clone $now)->modify('-36 years')->format('Y-m-d');
                     break;
-                case '35-40':
-                    $maxDate = (new DateTime())->modify('-35 years')->format('Y-m-d');
-                    $minDate = (new DateTime())->modify('-40 years')->format('Y-m-d');
+                case '36-40':
+                    $maxDate = (clone $now)->modify('-36 years')->format('Y-m-d');
+                    $minDate = (clone $now)->modify('-41 years')->format('Y-m-d');
                     break;
-                case '40+':
-                    $maxDate = (new DateTime())->modify('-40 years')->format('Y-m-d');
+                case '41-50':
+                    $maxDate = (clone $now)->modify('-41 years')->format('Y-m-d');
+                    $minDate = (clone $now)->modify('-51 years')->format('Y-m-d');
+                    break;
+                case '51-100':
+                    $maxDate = (clone $now)->modify('-51 years')->format('Y-m-d');
                     $minDate = '1900-01-01';
                     break;
             }
             
-            if (isset($minDate) && isset($maxDate)) {
+            if ($minDate && $maxDate) {
                 $sql .= " AND h.ngaySinh BETWEEN ? AND ?";
                 $types .= 'ss';
                 $params[] = $minDate;

@@ -52,8 +52,68 @@ function timeAgo($datetime) {
     <title>Người đã thích bạn - WebHenHo</title>
     <link rel="stylesheet" href="/public/css/home.css">
     <link rel="stylesheet" href="/public/css/likes.css">
+    <link rel="stylesheet" href="/public/css/profile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Header styles */
+        .profile-header {
+            background: white;
+            padding: 12px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .logo img {
+            display: block;
+            max-height: 60px;
+            width: auto;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FF6B9D 0%, #FF8DB4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Segoe UI', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #FF6B9D 0%, #FF8DB4 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+        }
+
         .likes-container {
             max-width: 1200px;
             margin: 20px auto;
@@ -201,15 +261,55 @@ function timeAgo($datetime) {
             color: #999;
             font-size: 16px;
         }
+
+        /* Back button */
+        .back-button-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .btn-back {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #5BC0DE;
+            color: white;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(91, 192, 222, 0.3);
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(91, 192, 222, 0.4);
+        }
     </style>
 </head>
 <body>
-    <?php include __DIR__ . '/../layouts/header.php'; ?>
+    <!-- Header -->
+    <header class="profile-header">
+        <a href="../trangchu/index.php" class="logo">
+            <img src="/public/img/logo.jpg" alt="Kết Nối Yêu Thương">
+            <span class="logo-text">DuyenHub</span>
+        </a>
+    </header>
     
+    <!-- Back button -->
+    <div class="back-button-container">
+        <button class="btn-back" onclick="window.location.href='../trangchu/index.php'">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+    </div>
+
     <div class="likes-container">
         <div class="page-header">
-            <h1>💖 Người thích bạn</h1>
-            <p>Những người đã thả tim cho bạn</p>
+            <h1>Người thích bạn</h1>
         </div>
         
         <?php if (empty($likedByUsers)): ?>

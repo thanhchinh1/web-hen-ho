@@ -85,23 +85,11 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
                 <img src="/public/img/logo.jpg" alt="WebHenHo">
                 <span class="logo-text">WebHenHo</span>
             </a>
-            <div class="header-center">
-                <a href="../trangchu/index.php" class="nav-item active">
-                    <i class="fas fa-home"></i>
-                    Trang chủ
-                </a>
-            </div>
-            <div class="header-right">
-                <a href="../../controller/cLogout.php" class="btn-logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Đăng Xuất
-                </a>
-            </div>
         </header>
 
         <!-- Back button -->
         <div class="back-button-container">
-            <button class="btn-back" onclick="window.history.back()">
+            <button class="btn-back" onclick="window.location.href='../trangchu/index.php'">
                 <i class="fas fa-arrow-left"></i>
             </button>
         </div>

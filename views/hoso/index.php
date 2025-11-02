@@ -36,6 +36,7 @@ $interests = explode(', ', $profile['soThich']);
     <meta charset="UTF-8">
     <title>Hồ sơ cá nhân - Kết Nối Yêu Thương</title>
     <link rel="stylesheet" href="../../public/css/profile.css">
+    <link rel="stylesheet" href="../../public/css/user-dropdown.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -56,7 +57,7 @@ $interests = explode(', ', $profile['soThich']);
 
     <!-- Back button -->
     <div class="back-button-container">
-        <button class="btn-back" onclick="window.history.back()">
+        <button class="btn-back" onclick="window.location.href='../trangchu/index.php'">
             <i class="fas fa-arrow-left"></i>
         </button>
     </div>
@@ -126,5 +127,6 @@ $interests = explode(', ', $profile['soThich']);
         </div>
     </div>
     </div>
+    <script src="../../public/js/user-dropdown.js"></script>
 </body>
 </html>

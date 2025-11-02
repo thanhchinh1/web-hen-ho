@@ -364,55 +364,101 @@ $infoMessage = Session::getFlash('info_message');
                             <label>Giới tính</label>
                             <select class="modal-form-select" id="gender">
                                 <option value="">Tất cả</option>
-                                <option value="male">Nam</option>
-                                <option value="female">Nữ</option>
-                                <option value="other">Khác</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khac">Khác</option>
                             </select>
                         </div>
 
                         <div class="modal-form-group">
-                            <label>Hôn nhân</label>
+                            <label>Tình trạng hôn nhân</label>
                             <select class="modal-form-select" id="status">
                                 <option value="">Tất cả</option>
-                                <option value="single">Độc thân</option>
-                                <option value="divorced">Đã ly hôn</option>
-                                <option value="widowed">Góa</option>
+                                <option value="Độc thân">Độc thân</option>
+                                <option value="Đã ly hôn">Đã ly hôn</option>
+                                <option value="Mẹ đơn thân">Mẹ đơn thân</option>
+                                <option value="Cha đơn thân">Cha đơn thân</option>
                             </select>
                         </div>
 
                         <div class="modal-form-group">
-                            <label>Mục tiêu</label>
+                            <label>Mục tiêu phát triển</label>
                             <select class="modal-form-select" id="purpose">
                                 <option value="">Tất cả</option>
-                                <option value="relationship">Hẹn hò nghiêm túc</option>
-                                <option value="friendship">Kết bạn</option>
-                                <option value="marriage">Kết hôn</option>
-                                <option value="casual">Tìm hiểu</option>
+                                <option value="Hẹn hò nghiêm túc">Hẹn hò nghiêm túc</option>
+                                <option value="Kết bạn">Kết bạn</option>
+                                <option value="Kết hôn">Kết hôn</option>
+                                <option value="Tìm hiểu">Tìm hiểu</option>
                             </select>
                         </div>
 
                         <div class="modal-form-group">
-                            <label>Thành Phố</label>
+                            <label>Nơi sống</label>
                             <select class="modal-form-select" id="city">
                                 <option value="">Tất cả</option>
-                                <option value="hcm">TP. Hồ Chí Minh</option>
-                                <option value="hn">Hà Nội</option>
-                                <option value="dn">Đà Nẵng</option>
-                                <option value="hp">Hải Phòng</option>
-                                <option value="ct">Cần Thơ</option>
-                            </select>
-                        </div>
-
-                        <div class="modal-form-group">
-                            <label>Sở thích</label>
-                            <select class="modal-form-select" id="interest">
-                                <option value="">Tất cả</option>
-                                <option value="travel">Du lịch</option>
-                                <option value="music">Âm nhạc</option>
-                                <option value="sport">Thể thao</option>
-                                <option value="cooking">Nấu ăn</option>
-                                <option value="reading">Đọc sách</option>
-                                <option value="movie">Xem phim</option>
+                                <option value="TP Hồ Chí Minh">TP Hồ Chí Minh</option>
+                                <option value="Hà Nội">Hà Nội</option>
+                                <option value="Đà Nẵng">Đà Nẵng</option>
+                                <option value="Hải Phòng">Hải Phòng</option>
+                                <option value="Cần Thơ">Cần Thơ</option>
+                                <option value="An Giang">An Giang</option>
+                                <option value="Bà Rịa - Vũng Tàu">Bà Rịa - Vũng Tàu</option>
+                                <option value="Bắc Giang">Bắc Giang</option>
+                                <option value="Bắc Kạn">Bắc Kạn</option>
+                                <option value="Bạc Liêu">Bạc Liêu</option>
+                                <option value="Bắc Ninh">Bắc Ninh</option>
+                                <option value="Bến Tre">Bến Tre</option>
+                                <option value="Bình Định">Bình Định</option>
+                                <option value="Bình Dương">Bình Dương</option>
+                                <option value="Bình Phước">Bình Phước</option>
+                                <option value="Bình Thuận">Bình Thuận</option>
+                                <option value="Cà Mau">Cà Mau</option>
+                                <option value="Cao Bằng">Cao Bằng</option>
+                                <option value="Đắk Lắk">Đắk Lắk</option>
+                                <option value="Đắk Nông">Đắk Nông</option>
+                                <option value="Điện Biên">Điện Biên</option>
+                                <option value="Đồng Nai">Đồng Nai</option>
+                                <option value="Đồng Tháp">Đồng Tháp</option>
+                                <option value="Gia Lai">Gia Lai</option>
+                                <option value="Hà Giang">Hà Giang</option>
+                                <option value="Hà Nam">Hà Nam</option>
+                                <option value="Hà Tĩnh">Hà Tĩnh</option>
+                                <option value="Hải Dương">Hải Dương</option>
+                                <option value="Hậu Giang">Hậu Giang</option>
+                                <option value="Hòa Bình">Hòa Bình</option>
+                                <option value="Hưng Yên">Hưng Yên</option>
+                                <option value="Khánh Hòa">Khánh Hòa</option>
+                                <option value="Kiên Giang">Kiên Giang</option>
+                                <option value="Kon Tum">Kon Tum</option>
+                                <option value="Lai Châu">Lai Châu</option>
+                                <option value="Lâm Đồng">Lâm Đồng</option>
+                                <option value="Lạng Sơn">Lạng Sơn</option>
+                                <option value="Lào Cai">Lào Cai</option>
+                                <option value="Long An">Long An</option>
+                                <option value="Nam Định">Nam Định</option>
+                                <option value="Nghệ An">Nghệ An</option>
+                                <option value="Ninh Bình">Ninh Bình</option>
+                                <option value="Ninh Thuận">Ninh Thuận</option>
+                                <option value="Phú Thọ">Phú Thọ</option>
+                                <option value="Phú Yên">Phú Yên</option>
+                                <option value="Quảng Bình">Quảng Bình</option>
+                                <option value="Quảng Nam">Quảng Nam</option>
+                                <option value="Quảng Ngãi">Quảng Ngãi</option>
+                                <option value="Quảng Ninh">Quảng Ninh</option>
+                                <option value="Quảng Trị">Quảng Trị</option>
+                                <option value="Sóc Trăng">Sóc Trăng</option>
+                                <option value="Sơn La">Sơn La</option>
+                                <option value="Tây Ninh">Tây Ninh</option>
+                                <option value="Thái Bình">Thái Bình</option>
+                                <option value="Thái Nguyên">Thái Nguyên</option>
+                                <option value="Thanh Hóa">Thanh Hóa</option>
+                                <option value="Thừa Thiên Huế">Thừa Thiên Huế</option>
+                                <option value="Tiền Giang">Tiền Giang</option>
+                                <option value="Trà Vinh">Trà Vinh</option>
+                                <option value="Tuyên Quang">Tuyên Quang</option>
+                                <option value="Vĩnh Long">Vĩnh Long</option>
+                                <option value="Vĩnh Phúc">Vĩnh Phúc</option>
+                                <option value="Yên Bái">Yên Bái</option>
                             </select>
                         </div>
 
@@ -420,12 +466,79 @@ $infoMessage = Session::getFlash('info_message');
                             <label>Tuổi</label>
                             <select class="modal-form-select" id="age">
                                 <option value="">Tất cả</option>
-                                <option value="18-25">18 đến 25</option>
-                                <option value="25-30">25 đến 30</option>
-                                <option value="30-35">30 đến 35</option>
-                                <option value="35-40">35 đến 40</option>
-                                <option value="40+">40+</option>
+                                <option value="18-25">18 - 25 tuổi</option>
+                                <option value="26-30">26 - 30 tuổi</option>
+                                <option value="31-35">31 - 35 tuổi</option>
+                                <option value="36-40">36 - 40 tuổi</option>
+                                <option value="41-50">41 - 50 tuổi</option>
+                                <option value="51-100">Trên 50 tuổi</option>
                             </select>
+                        </div>
+
+                        <div class="modal-form-group full-width">
+                            <label>Sở thích (chọn nhiều)</label>
+                            <div class="interests-selection" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-top: 10px;">
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Đọc sách"> Đọc sách
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Xem phim"> Xem phim
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Nghe nhạc"> Nghe nhạc
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Du lịch"> Du lịch
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Thể thao"> Thể thao
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Nấu ăn"> Nấu ăn
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Chụp ảnh"> Chụp ảnh
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Học ngoại ngữ"> Học ngoại ngữ
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Làm vườn"> Làm vườn
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Chơi game"> Chơi game
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Thiền"> Thiền
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Vẽ"> Vẽ
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Khiêu vũ"> Khiêu vũ
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Ca hát"> Ca hát
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Tập gym"> Tập gym
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Bơi lội"> Bơi lội
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Leo núi"> Leo núi
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Cắm trại"> Cắm trại
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Mua sắm"> Mua sắm
+                                </label>
+                                <label class="interest-checkbox">
+                                    <input type="checkbox" value="Thời trang"> Thời trang
+                                </label>
+                            </div>
                         </div>
                     </div>
 
@@ -464,8 +577,11 @@ $infoMessage = Session::getFlash('info_message');
             const status = document.getElementById('status').value;
             const purpose = document.getElementById('purpose').value;
             const city = document.getElementById('city').value;
-            const interest = document.getElementById('interest').value;
             const age = document.getElementById('age').value;
+            
+            // Lấy tất cả sở thích đã chọn
+            const interestCheckboxes = document.querySelectorAll('.interest-checkbox input[type="checkbox"]:checked');
+            const interests = Array.from(interestCheckboxes).map(cb => cb.value);
 
             // Show loading notification
             const loadingNotif = document.createElement('div');
@@ -501,12 +617,18 @@ $infoMessage = Session::getFlash('info_message');
             document.body.appendChild(loadingNotif);
 
             // Gửi request AJAX
+            const formData = new FormData();
+            formData.append('action', 'search');
+            formData.append('gender', gender);
+            formData.append('status', status);
+            formData.append('purpose', purpose);
+            formData.append('city', city);
+            formData.append('age', age);
+            formData.append('interests', JSON.stringify(interests));
+            
             fetch('../../controller/cSearch.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `action=search&gender=${gender}&status=${status}&purpose=${purpose}&city=${city}&interest=${interest}&age=${age}`
+                body: formData
             })
             .then(response => response.json())
             .then(data => {

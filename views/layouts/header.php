@@ -3,7 +3,14 @@
 if (!isset($currentUserId)) {
     $currentUserId = Session::getUserId();
 }
+
+// Lấy thông tin profile để hiển thị avatar
+require_once __DIR__ . '/../../models/mProfile.php';
+$profileModel = new Profile();
+$profile = $profileModel->getProfile($currentUserId);
+$avatarPath = !empty($profile['avt']) ? $profile['avt'] : 'public/img/default-avatar.jpg';
 ?>
+<link rel="stylesheet" href="/public/css/user-dropdown.css">
 <header class="main-header" style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 15px 0; position: sticky; top: 0; z-index: 1000;">
     <div class="header-container" style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px;">
         <a href="/views/trangchu/index.php" class="logo" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
@@ -30,3 +37,4 @@ if (!isset($currentUserId)) {
         </nav>
     </div>
 </header>
+<script src="/public/js/user-dropdown.js"></script>

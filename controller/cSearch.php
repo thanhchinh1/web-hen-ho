@@ -30,13 +30,21 @@ if ($action !== 'search') {
 }
 
 // Lấy tham số tìm kiếm
+$interests = [];
+if (isset($_POST['interests']) && !empty($_POST['interests'])) {
+    $decoded = json_decode($_POST['interests'], true);
+    if (is_array($decoded)) {
+        $interests = $decoded;
+    }
+}
+
 $filters = [
     'gender' => $_POST['gender'] ?? '',
     'status' => $_POST['status'] ?? '',
     'purpose' => $_POST['purpose'] ?? '',
     'city' => $_POST['city'] ?? '',
-    'interest' => $_POST['interest'] ?? '',
-    'age' => $_POST['age'] ?? ''
+    'interests' => $interests,
+    'ageRange' => $_POST['ageRange'] ?? ''
 ];
 
 try {
