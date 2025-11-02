@@ -4,9 +4,15 @@ require_once '../../models/mAdmin.php';
 
 Session::start();
 
-// Kiểm tra đăng nhập admin
-if (!Session::get('is_admin')) {
-    header('Location: dangnhap.php');
+// Kiểm tra đăng nhập admin từ bảng admin
+$isAdminSession = Session::get('is_admin');
+$userRole = Session::get('user_role');
+
+// Chỉ cho phép truy cập nếu:
+// 1. Đăng nhập qua hệ thống admin (is_admin = true) HOẶC
+// 2. Đăng nhập qua bảng nguoidung với role = 'admin'
+if (!$isAdminSession && $userRole !== 'admin') {
+    header('Location: ../dangnhap/login.php');
     exit;
 }
 
@@ -19,7 +25,7 @@ if (Session::get('admin_last_activity') && (time() - Session::get('admin_last_ac
     Session::delete('admin_name');
     Session::delete('admin_role');
     Session::delete('admin_username');
-    header('Location: dangnhap.php');
+    header('Location: ../dangnhap/login.php');
     exit;
 }
 
@@ -306,9 +312,6 @@ $stats = $adminModel->getDashboardStats();
                     <h1 class="page-title">Dashboard</h1>
                 </div>
                 <div class="admin-info">
-                    <div class="admin-avatar">
-                        <?php echo strtoupper(substr($adminName, 0, 1)); ?>
-                    </div>
                     <div>
                         <div style="font-weight: 600; color: #333;">
                             <?php echo htmlspecialchars($adminName); ?>

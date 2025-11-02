@@ -5,9 +5,12 @@ require_once '../../models/mReport.php';
 
 Session::start();
 
-// Kiểm tra đăng nhập admin
-if (!Session::get('is_admin')) {
-    header('Location: dangnhap.php');
+// Kiểm tra đăng nhập admin từ bảng admin hoặc role admin từ bảng nguoidung
+$isAdminSession = Session::get('is_admin');
+$userRole = Session::get('user_role');
+
+if (!$isAdminSession && $userRole !== 'admin') {
+    header('Location: ../dangnhap/login.php');
     exit;
 }
 
@@ -399,9 +402,6 @@ $errorMessage = Session::getFlash('admin_error');
                     <h1 class="page-title">Quản lý báo cáo vi phạm</h1>
                 </div>
                 <div class="admin-info">
-                    <div class="admin-avatar">
-                        <?php echo strtoupper(substr($adminName, 0, 1)); ?>
-                    </div>
                     <div>
                         <div style="font-weight: 600; color: #333;">
                             <?php echo htmlspecialchars($adminName); ?>

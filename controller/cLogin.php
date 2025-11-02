@@ -46,7 +46,19 @@ $loginResult = $userModel->login($email, $password);
 
 if (is_array($loginResult) && $loginResult['status'] === 'success') {
     $userId = $loginResult['userId'];
+    $userRole = $loginResult['role'] ?? 'user';
+    
     Session::set('user_id', $userId);
+    Session::set('user_role', $userRole);
+    
+    // Kiểm tra role và chuyển hướng phù hợp
+    if ($userRole === 'admin') {
+        // Nếu là admin, chuyển về trang admin
+        header('Location: ../views/admin/index.php');
+        exit;
+    }
+    
+    // Nếu là user, kiểm tra profile và xử lý như cũ
     $profileModel = new Profile();
     $hasProfile = $profileModel->hasProfile($userId);
 

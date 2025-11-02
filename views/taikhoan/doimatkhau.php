@@ -10,6 +10,13 @@ if (!Session::isLoggedIn()) {
     exit;
 }
 
+// Kiểm tra role - nếu là admin thì chuyển về trang admin
+$userRole = Session::get('user_role');
+if ($userRole === 'admin') {
+    header('Location: ../admin/index.php');
+    exit;
+}
+
 $userId = Session::getUserId();
 $userEmail = Session::getUserEmail();
 

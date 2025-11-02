@@ -33,8 +33,8 @@ class Admin {
             return false;
         }
         
-        // Verify password
-        if (!password_verify($password, $admin['matKhau'])) {
+        // Verify password bằng MD5
+        if (md5($password) !== $admin['matKhau']) {
             return false;
         }
         
@@ -79,13 +79,13 @@ class Admin {
         $result = $stmt->get_result();
         $admin = $result->fetch_assoc();
         
-        // Verify old password
-        if (!password_verify($oldPassword, $admin['matKhau'])) {
+        // Verify old password bằng MD5
+        if (md5($oldPassword) !== $admin['matKhau']) {
             return false;
         }
         
-        // Hash new password
-        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        // Hash new password bằng MD5
+        $hashedPassword = md5($newPassword);
         
         // Update
         $stmt = $this->conn->prepare("
@@ -128,8 +128,8 @@ class Admin {
                 FROM NguoiDung nd
                 LEFT JOIN HoSo h ON nd.maNguoiDung = h.maNguoiDung
                 LEFT JOIN GoiDangKy g ON nd.maNguoiDung = g.maNguoiDung AND g.trangThaiGoi = 'Active'
-                WHERE nd.tenDangNhap LIKE ? 
-                   OR h.ten LIKE ?
+                WHERE (nd.tenDangNhap LIKE ? OR h.ten LIKE ?)
+                  AND nd.role != 'admin'
                 ORDER BY nd.maNguoiDung DESC
                 LIMIT ? OFFSET ?
             ");
@@ -140,6 +140,7 @@ class Admin {
                 FROM NguoiDung nd
                 LEFT JOIN HoSo h ON nd.maNguoiDung = h.maNguoiDung
                 LEFT JOIN GoiDangKy g ON nd.maNguoiDung = g.maNguoiDung AND g.trangThaiGoi = 'Active'
+                WHERE nd.role != 'admin'
                 ORDER BY nd.maNguoiDung DESC
                 LIMIT ? OFFSET ?
             ");
@@ -166,12 +167,12 @@ class Admin {
                 SELECT COUNT(DISTINCT nd.maNguoiDung) as total
                 FROM NguoiDung nd
                 LEFT JOIN HoSo h ON nd.maNguoiDung = h.maNguoiDung
-                WHERE nd.tenDangNhap LIKE ? 
-                   OR h.ten LIKE ?
+                WHERE (nd.tenDangNhap LIKE ? OR h.ten LIKE ?)
+                  AND nd.role != 'admin'
             ");
             $stmt->bind_param("ss", $searchTerm, $searchTerm);
         } else {
-            $stmt = $this->conn->prepare("SELECT COUNT(*) as total FROM NguoiDung");
+            $stmt = $this->conn->prepare("SELECT COUNT(*) as total FROM NguoiDung WHERE role != 'admin'");
         }
         
         $stmt->execute();
@@ -218,8 +219,8 @@ class Admin {
     public function getDashboardStats() {
         $stats = [];
         
-        // Tổng người dùng
-        $result = $this->conn->query("SELECT COUNT(*) as total FROM NguoiDung");
+        // Tổng người dùng (không tính admin)
+        $result = $this->conn->query("SELECT COUNT(*) as total FROM NguoiDung WHERE role != 'admin'");
         $stats['totalUsers'] = $result->fetch_assoc()['total'];
         
         // Người dùng mới hôm nay (không có cột ngayTao, tạm set 0)

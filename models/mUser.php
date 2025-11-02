@@ -25,8 +25,8 @@ class User {
             return false;
         }
         
-        // Mã hóa mật khẩu
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        // Mã hóa mật khẩu bằng MD5
+        $hashedPassword = md5($password);
         
         // Thêm người dùng mới
         $stmt = $this->conn->prepare("INSERT INTO nguoidung (tenDangNhap, matKhau) VALUES (?, ?)");
@@ -40,7 +40,7 @@ class User {
     
     // Đăng nhập
     public function login($email, $password) {
-        $stmt = $this->conn->prepare("SELECT maNguoiDung, matKhau, trangThaiNguoiDung FROM nguoidung WHERE tenDangNhap = ?");
+        $stmt = $this->conn->prepare("SELECT maNguoiDung, matKhau, trangThaiNguoiDung, role FROM nguoidung WHERE tenDangNhap = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -48,14 +48,18 @@ class User {
         if ($result->num_rows == 1) {
             $user = $result->fetch_assoc();
             
-            // Kiểm tra mật khẩu
-            if (password_verify($password, $user['matKhau'])) {
+            // Kiểm tra mật khẩu bằng MD5
+            if (md5($password) === $user['matKhau']) {
                 // Kiểm tra trạng thái tài khoản
                 if ($user['trangThaiNguoiDung'] === 'banned' || $user['trangThaiNguoiDung'] === 'locked') {
                     return ['status' => 'banned', 'message' => 'Tài khoản của bạn đã bị khóa do vi phạm chính sách. Vui lòng liên hệ admin để biết thêm chi tiết.'];
                 }
                 
-                return ['status' => 'success', 'userId' => $user['maNguoiDung']]; // Trả về ID của user
+                return [
+                    'status' => 'success', 
+                    'userId' => $user['maNguoiDung'],
+                    'role' => $user['role']
+                ]; // Trả về ID và role của user
             }
         }
         return ['status' => 'error', 'message' => 'Email/Số điện thoại hoặc mật khẩu không đúng!'];
@@ -93,7 +97,7 @@ class User {
         
         if ($result->num_rows === 1) {
             $user = $result->fetch_assoc();
-            return password_verify($password, $user['matKhau']);
+            return md5($password) === $user['matKhau'];
         }
         return false;
     }
@@ -102,7 +106,7 @@ class User {
      * Cập nhật mật khẩu mới
      */
     public function updatePassword($userId, $newPassword) {
-        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        $hashedPassword = md5($newPassword);
         
         $stmt = $this->conn->prepare("UPDATE nguoidung SET matKhau = ? WHERE maNguoiDung = ?");
         $stmt->bind_param("si", $hashedPassword, $userId);

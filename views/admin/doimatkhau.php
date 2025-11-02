@@ -4,9 +4,12 @@ require_once '../../models/mAdmin.php';
 
 Session::start();
 
-// Kiểm tra đăng nhập admin
-if (!Session::get('is_admin')) {
-    header('Location: dangnhap.php');
+// Kiểm tra đăng nhập admin từ bảng admin hoặc role admin từ bảng nguoidung
+$isAdminSession = Session::get('is_admin');
+$userRole = Session::get('user_role');
+
+if (!$isAdminSession && $userRole !== 'admin') {
+    header('Location: ../dangnhap/login.php');
     exit;
 }
 
@@ -367,9 +370,6 @@ $errorMessage = Session::getFlash('admin_error');
                     <h1 class="page-title">Đổi mật khẩu</h1>
                 </div>
                 <div class="admin-info">
-                    <div class="admin-avatar">
-                        <?php echo strtoupper(substr($adminName, 0, 1)); ?>
-                    </div>
                     <div>
                         <div style="font-weight: 600; color: #333;">
                             <?php echo htmlspecialchars($adminName); ?>
@@ -438,7 +438,6 @@ $errorMessage = Session::getFlash('admin_error');
                                    id="new_password" 
                                    name="new_password" 
                                    placeholder="Nhập mật khẩu mới"
-                                   minlength="6"
                                    required>
                         </div>
                     </div>
@@ -453,19 +452,8 @@ $errorMessage = Session::getFlash('admin_error');
                                    id="confirm_password" 
                                    name="confirm_password" 
                                    placeholder="Nhập lại mật khẩu mới"
-                                   minlength="6"
                                    required>
                         </div>
-                    </div>
-                    
-                    <div class="password-requirements">
-                        <h4><i class="fas fa-info-circle"></i> Yêu cầu mật khẩu:</h4>
-                        <ul>
-                            <li><i class="fas fa-check"></i> Tối thiểu 6 ký tự</li>
-                            <li><i class="fas fa-check"></i> Nên có chữ hoa, chữ thường</li>
-                            <li><i class="fas fa-check"></i> Nên có số và ký tự đặc biệt</li>
-                            <li><i class="fas fa-check"></i> Không trùng với mật khẩu cũ</li>
-                        </ul>
                     </div>
                     
                     <button type="submit" class="btn-submit">
@@ -488,12 +476,6 @@ $errorMessage = Session::getFlash('admin_error');
             if (newPassword !== confirmPassword) {
                 e.preventDefault();
                 alert('Mật khẩu xác nhận không khớp!');
-                return false;
-            }
-            
-            if (newPassword.length < 6) {
-                e.preventDefault();
-                alert('Mật khẩu phải có ít nhất 6 ký tự!');
                 return false;
             }
         });

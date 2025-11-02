@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 02, 2025 lúc 01:20 AM
--- Phiên bản máy phục vụ: 10.4.32-MariaDB
--- Phiên bản PHP: 8.2.12
+-- Host: 127.0.0.1
+-- Generation Time: Nov 02, 2025 at 06:49 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Cơ sở dữ liệu: `webhenho`
+-- Database: `webhenho`
 --
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `admin`
+-- Table structure for table `admin`
 --
 
 CREATE TABLE `admin` (
@@ -43,7 +43,7 @@ CREATE TABLE `admin` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `adminlog`
+-- Table structure for table `adminlog`
 --
 
 CREATE TABLE `adminlog` (
@@ -58,7 +58,7 @@ CREATE TABLE `adminlog` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `baocao`
+-- Table structure for table `baocao`
 --
 
 CREATE TABLE `baocao` (
@@ -78,7 +78,7 @@ CREATE TABLE `baocao` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `channguoidung`
+-- Table structure for table `channguoidung`
 --
 
 CREATE TABLE `channguoidung` (
@@ -91,7 +91,7 @@ CREATE TABLE `channguoidung` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `ghepdoi`
+-- Table structure for table `ghepdoi`
 --
 
 CREATE TABLE `ghepdoi` (
@@ -105,7 +105,7 @@ CREATE TABLE `ghepdoi` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `goidangky`
+-- Table structure for table `goidangky`
 --
 
 CREATE TABLE `goidangky` (
@@ -120,7 +120,7 @@ CREATE TABLE `goidangky` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `hoso`
+-- Table structure for table `hoso`
 --
 
 CREATE TABLE `hoso` (
@@ -143,7 +143,7 @@ CREATE TABLE `hoso` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `nguoidung`
+-- Table structure for table `nguoidung`
 --
 
 CREATE TABLE `nguoidung` (
@@ -151,13 +151,14 @@ CREATE TABLE `nguoidung` (
   `tenDangNhap` varchar(50) NOT NULL,
   `matKhau` varchar(255) NOT NULL,
   `trangThaiNguoiDung` enum('active','banned','inactive') DEFAULT 'active',
-  `lanHoatDongCuoi` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `lanHoatDongCuoi` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `role` varchar(255) NOT NULL DEFAULT 'user'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `ratelimitlog`
+-- Table structure for table `ratelimitlog`
 --
 
 CREATE TABLE `ratelimitlog` (
@@ -171,7 +172,7 @@ CREATE TABLE `ratelimitlog` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `thanhtoan`
+-- Table structure for table `thanhtoan`
 --
 
 CREATE TABLE `thanhtoan` (
@@ -184,7 +185,7 @@ CREATE TABLE `thanhtoan` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `thich`
+-- Table structure for table `thich`
 --
 
 CREATE TABLE `thich` (
@@ -197,7 +198,7 @@ CREATE TABLE `thich` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `thongkengay`
+-- Table structure for table `thongkengay`
 --
 
 CREATE TABLE `thongkengay` (
@@ -213,7 +214,7 @@ CREATE TABLE `thongkengay` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `timkiemghepdoi`
+-- Table structure for table `timkiemghepdoi`
 --
 
 CREATE TABLE `timkiemghepdoi` (
@@ -227,7 +228,7 @@ CREATE TABLE `timkiemghepdoi` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `tinnhan`
+-- Table structure for table `tinnhan`
 --
 
 CREATE TABLE `tinnhan` (
@@ -239,11 +240,11 @@ CREATE TABLE `tinnhan` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Chỉ mục cho các bảng đã đổ
+-- Indexes for dumped tables
 --
 
 --
--- Chỉ mục cho bảng `admin`
+-- Indexes for table `admin`
 --
 ALTER TABLE `admin`
   ADD PRIMARY KEY (`maAdmin`),
@@ -252,7 +253,7 @@ ALTER TABLE `admin`
   ADD KEY `idx_role` (`vaiTro`);
 
 --
--- Chỉ mục cho bảng `adminlog`
+-- Indexes for table `adminlog`
 --
 ALTER TABLE `adminlog`
   ADD PRIMARY KEY (`maLog`),
@@ -260,7 +261,7 @@ ALTER TABLE `adminlog`
   ADD KEY `idx_time` (`thoiGian`);
 
 --
--- Chỉ mục cho bảng `baocao`
+-- Indexes for table `baocao`
 --
 ALTER TABLE `baocao`
   ADD PRIMARY KEY (`maBaoCao`),
@@ -272,7 +273,7 @@ ALTER TABLE `baocao`
   ADD KEY `idx_report_status` (`trangThai`,`thoiDiemBaoCao`);
 
 --
--- Chỉ mục cho bảng `channguoidung`
+-- Indexes for table `channguoidung`
 --
 ALTER TABLE `channguoidung`
   ADD PRIMARY KEY (`id`),
@@ -281,7 +282,7 @@ ALTER TABLE `channguoidung`
   ADD KEY `idx_blocked` (`maNguoiBiChan`);
 
 --
--- Chỉ mục cho bảng `ghepdoi`
+-- Indexes for table `ghepdoi`
 --
 ALTER TABLE `ghepdoi`
   ADD PRIMARY KEY (`maGhepDoi`),
@@ -290,28 +291,28 @@ ALTER TABLE `ghepdoi`
   ADD KEY `maNguoiB` (`maNguoiB`);
 
 --
--- Chỉ mục cho bảng `goidangky`
+-- Indexes for table `goidangky`
 --
 ALTER TABLE `goidangky`
   ADD PRIMARY KEY (`maGoiDangKy`),
   ADD KEY `maNguoiDung` (`maNguoiDung`);
 
 --
--- Chỉ mục cho bảng `hoso`
+-- Indexes for table `hoso`
 --
 ALTER TABLE `hoso`
   ADD PRIMARY KEY (`maHoSo`),
   ADD UNIQUE KEY `maNguoiDung` (`maNguoiDung`);
 
 --
--- Chỉ mục cho bảng `nguoidung`
+-- Indexes for table `nguoidung`
 --
 ALTER TABLE `nguoidung`
   ADD PRIMARY KEY (`maNguoiDung`),
   ADD UNIQUE KEY `tenDangNhap` (`tenDangNhap`);
 
 --
--- Chỉ mục cho bảng `ratelimitlog`
+-- Indexes for table `ratelimitlog`
 --
 ALTER TABLE `ratelimitlog`
   ADD PRIMARY KEY (`id`),
@@ -319,14 +320,14 @@ ALTER TABLE `ratelimitlog`
   ADD KEY `idx_cleanup` (`thoiDiem`);
 
 --
--- Chỉ mục cho bảng `thanhtoan`
+-- Indexes for table `thanhtoan`
 --
 ALTER TABLE `thanhtoan`
   ADD PRIMARY KEY (`maThanhToan`),
   ADD KEY `maNguoiThanhToan` (`maNguoiThanhToan`);
 
 --
--- Chỉ mục cho bảng `thich`
+-- Indexes for table `thich`
 --
 ALTER TABLE `thich`
   ADD PRIMARY KEY (`maThich`),
@@ -334,7 +335,7 @@ ALTER TABLE `thich`
   ADD KEY `maNguoiDuocThich` (`maNguoiDuocThich`);
 
 --
--- Chỉ mục cho bảng `thongkengay`
+-- Indexes for table `thongkengay`
 --
 ALTER TABLE `thongkengay`
   ADD PRIMARY KEY (`maThongKe`),
@@ -342,7 +343,7 @@ ALTER TABLE `thongkengay`
   ADD KEY `idx_date` (`ngay`);
 
 --
--- Chỉ mục cho bảng `timkiemghepdoi`
+-- Indexes for table `timkiemghepdoi`
 --
 ALTER TABLE `timkiemghepdoi`
   ADD PRIMARY KEY (`maTimKiem`),
@@ -350,7 +351,7 @@ ALTER TABLE `timkiemghepdoi`
   ADD KEY `idx_user` (`maNguoiDung`);
 
 --
--- Chỉ mục cho bảng `tinnhan`
+-- Indexes for table `tinnhan`
 --
 ALTER TABLE `tinnhan`
   ADD PRIMARY KEY (`maTinNhan`),
@@ -358,105 +359,105 @@ ALTER TABLE `tinnhan`
   ADD KEY `maNguoiGui` (`maNguoiGui`);
 
 --
--- AUTO_INCREMENT cho các bảng đã đổ
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT cho bảng `admin`
+-- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
   MODIFY `maAdmin` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT cho bảng `adminlog`
+-- AUTO_INCREMENT for table `adminlog`
 --
 ALTER TABLE `adminlog`
   MODIFY `maLog` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
--- AUTO_INCREMENT cho bảng `baocao`
+-- AUTO_INCREMENT for table `baocao`
 --
 ALTER TABLE `baocao`
   MODIFY `maBaoCao` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT cho bảng `channguoidung`
+-- AUTO_INCREMENT for table `channguoidung`
 --
 ALTER TABLE `channguoidung`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT cho bảng `ghepdoi`
+-- AUTO_INCREMENT for table `ghepdoi`
 --
 ALTER TABLE `ghepdoi`
   MODIFY `maGhepDoi` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
--- AUTO_INCREMENT cho bảng `goidangky`
+-- AUTO_INCREMENT for table `goidangky`
 --
 ALTER TABLE `goidangky`
   MODIFY `maGoiDangKy` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT cho bảng `hoso`
+-- AUTO_INCREMENT for table `hoso`
 --
 ALTER TABLE `hoso`
   MODIFY `maHoSo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
--- AUTO_INCREMENT cho bảng `nguoidung`
+-- AUTO_INCREMENT for table `nguoidung`
 --
 ALTER TABLE `nguoidung`
   MODIFY `maNguoiDung` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
--- AUTO_INCREMENT cho bảng `ratelimitlog`
+-- AUTO_INCREMENT for table `ratelimitlog`
 --
 ALTER TABLE `ratelimitlog`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
--- AUTO_INCREMENT cho bảng `thanhtoan`
+-- AUTO_INCREMENT for table `thanhtoan`
 --
 ALTER TABLE `thanhtoan`
   MODIFY `maThanhToan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT cho bảng `thich`
+-- AUTO_INCREMENT for table `thich`
 --
 ALTER TABLE `thich`
   MODIFY `maThich` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=99;
 
 --
--- AUTO_INCREMENT cho bảng `thongkengay`
+-- AUTO_INCREMENT for table `thongkengay`
 --
 ALTER TABLE `thongkengay`
   MODIFY `maThongKe` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT cho bảng `timkiemghepdoi`
+-- AUTO_INCREMENT for table `timkiemghepdoi`
 --
 ALTER TABLE `timkiemghepdoi`
   MODIFY `maTimKiem` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT cho bảng `tinnhan`
+-- AUTO_INCREMENT for table `tinnhan`
 --
 ALTER TABLE `tinnhan`
   MODIFY `maTinNhan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
--- Các ràng buộc cho các bảng đã đổ
+-- Constraints for dumped tables
 --
 
 --
--- Các ràng buộc cho bảng `adminlog`
+-- Constraints for table `adminlog`
 --
 ALTER TABLE `adminlog`
   ADD CONSTRAINT `adminlog_ibfk_1` FOREIGN KEY (`maAdmin`) REFERENCES `admin` (`maAdmin`) ON DELETE SET NULL;
 
 --
--- Các ràng buộc cho bảng `baocao`
+-- Constraints for table `baocao`
 --
 ALTER TABLE `baocao`
   ADD CONSTRAINT `baocao_ibfk_1` FOREIGN KEY (`maNguoiBaoCao`) REFERENCES `nguoidung` (`maNguoiDung`),
@@ -464,52 +465,52 @@ ALTER TABLE `baocao`
   ADD CONSTRAINT `fk_admin_report` FOREIGN KEY (`maAdminXuLy`) REFERENCES `admin` (`maAdmin`) ON DELETE SET NULL;
 
 --
--- Các ràng buộc cho bảng `channguoidung`
+-- Constraints for table `channguoidung`
 --
 ALTER TABLE `channguoidung`
   ADD CONSTRAINT `channguoidung_ibfk_1` FOREIGN KEY (`maNguoiChan`) REFERENCES `nguoidung` (`maNguoiDung`) ON DELETE CASCADE,
   ADD CONSTRAINT `channguoidung_ibfk_2` FOREIGN KEY (`maNguoiBiChan`) REFERENCES `nguoidung` (`maNguoiDung`) ON DELETE CASCADE;
 
 --
--- Các ràng buộc cho bảng `ghepdoi`
+-- Constraints for table `ghepdoi`
 --
 ALTER TABLE `ghepdoi`
   ADD CONSTRAINT `ghepdoi_ibfk_1` FOREIGN KEY (`maNguoiA`) REFERENCES `nguoidung` (`maNguoiDung`),
   ADD CONSTRAINT `ghepdoi_ibfk_2` FOREIGN KEY (`maNguoiB`) REFERENCES `nguoidung` (`maNguoiDung`);
 
 --
--- Các ràng buộc cho bảng `goidangky`
+-- Constraints for table `goidangky`
 --
 ALTER TABLE `goidangky`
   ADD CONSTRAINT `goidangky_ibfk_1` FOREIGN KEY (`maNguoiDung`) REFERENCES `nguoidung` (`maNguoiDung`);
 
 --
--- Các ràng buộc cho bảng `hoso`
+-- Constraints for table `hoso`
 --
 ALTER TABLE `hoso`
   ADD CONSTRAINT `hoso_ibfk_1` FOREIGN KEY (`maNguoiDung`) REFERENCES `nguoidung` (`maNguoiDung`) ON DELETE CASCADE;
 
 --
--- Các ràng buộc cho bảng `thanhtoan`
+-- Constraints for table `thanhtoan`
 --
 ALTER TABLE `thanhtoan`
   ADD CONSTRAINT `thanhtoan_ibfk_1` FOREIGN KEY (`maNguoiThanhToan`) REFERENCES `nguoidung` (`maNguoiDung`);
 
 --
--- Các ràng buộc cho bảng `thich`
+-- Constraints for table `thich`
 --
 ALTER TABLE `thich`
   ADD CONSTRAINT `thich_ibfk_1` FOREIGN KEY (`maNguoiThich`) REFERENCES `nguoidung` (`maNguoiDung`),
   ADD CONSTRAINT `thich_ibfk_2` FOREIGN KEY (`maNguoiDuocThich`) REFERENCES `nguoidung` (`maNguoiDung`);
 
 --
--- Các ràng buộc cho bảng `timkiemghepdoi`
+-- Constraints for table `timkiemghepdoi`
 --
 ALTER TABLE `timkiemghepdoi`
   ADD CONSTRAINT `timkiemghepdoi_ibfk_1` FOREIGN KEY (`maNguoiDung`) REFERENCES `nguoidung` (`maNguoiDung`) ON DELETE CASCADE;
 
 --
--- Các ràng buộc cho bảng `tinnhan`
+-- Constraints for table `tinnhan`
 --
 ALTER TABLE `tinnhan`
   ADD CONSTRAINT `fk_tinnhan_ghepdoi` FOREIGN KEY (`maGhepDoi`) REFERENCES `ghepdoi` (`maGhepDoi`) ON DELETE CASCADE,

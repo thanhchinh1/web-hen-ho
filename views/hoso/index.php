@@ -9,6 +9,13 @@ if (!Session::isLoggedIn()) {
     exit;
 }
 
+// Kiểm tra role - nếu là admin thì chuyển về trang admin
+$userRole = Session::get('user_role');
+if ($userRole === 'admin') {
+    header('Location: ../admin/index.php');
+    exit;
+}
+
 $currentUserId = Session::getUserId();
 $profileModel = new Profile();
 $profile = $profileModel->getProfile($currentUserId);
