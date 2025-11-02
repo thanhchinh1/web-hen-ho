@@ -1,14 +1,16 @@
 <?php
-session_start();
+require_once '../models/mSession.php';
 require_once '../models/mProfile.php';
 
+Session::start();
+
 // Kiểm tra đăng nhập
-if (!isset($_SESSION['user_id'])) {
+if (!Session::isLoggedIn()) {
     echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập!']);
     exit;
 }
 
-$userId = $_SESSION['user_id'];
+$userId = Session::getUserId();
 $profile = new Profile();
 
 // Kiểm tra request method
@@ -61,9 +63,12 @@ if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
     // Xóa ảnh cũ nếu có
     $oldProfile = $profile->getProfile($userId);
     if ($oldProfile && !empty($oldProfile['avt'])) {
-        $oldAvatarPath = '../' . $oldProfile['avt'];
-        if (file_exists($oldAvatarPath)) {
-            unlink($oldAvatarPath);
+        $oldAvatarPath = __DIR__ . '/../' . $oldProfile['avt'];
+        if (file_exists($oldAvatarPath) && is_file($oldAvatarPath)) {
+            // Không xóa default avatar
+            if (strpos($oldProfile['avt'], 'default-avatar') === false) {
+                @unlink($oldAvatarPath); // @ để suppress warning nếu không xóa được
+            }
         }
     }
     

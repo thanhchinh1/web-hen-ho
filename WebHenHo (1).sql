@@ -22,6 +22,34 @@
 --
 -- Table structure for table `BaoCao`
 --
+-- Tạo bảng ChanNguoiDung
+CREATE TABLE IF NOT EXISTS ChanNguoiDung (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    maNguoiChan INT NOT NULL,
+    maNguoiBiChan INT NOT NULL,
+    thoiDiemChan DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (maNguoiChan) REFERENCES NguoiDung(maNguoiDung) ON DELETE CASCADE,
+    FOREIGN KEY (maNguoiBiChan) REFERENCES NguoiDung(maNguoiDung) ON DELETE CASCADE,
+    UNIQUE KEY unique_block (maNguoiChan, maNguoiBiChan),
+    INDEX idx_blocker (maNguoiChan),
+    INDEX idx_blocked (maNguoiBiChan)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Hoàn thành! Bảng ChanNguoiDung đã được tạo.
+
+-- Tạo bảng RateLimitLog
+CREATE TABLE IF NOT EXISTS RateLimitLog (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    maNguoiDung INT NOT NULL,
+    action VARCHAR(50) NOT NULL,
+    ipAddress VARCHAR(45) NOT NULL,
+    thoiDiem DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_action (maNguoiDung, action, thoiDiem),
+    INDEX idx_cleanup (thoiDiem)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Hoàn thành! Bảng RateLimitLog đã được tạo.
+
 
 CREATE TABLE `BaoCao` (
   `maBaoCao` int(11) NOT NULL,

@@ -1,14 +1,21 @@
 <?php
-session_start();
+// Bật hiển thị lỗi cho debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+require_once '../models/mSession.php';
 require_once '../models/mProfile.php';
 
+Session::start();
+
 // Kiểm tra đăng nhập
-if (!isset($_SESSION['user_id'])) {
+if (!Session::isLoggedIn()) {
     echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập!']);
     exit;
 }
 
-$userId = $_SESSION['user_id'];
+$userId = Session::getUserId();
 $profile = new Profile();
 
 // Kiểm tra request method
@@ -36,7 +43,7 @@ if (!isset($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
 
 // Xử lý upload avatar
 $avatarPath = null;
-$uploadDir = '../public/uploads/avatars/';
+$uploadDir = __DIR__ . '/../public/uploads/avatars/';
 
 // Tạo thư mục nếu chưa tồn tại
 if (!is_dir($uploadDir)) {
@@ -109,7 +116,42 @@ if ($profile->hasProfile($userId)) {
 
 // Tạo hồ sơ mới
 if ($profile->createProfile($userId, $data, $avatarPath)) {
-    echo json_encode(['success' => true, 'message' => 'Thiết lập hồ sơ thành công!']);
+    // Kiểm tra có pending like action không
+    $pendingLikeUserId = Session::get('pending_like_user_id');
+    
+    if ($pendingLikeUserId && $pendingLikeUserId != $userId) {
+        // Thực hiện like
+        require_once '../models/mLike.php';
+        $likeModel = new Like();
+        
+        // Kiểm tra target user có tồn tại không
+        if ($profile->hasProfile($pendingLikeUserId)) {
+            $likeModel->likeUser($userId, $pendingLikeUserId);
+            
+            // Xóa pending action
+            Session::delete('pending_like_user_id');
+            
+            // Thông báo thành công kèm like
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Thiết lập hồ sơ thành công! Đã thích hồ sơ! 💖',
+                'redirect' => '../trangchu/index.php'
+            ]);
+        } else {
+            Session::delete('pending_like_user_id');
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Thiết lập hồ sơ thành công!',
+                'redirect' => '../trangchu/index.php'
+            ]);
+        }
+    } else {
+        echo json_encode([
+            'success' => true, 
+            'message' => 'Thiết lập hồ sơ thành công!',
+            'redirect' => '../trangchu/index.php'
+        ]);
+    }
 } else {
     echo json_encode(['success' => false, 'message' => 'Có lỗi xảy ra, vui lòng thử lại!']);
 }

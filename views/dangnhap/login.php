@@ -1,12 +1,21 @@
 <?php
-require_once '../../models/session.php';
-redirectIfLoggedIn(); // Chuyển về trang chủ nếu đã đăng nhập
+require_once '../../models/mSession.php';
 
-$errors = isset($_SESSION['login_errors']) ? $_SESSION['login_errors'] : [];
-$formData = isset($_SESSION['login_data']) ? $_SESSION['login_data'] : [];
-// Xóa errors và data sau khi đã lấy
-unset($_SESSION['login_errors']);
-unset($_SESSION['login_data']);
+Session::start();
+
+// Chuyển về trang chủ nếu đã đăng nhập
+if (Session::isLoggedIn()) {
+    header('Location: ../trangchu/index.php');
+    exit;
+}
+
+$errors = Session::getFlash('login_errors') ?? [];
+$formData = Session::getFlash('login_data') ?? [];
+$successMessage = Session::getFlash('register_success');
+
+// Lấy action và targetUser từ URL nếu có
+$action = $_GET['action'] ?? '';
+$targetUser = $_GET['targetUser'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -27,6 +36,12 @@ unset($_SESSION['login_data']);
             <h1>Chào Mừng Trở Lại!</h1>
             <p>Vui lòng đăng nhập vào tài khoản của bạn để tiếp tục tìm kiếm người đặc biệt.</p>
             
+            <?php if ($successMessage): ?>
+                <div class="success-container" style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($successMessage); ?>
+                </div>
+            <?php endif; ?>
+            
             <?php if (isset($_GET['redirect']) && $_GET['redirect'] === 'profile'): ?>
                 <div class="info-container" style="background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; padding: 15px; border-radius: 8px; margin: 10px 0;">
                     <i class="fas fa-info-circle"></i> Vui lòng đăng nhập để xem hồ sơ này
@@ -42,9 +57,31 @@ unset($_SESSION['login_data']);
                     </ul>
                 </div>
             <?php endif; ?>
+            
+            <?php if ($action === 'like' && !empty($targetUser)): ?>
+                <div class="info-container" style="background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <i class="fas fa-heart"></i> Đăng nhập để thích hồ sơ này
+                </div>
+            <?php endif; ?>
         </div>
 
-        <form action="../../controller/login.php<?php echo isset($_GET['redirect']) && isset($_GET['id']) ? '?redirect=' . htmlspecialchars($_GET['redirect']) . '&id=' . htmlspecialchars($_GET['id']) : ''; ?>" method="POST" id="loginForm">
+        <?php
+        // Build form action URL with params
+        $formAction = '../../controller/cLogin.php';
+        $params = [];
+        if ($action === 'like' && !empty($targetUser)) {
+            $params[] = 'action=' . urlencode($action);
+            $params[] = 'targetUser=' . urlencode($targetUser);
+        } elseif (isset($_GET['redirect']) && isset($_GET['id'])) {
+            $params[] = 'redirect=' . urlencode($_GET['redirect']);
+            $params[] = 'id=' . urlencode($_GET['id']);
+        }
+        if (!empty($params)) {
+            $formAction .= '?' . implode('&', $params);
+        }
+        ?>
+
+        <form action="<?php echo $formAction; ?>" method="POST" id="loginForm">
             <div class="form-group">
                 <label for="email">Email/SĐT</label>
                 <div class="input-wrapper">
@@ -76,7 +113,7 @@ unset($_SESSION['login_data']);
                     </button>
                 </div>
                 <div class="forgot-password">
-                    <a href="../admin/doimatkhau.php">Quên mật khẩu?</a>
+                    <a href="quenmatkhau.php">Quên mật khẩu?</a>
                 </div>
             </div>
 
@@ -101,8 +138,21 @@ unset($_SESSION['login_data']);
             </button>
         </div>
 
+        <?php
+        // Build register link with params
+        $registerLink = '../dangky/register.php';
+        $registerParams = [];
+        if ($action === 'like' && !empty($targetUser)) {
+            $registerParams[] = 'action=' . urlencode($action);
+            $registerParams[] = 'targetUser=' . urlencode($targetUser);
+        }
+        if (!empty($registerParams)) {
+            $registerLink .= '?' . implode('&', $registerParams);
+        }
+        ?>
+
         <div class="signup-link">
-            Chưa có tài khoản? <a href="../dangky/register.php">Đăng ký</a>
+            Chưa có tài khoản? <a href="<?php echo $registerLink; ?>">Đăng ký</a>
         </div>
     </div>
 
