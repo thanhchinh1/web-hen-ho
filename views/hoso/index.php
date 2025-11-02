@@ -1,6 +1,7 @@
 <?php
 require_once '../../models/mSession.php';
 require_once '../../models/mProfile.php';
+require_once '../../models/mVIP.php';
 
 Session::start();
 
@@ -18,7 +19,11 @@ if ($userRole === 'admin') {
 
 $currentUserId = Session::getUserId();
 $profileModel = new Profile();
+$vipModel = new VIP();
 $profile = $profileModel->getProfile($currentUserId);
+
+// Kiểm tra VIP status
+$isVIP = $vipModel->isVIP($currentUserId);
 
 if (!$profile) {
     // Nếu chưa có hồ sơ, chuyển về trang thiết lập
@@ -68,6 +73,12 @@ $interests = explode(', ', $profile['soThich']);
                 <img src="<?php echo $avatarSrc; ?>" alt="Avatar" class="profile-avatar">
             </div>
             <h2 class="profile-name"><?php echo htmlspecialchars($profile['ten']); ?></h2>
+            <?php if ($isVIP): ?>
+                <div class="vip-badge-profile">
+                    <i class="fas fa-crown"></i>
+                    <span>Thành viên VIP</span>
+                </div>
+            <?php endif; ?>
         </div>
         <div class="profile-details">
             <section class="detail-section">

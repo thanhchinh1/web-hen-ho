@@ -195,7 +195,7 @@ body {
 /* VIP Crown Badge on Avatar */
 .vip-crown-badge {
     position: absolute;
-    top: 0px;
+    top: -13px;
     left: 50%;
     transform: translateX(-50%);
     width: 18px;
