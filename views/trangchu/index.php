@@ -4,7 +4,6 @@ require_once '../../models/mProfile.php';
 require_once '../../models/mLike.php';
 require_once '../../models/mNotification.php';
 require_once '../../models/mUser.php';
-require_once '../../models/mVIP.php';
 
 Session::start();
 
@@ -28,11 +27,7 @@ $profileModel = new Profile();
 $likeModel = new Like();
 $notificationModel = new Notification();
 $userModel = new User();
-$vipModel = new VIP();
 $currentUserProfile = $profileModel->getProfile($currentUserId);
-
-// Kiểm tra VIP status
-$isVIP = $vipModel->isVIP($currentUserId);
 
 // Đếm số ghép đôi mới (chưa nhắn tin)
 $newMatchesCount = $notificationModel->getNewMatchesCount($currentUserId);
@@ -52,8 +47,16 @@ require_once '../../models/mBlock.php';
 $blockModel = new Block();
 $blockedUserIds = $blockModel->getBlockedUserIds($currentUserId);
 
+// Thêm người đã ghép đôi vào danh sách loại trừ
+require_once '../../models/mMatch.php';
+$matchModel = new MatchModel();
+$myMatches = $matchModel->getMyMatches($currentUserId);
+$matchedUserIds = array_map(function($match) {
+    return $match['maNguoiDung'];
+}, $myMatches);
+
 // Kết hợp và thêm chính mình vào danh sách loại trừ
-$excludeIds = array_unique(array_merge([$currentUserId], $likedUserIds, $whoLikedMeIds, $blockedUserIds));
+$excludeIds = array_unique(array_merge([$currentUserId], $likedUserIds, $whoLikedMeIds, $blockedUserIds, $matchedUserIds));
 
 // Lấy danh sách hồ sơ để hiển thị (loại trừ những người đã like và được like)
 $allProfiles = $profileModel->getAllProfiles(12, 0, $excludeIds);
@@ -212,14 +215,7 @@ $infoMessage = Session::getFlash('info_message');
                     Đăng Xuất
                 </a>
                 <div class="user-menu-wrapper" style="position: relative;">
-                    <div style="position: relative; display: inline-block;">
-                        <img src="../../<?php echo htmlspecialchars($currentUserProfile['avt']); ?>" alt="User" class="user-avatar" id="userAvatar" style="cursor:pointer;">
-                        <?php if ($isVIP): ?>
-                            <div class="vip-crown-badge">
-                                <i class="fas fa-crown"></i>
-                            </div>
-                        <?php endif; ?>
-                    </div>
+                    <img src="../../<?php echo htmlspecialchars($currentUserProfile['avt']); ?>" alt="User" class="user-avatar" id="userAvatar" style="cursor:pointer;">
                     <div class="user-dropdown" id="userDropdown" style="display:none;">
                         <a href="../hoso/index.php" class="user-dropdown-item">
                             <i class="fas fa-user"></i>
@@ -233,7 +229,10 @@ $infoMessage = Session::getFlash('info_message');
                             <i class="fas fa-key"></i>
                             Đổi mật khẩu
                         </a>
-                     
+                        <a href="../ghepdoi/index.php" class="user-dropdown-item">
+                            <i class="fas fa-heart"></i>
+                            Đã ghép đôi
+                        </a>
                         <a href="../thich/nguoithichban.php" class="user-dropdown-item">
                             <i class="fas fa-heart"></i>
                             Xem danh sách thích bạn

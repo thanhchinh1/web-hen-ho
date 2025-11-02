@@ -21,7 +21,26 @@ if ($userRole === 'admin') {
 $currentUserId = Session::getUserId();
 $likeModel = new Like();
 $profileModel = new Profile();
+
+// Lấy danh sách người mình đã thích
 $likedUsers = $likeModel->getPeopleLikedByUser($currentUserId);
+
+// Lọc bỏ những người đã ghép đôi (mutual match)
+require_once __DIR__ . '/../../models/mMatch.php';
+$matchModel = new MatchModel();
+$filteredUsers = [];
+
+foreach ($likedUsers as $person) {
+    // Kiểm tra đã matched chưa
+    $isMatched = $matchModel->isMatched($currentUserId, $person['maNguoiDung']);
+    
+    // Chỉ hiển thị những người chưa matched
+    if (!$isMatched) {
+        $filteredUsers[] = $person;
+    }
+}
+
+$likedUsers = $filteredUsers;
 
 // Helper function để hiển thị thời gian
 function timeAgo($datetime) {

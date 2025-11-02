@@ -22,6 +22,9 @@ $avatarPath = !empty($profile['avt']) ? $profile['avt'] : 'public/img/default-av
             <a href="/views/trangchu/index.php" style="color: #333; text-decoration: none; font-weight: 500;">
                 <i class="fas fa-home"></i> Trang chủ
             </a>
+            <a href="/views/ghepdoi/index.php" style="color: #333; text-decoration: none; font-weight: 500;">
+                <i class="fas fa-heart"></i> Đã ghép đôi
+            </a>
             <a href="/views/thich/nguoithichban.php" style="color: #333; text-decoration: none; font-weight: 500;">
                 <i class="fas fa-heart"></i> Người thích bạn
             </a>
