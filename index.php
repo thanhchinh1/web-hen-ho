@@ -188,9 +188,9 @@ $allProfiles = $profileModel->getAllProfiles(12);
     <!-- Footer -->
     <footer class="main-footer">
         <div class="footer-container">
-            <div class="footer-top">
+                <div class="footer-top">
                 <div class="footer-links">
-                    <a href="#">Về chúng tôi</a>
+                        <a href="/web-hen-ho/views/about/about.php">Về chúng tôi</a>
                     <a href="#">Hỗ trợ</a>
                     <a href="#">Pháp lý</a>
                 </div>

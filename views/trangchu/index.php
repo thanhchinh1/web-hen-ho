@@ -115,6 +115,7 @@ $allProfiles = $profileModel->getAllProfiles(12);
             </div>
             <div class="hero-illustration">
                 <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="heart-illustration">
+
                     <path d="M200,350 C120,290 50,220 50,150 C50,100 80,70 130,70 C160,70 180,85 200,110 C220,85 240,70 270,70 C320,70 350,100 350,150 C350,220 280,290 200,350 Z" fill="#FFE5EC" stroke="#FF6B9D" stroke-width="3"/>
                     <circle cx="160" cy="180" r="35" fill="#FFD7BA"/>
                     <path d="M160,145 Q145,135 150,155 Q155,145 160,145 Q165,145 170,155 Q175,135 160,145 Z" fill="#5C3D2E"/>
@@ -161,21 +162,21 @@ $allProfiles = $profileModel->getAllProfiles(12);
     <!-- Footer -->
     <footer class="main-footer">
         <div class="footer-container">
-            <div class="footer-top">
+                <div class="footer-top">
                 <div class="footer-links">
-                    <a href="#">Về chúng tôi</a>
-                    <a href="#">Hỗ trợ</a>
-                    <a href="#">Pháp lý</a>
+                    <a href="about.php">Về chúng tôi</a>
+                    <a href="hotro.php">Hỗ trợ</a>
+                    <a href="phaply.php">Pháp lý</a>
                 </div>
                 <div class="footer-social">
-                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.facebook.com/profile.php?id=61583156011828" class="social-icon" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
                     <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
                     <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
                     <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Kết Nối Yêu Thương. Mọi quyền được bảo lưu.</p>
+                 <p>&copy; 2025 <strong>DuyenHub</strong> - Kết Nối Yêu Thương.</p>
             </div>
         </div>
     </footer>
