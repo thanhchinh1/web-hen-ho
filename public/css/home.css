@@ -192,6 +192,39 @@ body {
     transform: scale(1.05);
 }
 
+/* VIP Crown Badge on Avatar */
+.vip-crown-badge {
+    position: absolute;
+    top: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.6);
+    border: 1.5px solid white;
+    animation: crownGlow 2s infinite;
+    z-index: 10;
+}
+
+.vip-crown-badge i {
+    color: white;
+    font-size: 9px;
+}
+
+@keyframes crownGlow {
+    0%, 100% {
+        box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
+    }
+    50% {
+        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.8);
+    }
+}
+
 .user-menu-wrapper {
     position: relative;
 }

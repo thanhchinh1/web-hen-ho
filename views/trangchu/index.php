@@ -4,6 +4,7 @@ require_once '../../models/mProfile.php';
 require_once '../../models/mLike.php';
 require_once '../../models/mNotification.php';
 require_once '../../models/mUser.php';
+require_once '../../models/mVIP.php';
 
 Session::start();
 
@@ -27,7 +28,11 @@ $profileModel = new Profile();
 $likeModel = new Like();
 $notificationModel = new Notification();
 $userModel = new User();
+$vipModel = new VIP();
 $currentUserProfile = $profileModel->getProfile($currentUserId);
+
+// Kiểm tra VIP status
+$isVIP = $vipModel->isVIP($currentUserId);
 
 // Đếm số ghép đôi mới (chưa nhắn tin)
 $newMatchesCount = $notificationModel->getNewMatchesCount($currentUserId);
@@ -207,7 +212,14 @@ $infoMessage = Session::getFlash('info_message');
                     Đăng Xuất
                 </a>
                 <div class="user-menu-wrapper" style="position: relative;">
-                    <img src="../../<?php echo htmlspecialchars($currentUserProfile['avt']); ?>" alt="User" class="user-avatar" id="userAvatar" style="cursor:pointer;">
+                    <div style="position: relative; display: inline-block;">
+                        <img src="../../<?php echo htmlspecialchars($currentUserProfile['avt']); ?>" alt="User" class="user-avatar" id="userAvatar" style="cursor:pointer;">
+                        <?php if ($isVIP): ?>
+                            <div class="vip-crown-badge">
+                                <i class="fas fa-crown"></i>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                     <div class="user-dropdown" id="userDropdown" style="display:none;">
                         <a href="../hoso/index.php" class="user-dropdown-item">
                             <i class="fas fa-user"></i>
