@@ -40,14 +40,14 @@ $errorMessage = Session::getFlash('error_message');
     <link rel="stylesheet" href="../../public/css/change-password.css">
 </head>
 <body>
-    <div class="page-wrapper">
-        <header class="profile-header">
-            <a href="../trangchu/index.php" class="logo">
-                <img src="../../public/img/logo.jpg" alt="Kết Nối Yêu Thương">
-                <span class="logo-text">DuyenHub</span>
-            </a>
-        </header>
+    <header class="profile-header">
+        <a href="../trangchu/index.php" class="logo">
+            <img src="../../public/img/logo.jpg" alt="Kết Nối Yêu Thương">
+            <span class="logo-text">DuyenHub</span>
+        </a>
+    </header>
 
+    <div class="page-wrapper">
         <div class="back-button-container">
             <button class="btn-back" onclick="window.location.href='../trangchu/index.php'">
                 <i class="fas fa-arrow-left"></i>

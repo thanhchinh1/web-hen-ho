@@ -195,14 +195,14 @@ $allProfiles = $profileModel->getAllProfiles(12);
                     <a href="#">Pháp lý</a>
                 </div>
                 <div class="footer-social">
-                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.facebook.com/profile.php?id=61583156011828" class="social-icon"><i class="fab fa-facebook-f"></i></a>
                     <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
                     <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
                     <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Kết Nối Yêu Thương. Mọi quyền được bảo lưu.</p>
+                <p>&copy; Kết Nối Yêu Thương. Mọi quyền được bảo lưu.</p>
             </div>
         </div>
     </footer>
