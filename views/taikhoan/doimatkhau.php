@@ -49,7 +49,7 @@ $errorMessage = Session::getFlash('error_message');
         </header>
 
         <div class="back-button-container">
-            <button class="btn-back" onclick="window.location.href='../hoso/index.php'">
+            <button class="btn-back" onclick="window.location.href='../trangchu/index.php'">
                 <i class="fas fa-arrow-left"></i>
             </button>
         </div>
