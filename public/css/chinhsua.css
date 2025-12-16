@@ -763,16 +763,14 @@ body {
   box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3);
 }
 .avatar-crop-container img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  user-select: none;
-  -webkit-user-drag: none;
-  transition: transform 0.1s ease-out;
-  transform-origin: center center;
-}
-
-.avatar-controls {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+    transition: transform 0.1s ease-out;
+    transform-origin: center center;
+}.avatar-controls {
   max-width: 400px;
   margin: 0 auto;
 }
