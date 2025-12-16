@@ -45,129 +45,180 @@ $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chỉnh sửa Hồ sơ - DuyenHub</title>
-    <link rel="stylesheet" href="../../public/css/profile.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../public/css/chinhsua.css?v=<?php echo time(); ?>">
 </head>
 <body>
-    <div class="page-wrapper">
-        <!-- Header -->
-        <header class="profile-header">
-            <a href="../trangchu/index.php" class="logo">
-                <img src="../../public/img/logo.jpg" alt="DuyenHub">
-                <span class="logo-text">DuyenHub</span>
-            </a>
-        </header>
-
-        <!-- Back button -->
-        <div class="back-button-container">
-            <button class="btn-back" onclick="window.location.href='../trangchu/index.php'">
-                <i class="fas fa-arrow-left"></i>
-            </button>
+    <!-- Header -->
+     <header class="main-header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="../trangchu/index.php" class="logo">
+                    <img src="../../public/img/logo.jpg" alt="DuyenHub Logo">
+                    <span class="logo-text">DuyenHub</span>
+                </a>
+                <nav class="header-menu">
+                    <a href="../trangchu/index.php" class="menu-item active">
+                        <i class="fas fa-home"></i>
+                        <span>Trang chủ</span>
+                    </a>
+                    <a href="../nhantin/chat.php" class="menu-item">
+                        <i class="fas fa-comments"></i>
+                        <span>Tin nhắn</span>
+                    </a>
+                    <a href="../timkiem/ghepdoinhanh.php" class="menu-item">
+                        <i class="fas fa-search"></i>
+                        <span>Tìm kiếm</span>
+                    </a>
+                    <a href="#" class="menu-item">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Trợ giúp</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="header-actions">
+                <a href="../../controller/cLogout.php" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Đăng xuất</span>
+                </a>
+            </div>
         </div>
+    </header>
 
-        <!-- Profile Content -->
-        <div class="profile-content">
-            <!-- Profile Header Section -->
-            <div class="profile-hero">
-                <div class="profile-avatar-section">
-                    <img src="<?php echo $avatarSrc; ?>" alt="Avatar" class="profile-avatar" id="avatarImage">
-                    <h1 class="profile-name"><?php echo htmlspecialchars($profile['ten']); ?></h1>
+    <div class="profile-setup-wrapper">
+        <button class="back-btn" onclick="window.history.back()" title="Quay lại">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        
+        <div class="profile-setup-container">
+            <div class="profile-setup-header">
+                <h1>Chỉnh sửa Hồ sơ</h1>
+               
+            </div>
+
+            <!-- Avatar Upload Section -->
+            <div class="avatar-section">
+                <div class="avatar-preview" id="avatarPreview">
+                    <img src="<?php echo $avatarSrc; ?>" alt="Avatar" id="avatarImage">
                 </div>
+                <button type="button" class="btn-upload-avatar" onclick="document.getElementById('avatarInput').click()">
+                    <i class="fas fa-camera"></i>
+                    Tải ảnh lên
+                </button>
+                <p class="avatar-hint">Kích thước tối đa: 5MB</p>
             </div>
 
             <!-- Profile Form -->
             <form id="profileForm" method="POST" action="../../controller/cProfile_update.php" enctype="multipart/form-data">
-                <!-- Avatar Upload Section -->
-                <div style="text-align: center; margin: 20px 0;">
-                    <button type="button" class="btn-upload-avatar" onclick="document.getElementById('avatarInput').click()" style="
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                        color: white;
-                        border: none;
-                        padding: 12px 30px;
-                        border-radius: 25px;
-                        font-size: 16px;
-                        font-weight: 600;
-                        cursor: pointer;
-                        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-                        transition: all 0.3s ease;
-                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.3)'">
-                        <i class="fas fa-camera"></i>
-                        Thay đổi ảnh đại diện
-                    </button>
-                    <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none;" onchange="previewAvatar(event)">
-                </div>
-
+                <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none;" onchange="previewAvatar(event)">
+                
                 <!-- Profile Details -->
                 <div class="profile-details">
                     <!-- Thông tin cá nhân -->
-                    <section class="detail-section">
+                    <!-- Thông tin cá nhân -->
+                    <div class="form-section">
                         <h2 class="section-title">Thông tin cá nhân</h2>
-                        <div class="info-list">
-                            <div class="info-item">
-                                <i class="fas fa-user"></i>
-                                <label class="info-label">Tên đầy đủ</label>
-                                <input type="text" name="fullName" class="info-value" value="<?php echo htmlspecialchars($profile['ten']); ?>" required>
+                        
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-user icon"></i>
+                                    Tên đầy đủ
+                                </label>
+                                <input type="text" name="fullName" class="form-input" 
+                                       value="<?php echo htmlspecialchars($profile['ten']); ?>" 
+                                       placeholder="Nhập tên của bạn" required>
                             </div>
-                            
-                            <div class="info-item">
-                                <i class="fas fa-venus-mars"></i>
-                                <label class="info-label">Giới tính</label>
-                                <select name="gender" class="info-value" required>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-venus-mars icon"></i>
+                                    Giới tính
+                                </label>
+                                <select name="gender" class="form-select" required>
+                                    <option value="">Chọn giới tính</option>
                                     <option value="Nam" <?php echo $profile['gioiTinh'] == 'Nam' ? 'selected' : ''; ?>>Nam</option>
                                     <option value="Nữ" <?php echo $profile['gioiTinh'] == 'Nữ' ? 'selected' : ''; ?>>Nữ</option>
                                     <option value="Khác" <?php echo $profile['gioiTinh'] == 'Khác' ? 'selected' : ''; ?>>Khác</option>
                                 </select>
                             </div>
-                            
-                            <div class="info-item">
-                                <i class="fas fa-calendar-alt"></i>
-                                <label class="info-label">Ngày sinh</label>
-                                <div style="display: flex; gap: 5px;">
-                                    <select name="day" style="flex: 1; padding: 8px; border: 1px solid #e0e0e0; border-radius: 8px; background: white; font-size: 15px; font-weight: 600; color: #2c3e50;" required>
-                                        <?php for($i = 1; $i <= 31; $i++): ?>
-                                            <option value="<?= str_pad($i, 2, '0', STR_PAD_LEFT) ?>" <?php echo $birthDay == str_pad($i, 2, '0', STR_PAD_LEFT) ? 'selected' : ''; ?>><?= $i ?></option>
-                                        <?php endfor; ?>
-                                    </select>
-                                    <select name="month" style="flex: 1; padding: 8px; border: 1px solid #e0e0e0; border-radius: 8px; background: white; font-size: 15px; font-weight: 600; color: #2c3e50;" required>
-                                        <?php for($i = 1; $i <= 12; $i++): ?>
-                                            <option value="<?= str_pad($i, 2, '0', STR_PAD_LEFT) ?>" <?php echo $birthMonth == str_pad($i, 2, '0', STR_PAD_LEFT) ? 'selected' : ''; ?>><?= str_pad($i, 2, '0', STR_PAD_LEFT) ?></option>
-                                        <?php endfor; ?>
-                                    </select>
-                                    <select name="year" style="flex: 1; padding: 8px; border: 1px solid #e0e0e0; border-radius: 8px; background: white; font-size: 15px; font-weight: 600; color: #2c3e50;" required>
-                                        <?php for($i = date('Y') - 18; $i >= 1950; $i--): ?>
-                                            <option value="<?= $i ?>" <?php echo $birthYear == $i ? 'selected' : ''; ?>><?= $i ?></option>
-                                        <?php endfor; ?>
-                                    </select>
-                                </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-calendar-alt icon"></i>
+                                Ngày sinh
+                            </label>
+                            <div class="birthday-group">
+                                <select name="day" class="birthday-select" required>
+                                    <option value="">Ngày</option>
+                                    <?php for($i = 1; $i <= 31; $i++): ?>
+                                        <option value="<?= str_pad($i, 2, '0', STR_PAD_LEFT) ?>" <?php echo $birthDay == str_pad($i, 2, '0', STR_PAD_LEFT) ? 'selected' : ''; ?>><?= $i ?></option>
+                                    <?php endfor; ?>
+                                </select>
+                                <select name="month" class="birthday-select" required>
+                                    <option value="">Tháng</option>
+                                    <?php for($i = 1; $i <= 12; $i++): ?>
+                                        <option value="<?= str_pad($i, 2, '0', STR_PAD_LEFT) ?>" <?php echo $birthMonth == str_pad($i, 2, '0', STR_PAD_LEFT) ? 'selected' : ''; ?>>Tháng <?= $i ?></option>
+                                    <?php endfor; ?>
+                                </select>
+                                <select name="year" class="birthday-select" required>
+                                    <option value="">Năm</option>
+                                    <?php for($i = date('Y') - 18; $i >= 1950; $i--): ?>
+                                        <option value="<?= $i ?>" <?php echo $birthYear == $i ? 'selected' : ''; ?>><?= $i ?></option>
+                                    <?php endfor; ?>
+                                </select>
                             </div>
-                            
-                            <div class="info-item">
-                                <i class="fas fa-heart"></i>
-                                <label class="info-label">Tình trạng hôn nhân</label>
-                                <select name="maritalStatus" class="info-value" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-heart icon"></i>
+                                    Tình trạng hôn nhân
+                                </label>
+                                <select name="maritalStatus" class="form-select" required>
+                                    <option value="">Chọn tình trạng</option>
                                     <option value="Độc thân" <?php echo $profile['tinhTrangHonNhan'] == 'Độc thân' ? 'selected' : ''; ?>>Độc thân</option>
                                     <option value="Đã ly hôn" <?php echo $profile['tinhTrangHonNhan'] == 'Đã ly hôn' ? 'selected' : ''; ?>>Đã ly hôn</option>
                                     <option value="Mẹ đơn thân" <?php echo $profile['tinhTrangHonNhan'] == 'Mẹ đơn thân' ? 'selected' : ''; ?>>Mẹ đơn thân</option>
                                     <option value="Cha đơn thân" <?php echo $profile['tinhTrangHonNhan'] == 'Cha đơn thân' ? 'selected' : ''; ?>>Cha đơn thân</option>
                                 </select>
                             </div>
-                            
-                            <div class="info-item">
-                                <i class="fas fa-weight"></i>
-                                <label class="info-label">Cân nặng (kg)</label>
-                                <input type="number" name="weight" class="info-value" min="30" max="200" value="<?php echo isset($profile['canNang']) ? $profile['canNang'] : ''; ?>">
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-weight icon"></i>
+                                    Cân nặng (kg)
+                                </label>
+                                <input type="number" name="weight" class="form-input" 
+                                       min="30" max="200" placeholder="VD: 65"
+                                       value="<?php echo isset($profile['canNang']) ? $profile['canNang'] : ''; ?>">
                             </div>
-                            
-                            <div class="info-item">
-                                <i class="fas fa-ruler-vertical"></i>
-                                <label class="info-label">Chiều cao (cm)</label>
-                                <input type="number" name="height" class="info-value" min="100" max="250" value="<?php echo isset($profile['chieuCao']) ? $profile['chieuCao'] : ''; ?>">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-ruler-vertical icon"></i>
+                                    Chiều cao (cm)
+                                </label>
+                                <input type="number" name="height" class="form-input" 
+                                       min="100" max="250" placeholder="VD: 170"
+                                       value="<?php echo isset($profile['chieuCao']) ? $profile['chieuCao'] : ''; ?>">
                             </div>
-                            
-                            <div class="info-item" style="grid-column: 1 / -1;">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <label class="info-label">Thành phố</label>
-                                <select name="location" class="info-value" required>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-map-marker-alt icon"></i>
+                                    Thành phố
+                                </label>
+                                <select name="location" class="form-select" required>
+                                    <option value="">Chọn thành phố</option>
                                     <?php 
                                     $cities = ["An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu", "Bắc Ninh", "Bến Tre", "Bình Định", "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau", "Cần Thơ", "Cao Bằng", "Đà Nẵng", "Đắk Lắk", "Đắk Nông", "Điện Biên", "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Giang", "Hà Nam", "Hà Nội", "Hà Tĩnh", "Hải Dương", "Hải Phòng", "Hậu Giang", "Hòa Bình", "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu", "Lâm Đồng", "Lạng Sơn", "Lào Cai", "Long An", "Nam Định", "Nghệ An", "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Phú Yên", "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị", "Sóc Trăng", "Sơn La", "Tây Ninh", "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang", "TP Hồ Chí Minh", "Trà Vinh", "Tuyên Quang", "Vĩnh Long", "Vĩnh Phúc", "Yên Bái"];
                                     foreach ($cities as $city):
@@ -177,16 +228,21 @@ $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt
                                 </select>
                             </div>
                         </div>
-                    </section>
+                    </div>
 
                     <!-- Học vấn & Mục tiêu -->
-                    <section class="detail-section">
+                    <div class="form-section">
                         <h2 class="section-title">Học vấn & Mục tiêu</h2>
-                        <div class="info-list">
-                            <div class="info-item">
-                                <i class="fas fa-graduation-cap"></i>
-                                <label class="info-label">Học vấn</label>
-                                <select name="education" class="info-value" required>
+                       
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-graduation-cap icon"></i>
+                                    Học vấn
+                                </label>
+                                <select name="education" class="form-select" required>
+                                    <option value="">Chọn trình độ</option>
                                     <option value="Trung học" <?php echo $profile['hocVan'] == 'Trung học' ? 'selected' : ''; ?>>Trung học</option>
                                     <option value="Cao đẳng" <?php echo $profile['hocVan'] == 'Cao đẳng' ? 'selected' : ''; ?>>Cao đẳng</option>
                                     <option value="Đại học" <?php echo $profile['hocVan'] == 'Đại học' ? 'selected' : ''; ?>>Đại học</option>
@@ -194,11 +250,14 @@ $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt
                                     <option value="Tiến sĩ" <?php echo $profile['hocVan'] == 'Tiến sĩ' ? 'selected' : ''; ?>>Tiến sĩ</option>
                                 </select>
                             </div>
-                            
-                            <div class="info-item">
-                                <i class="fas fa-bullseye"></i>
-                                <label class="info-label">Mục tiêu</label>
-                                <select name="goal" class="info-value" required>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-bullseye icon"></i>
+                                    Mục tiêu
+                                </label>
+                                <select name="goal" class="form-select" required>
+                                    <option value="">Chọn mục tiêu</option>
                                     <option value="Hẹn hò" <?php echo $profile['mucTieuPhatTrien'] == 'Hẹn hò' ? 'selected' : ''; ?>>Hẹn hò</option>
                                     <option value="Kết bạn" <?php echo $profile['mucTieuPhatTrien'] == 'Kết bạn' ? 'selected' : ''; ?>>Kết bạn</option>
                                     <option value="Kết hôn" <?php echo $profile['mucTieuPhatTrien'] == 'Kết hôn' ? 'selected' : ''; ?>>Kết hôn</option>
@@ -206,13 +265,12 @@ $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt
                                 </select>
                             </div>
                         </div>
-                    </section>
+                    </div>
 
                     <!-- Sở thích -->
-                    <section class="detail-section">
+                    <div class="form-section">
                         <h2 class="section-title">Sở thích</h2>
-                        <p style="color: #666; font-size: 14px; margin-bottom: 15px;"><i class="fas fa-heart"></i> Chọn sở thích của bạn</p>
-                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <div class="interests-grid">
                             <?php
                             $allInterests = [
                                 "Đọc sách", "Xem phim", "Nghe nhạc", "Du lịch", "Thể thao", "Nấu ăn",
@@ -232,42 +290,26 @@ $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt
                             <?php endforeach; ?>
                         </div>
                         <input type="hidden" name="interests" id="interestsInput" value="<?php echo isset($profile['soThich']) ? htmlspecialchars($profile['soThich']) : ''; ?>">
-                    </section>
+                    </div>
 
                     <!-- Giới thiệu bản thân -->
-                    <section class="detail-section">
+                    <div class="form-section">
                         <h2 class="section-title">Giới thiệu bản thân</h2>
-                        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                            <textarea name="bio" rows="5" style="
-                                width: 100%;
-                                padding: 15px;
-                                border: 1px solid #e8eef3;
-                                border-radius: 10px;
-                                font-size: 15px;
-                                font-family: inherit;
-                                resize: vertical;
-                                transition: all 0.3s ease;
-                            " placeholder="Viết vài dòng về bản thân bạn..." 
-                            onfocus="this.style.borderColor='#5BC0DE'; this.style.boxShadow='0 0 0 3px rgba(91, 192, 222, 0.1)'"
-                            onblur="this.style.borderColor='#e8eef3'; this.style.boxShadow='none'"><?php echo isset($profile['moTa']) ? htmlspecialchars($profile['moTa']) : ''; ?></textarea>
+                       
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-pen icon"></i>
+                                Mô tả về bạn
+                            </label>
+                            <textarea name="bio" class="form-textarea" rows="5" 
+                                      placeholder="Viết vài dòng về bản thân bạn..."><?php echo isset($profile['moTa']) ? htmlspecialchars($profile['moTa']) : ''; ?></textarea>
                         </div>
-                    </section>
+                    </div>
 
                     <!-- Submit buttons -->
-                    <div style="text-align: center; margin: 30px 0; display: flex; gap: 15px; justify-content: center;">
-                        <button type="submit" style="
-                            background: linear-gradient(135deg, #FF6B9D 0%, #FF8DB4 100%);
-                            color: white;
-                            border: none;
-                            padding: 15px 40px;
-                            border-radius: 25px;
-                            font-size: 16px;
-                            font-weight: 600;
-                            cursor: pointer;
-                            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3);
-                            transition: all 0.3s ease;
-                        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 157, 0.4)'" 
-                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 157, 0.3)'">
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit">
                             <i class="fas fa-save"></i>
                             Lưu thay đổi
                         </button>
@@ -277,92 +319,7 @@ $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt
         </div>
     </div>
 
-    <style>
-        /* Override profile.css for more compact layout */
-        .info-list {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-        
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            padding: 14px;
-            background: #ffffff;
-            border: 1px solid #e8eef3;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-        }
-        
-        .info-item:hover {
-            border-color: #5BC0DE;
-            box-shadow: 0 3px 10px rgba(91,192,222,0.15);
-            transform: translateY(-1px);
-        }
-        
-        .info-item i {
-            color: #5BC0DE;
-            font-size: 18px;
-            margin-bottom: 2px;
-        }
-        
-        .info-label {
-            font-weight: 500;
-            color: #888;
-            font-size: 12px;
-        }
-        
-        .info-value {
-            padding: 8px 10px;
-            border: 1px solid #e8eef3;
-            border-radius: 7px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #2c3e50;
-            background: white;
-            font-family: inherit;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-        
-        .info-value:focus {
-            outline: none;
-            border-color: #5BC0DE;
-            box-shadow: 0 0 0 2px rgba(91, 192, 222, 0.1);
-        }
-        
-        /* Interest tags styling */
-        .interest-tag {
-            padding: 10px 20px;
-            border: 2px solid #E0E0E0;
-            border-radius: 20px;
-            background: white;
-            color: #666;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
 
-        .interest-tag:hover {
-            border-color: #5BC0DE;
-            color: #5BC0DE;
-        }
-
-        .interest-tag.active {
-            background: #5BC0DE;
-            border-color: #5BC0DE;
-            color: white;
-        }
-        
-        @media (max-width: 768px) {
-            .info-list {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 
     <script>
         // Preview avatar before upload

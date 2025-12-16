@@ -68,317 +68,80 @@ function timeAgo($datetime) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Người bạn đã thích - WebHenHo</title>
-    <link rel="stylesheet" href="/public/css/home.css">
-    <link rel="stylesheet" href="/public/css/likes.css">
-    <link rel="stylesheet" href="/public/css/profile.css">
+    <title>Người bạn đã thích - DuyenHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Header styles */
-        .profile-header {
-            background: white;
-            padding: 12px 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-        }
-
-        .logo img {
-            display: block;
-            max-height: 60px;
-            width: auto;
-        }
-
-        .logo-text {
-            font-size: 24px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #FF6B9D 0%, #FF8DB4 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-family: 'Segoe UI', sans-serif;
-            letter-spacing: 0.5px;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .btn-logout {
-            background: linear-gradient(135deg, #FF6B9D 0%, #FF8DB4 100%);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-logout:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
-        }
-
-        .likes-container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-        }
-        
-        .page-header {
-            margin-bottom: 30px;
-        }
-        
-        .page-header h1 {
-            color: #e94057;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        
-        .page-header p {
-            color: #666;
-            font-size: 16px;
-        }
-        
-        .profiles-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .profile-card {
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .profile-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-        }
-        
-        .profile-image {
-            position: relative;
-            width: 100%;
-            height: 300px;
-            overflow: hidden;
-            cursor: pointer;
-        }
-        
-        .profile-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .liked-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(233, 64, 87, 0.9);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .profile-info {
-            padding: 15px;
-        }
-        
-        .profile-name {
-            font-size: 20px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-        }
-        
-        .profile-details {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-        
-        .profile-details span {
-            display: inline-block;
-            margin-right: 15px;
-        }
-        
-        .profile-bio {
-            color: #888;
-            font-size: 14px;
-            line-height: 1.4;
-            margin-bottom: 15px;
-            max-height: 60px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .profile-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .btn-view-profile, .btn-unlike {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s;
-        }
-        
-        .btn-view-profile {
-            background: #e94057;
-            color: white;
-        }
-        
-        .btn-view-profile:hover {
-            background: #d63447;
-        }
-        
-        .btn-unlike {
-            background: #f5f5f5;
-            color: #666;
-        }
-        
-        .btn-unlike:hover {
-            background: #e0e0e0;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-        }
-        
-        .empty-state svg {
-            width: 120px;
-            height: 120px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-        
-        .empty-state h2 {
-            color: #666;
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        
-        .empty-state p {
-            color: #999;
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
-
-        /* Back button */
-        .back-button-container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
-
-        .btn-back {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: #5BC0DE;
-            color: white;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(91, 192, 222, 0.3);
-        }
-
-        .btn-back:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(91, 192, 222, 0.4);
-        }
-        
-        .btn-explore {
-            display: inline-block;
-            padding: 12px 30px;
-            background: #e94057;
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: background 0.3s;
-        }
-        
-        .btn-explore:hover {
-            background: #d63447;
-        }
-    </style>
+    <link rel="stylesheet" href="/public/css/nguoibanthich.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <!-- Header -->
-    <header class="profile-header">
-        <a href="../trangchu/index.php" class="logo">
-            <img src="/public/img/logo.jpg" alt="Kết Nối Yêu Thương">
-            <span class="logo-text">DuyenHub</span>
-        </a>
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="../trangchu/index.php" class="logo">
+                    <img src="../../public/img/logo.jpg" alt="DuyenHub Logo">
+                    <span class="logo-text">DuyenHub</span>
+                </a>
+                <nav class="header-menu">
+                    <a href="../trangchu/index.php" class="menu-item active">
+                        <i class="fas fa-home"></i>
+                        <span>Trang chủ</span>
+                    </a>
+                    <a href="../nhantin/chat.php" class="menu-item">
+                        <i class="fas fa-comments"></i>
+                        <span>Tin nhắn</span>
+                    </a>
+                    <a href="../timkiem/ghepdoinhanh.php" class="menu-item">
+                        <i class="fas fa-search"></i>
+                        <span>Tìm kiếm</span>
+                    </a>
+                    <a href="#" class="menu-item">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Trợ giúp</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="header-actions">
+                <a href="../../controller/cLogout.php" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Đăng xuất</span>
+                </a>
+            </div>
+        </div>
     </header>
-    
-    <!-- Back button -->
-    <div class="back-button-container">
-        <button class="btn-back" onclick="window.location.href='../trangchu/index.php'">
+
+    <div class="likes-wrapper">
+        <button class="back-btn" onclick="window.history.back()" title="Quay lại">
             <i class="fas fa-arrow-left"></i>
         </button>
-    </div>
-    
-    <div class="likes-container">
-        <div class="page-header">
-            <h1>Người bạn đã thích</h1>
-        </div>
         
+        <div class="likes-container">
+            <div class="likes-header">
+                <h1>Người bạn đã thích</h1>
+                <p>Danh sách những người bạn đã thể hiện sự quan tâm</p>
+            </div>
+            
         <?php if (empty($likedUsers)): ?>
             <div class="empty-state">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
-                          stroke="#e94057" stroke-width="2" fill="none"/>
-                </svg>
+                <i class="fas fa-heart-broken"></i>
                 <h2>Chưa có ai được thích</h2>
                 <p>Hãy khám phá và tìm kiếm người phù hợp với bạn!</p>
                 <a href="/views/trangchu/index.php" class="btn-explore">
-                    <i class="fas fa-search"></i> Khám phá ngay
+                    Khám phá
                 </a>
             </div>
         <?php else: ?>
-            <div class="profiles-grid">
+            <div class="likes-list">
                 <?php foreach ($likedUsers as $person): 
                     $age = $profileModel->calculateAge($person['ngaySinh']);
                     // Xử lý đường dẫn avatar
                     if (!empty($person['avt'])) {
-                        // Nếu đã có 'public/' trong đường dẫn
-                        if (strpos($person['avt'], 'public/') === 0) {
+                        // Kiểm tra nếu đã có đường dẫn đầy đủ
+                        if (strpos($person['avt'], '/') === 0) {
+                            $avatarSrc = htmlspecialchars($person['avt']);
+                        } elseif (strpos($person['avt'], 'public/') === 0) {
                             $avatarSrc = '/' . htmlspecialchars($person['avt']);
                         } else {
                             $avatarSrc = '/public/uploads/avatars/' . htmlspecialchars($person['avt']);
@@ -387,45 +150,37 @@ function timeAgo($datetime) {
                         $avatarSrc = '/public/img/default-avatar.jpg';
                     }
                 ?>
-                    <div class="profile-card">
-                        <div class="profile-image" onclick="window.location.href='/views/hoso/xemnguoikhac.php?id=<?php echo $person['maNguoiDung']; ?>'">
+                    <div class="like-item" id="like-<?php echo $person['maNguoiDung']; ?>" onclick="window.location.href='/views/hoso/xemnguoikhac.php?id=<?php echo $person['maNguoiDung']; ?>'">
+                        <div class="like-avatar">
                             <img src="<?php echo $avatarSrc; ?>" 
                                  alt="<?php echo htmlspecialchars($person['ten']); ?>">
-                            <div class="liked-badge">
-                                ❤️ <?php echo timeAgo($person['thoiDiemThich']); ?>
-                            </div>
                         </div>
-                        <div class="profile-info">
-                            <div class="profile-name"><?php echo htmlspecialchars($person['ten']); ?>, <?php echo $age; ?></div>
-                            <div class="profile-details">
-                                <span><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($person['noiSong'] ?? 'N/A'); ?></span>
-                            </div>
-                            <?php if (!empty($person['moTa'])): ?>
-                                <div class="profile-bio">
-                                    <?php echo htmlspecialchars($person['moTa']); ?>
-                                </div>
-                            <?php endif; ?>
-                            <div class="profile-actions">
-                                <a href="/views/hoso/xemnguoikhac.php?id=<?php echo $person['maNguoiDung']; ?>" 
-                                   class="btn-view-profile">
-                                    Xem hồ sơ
-                                </a>
-                                <button class="btn-unlike" onclick="unlikeProfile(<?php echo $person['maNguoiDung']; ?>, this)">
-                                    <i class="fas fa-heart-broken"></i> Bỏ thích
-                                </button>
-                            </div>
+                        <div class="like-info">
+                            <h3 class="like-name">
+                                <?php echo htmlspecialchars($person['ten']); ?>, <?php echo $age; ?>
+                            </h3>
+                            <p class="like-location">
+                                <i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($person['noiSong'] ?? 'N/A'); ?>
+                            </p>
+                            <p class="like-date">
+                                <i class="fas fa-heart"></i> Đã thích <?php echo timeAgo($person['thoiDiemThich']); ?>
+                            </p>
                         </div>
+                        <button class="btn-unlike" onclick="event.stopPropagation(); unlikeUser(<?php echo $person['maNguoiDung']; ?>)">
+                            <i class="fas fa-heart-broken"></i> Bỏ thích
+                        </button>
                     </div>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
+        </div>
     </div>
     
     <?php include __DIR__ . '/../layouts/footer.php'; ?>
     
     <script>
-        function unlikeProfile(targetUserId, button) {
-            console.log('unlikeProfile called with userId:', targetUserId);
+        function unlikeUser(targetUserId) {
+            console.log('unlikeUser called with userId:', targetUserId);
             
             if (!confirm('Bạn có chắc muốn bỏ thích người này?')) {
                 return;
@@ -450,20 +205,22 @@ function timeAgo($datetime) {
                 
                 if (data.success && data.action === 'unliked') {
                     // Remove card with animation
-                    const card = button.closest('.profile-card');
-                    card.style.opacity = '0';
-                    card.style.transform = 'scale(0.8)';
-                    setTimeout(() => {
-                        card.remove();
-                        
-                        // Check if empty
-                        const grid = document.querySelector('.profiles-grid');
-                        if (grid && grid.children.length === 0) {
-                            location.reload();
-                        }
-                    }, 300);
+                    const item = document.getElementById('like-' + targetUserId);
+                    if (item) {
+                        item.style.opacity = '0';
+                        item.style.transform = 'translateX(-20px)';
+                        setTimeout(() => {
+                            item.remove();
+                            
+                            // Check if empty
+                            const list = document.querySelector('.likes-list');
+                            if (list && list.children.length === 0) {
+                                location.reload();
+                            }
+                        }, 300);
+                    }   
                     
-                    showNotification('Đã bỏ thích!');
+                    showNotification('Đã bỏ thích!', 'success');
                 } else {
                     showNotification(data.message || 'Có lỗi xảy ra!', 'error');
                 }
@@ -476,42 +233,17 @@ function timeAgo($datetime) {
         
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
-            notification.textContent = message;
-            const bgColor = type === 'error' ? '#dc3545' : '#e94057';
-            notification.style.cssText = `
-                position: fixed;
-                top: 100px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: ${bgColor};
-                color: white;
-                padding: 15px 30px;
-                border-radius: 25px;
-                font-size: 16px;
-                font-weight: 600;
-                box-shadow: 0 5px 20px rgba(233, 64, 87, 0.3);
-                z-index: 10000;
-                animation: slideDown 0.3s ease;
+            notification.className = 'notification ' + type;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <p>${message}</p>
             `;
             document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 2000);
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
         }
     </script>
-    <style>
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -20px);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, 0);
-            }
-        }
-        
-        .profile-card {
-            transition: opacity 0.3s, transform 0.3s;
-        }
-    </style>
 </body>
 </html>

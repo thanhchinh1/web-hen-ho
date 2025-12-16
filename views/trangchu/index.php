@@ -71,9 +71,12 @@ $infoMessage = Session::getFlash('info_message');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang chủ - Kết Nối Yêu Thương</title>
+    <title>Trang chủ - DuyenHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../../public/css/home.css">
+    <link rel="stylesheet" href="../../public/css/trangchu.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../../public/css/search-modal.css">
 </head>
 <body>
@@ -186,68 +189,72 @@ $infoMessage = Session::getFlash('info_message');
     <!-- Header -->
     <header class="main-header">
         <div class="header-container">
-            <a href="../trangchu/index.php" class="logo">
-                <img src="../../public/img/logo.jpg" alt="Kết Nối Yêu Thương">
-                <span class="logo-text">DuyenHub</span>
-            </a>
+            <div class="header-left">
+                <a href="../trangchu/index.php" class="logo">
+                    <img src="../../public/img/logo.jpg" alt="Kết Nối Yêu Thương">
+                    <span class="logo-text">DuyenHub</span>
+                </a>
+                <nav class="main-nav">
+                    <a href="../trangchu/index.php" class="nav-link active">
+                        <i class="fas fa-home"></i>
+                        Trang chủ
+                    </a>
+                    <a href="../nhantin/chat.php" class="nav-link">
+                        <i class="fas fa-comment"></i>
+                        Tin nhẫn
+                        <?php if ($newMatchesCount > 0): ?>
+                            <span class="notification-badge"><?php echo $newMatchesCount; ?></span>
+                        <?php endif; ?>
+                    </a>
+                    <a href="#" class="nav-link" onclick="openSearchModal(); return false;">
+                        <i class="fas fa-search"></i>
+                        Tìm kiếm
+                    </a>
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-question-circle"></i>
+                        Trợ giúp
+                    </a>
+                </nav>
+            </div>
 
-            <nav class="nav-center">
-                <a href="#" class="nav-item active">
-                    <i class="fas fa-home"></i>
-                    Trang chủ
-                </a>
-                <a href="../nhantin/chat.php" class="nav-item" style="position: relative;">
-                    <i class="fas fa-comment"></i>
-                    Tin nhắn
-                    <?php if ($newMatchesCount > 0): ?>
-                        <span class="notification-badge"><?php echo $newMatchesCount; ?></span>
-                    <?php endif; ?>
-                </a>
-                <a href="#" class="nav-item" onclick="openSearchModal(); return false;">
-                    <i class="fas fa-search"></i>
-                    Tìm kiếm
-                </a>
-            </nav>
-
-            <div class="nav-right">
+            <div class="header-right">
                 <a href="../../controller/cLogout.php" class="btn-logout">
                     <i class="fas fa-sign-out-alt"></i>
                     Đăng Xuất
                 </a>
-                <div class="user-menu-wrapper" style="position: relative;">
-                    <img src="../../<?php echo htmlspecialchars($currentUserProfile['avt']); ?>" alt="User" class="user-avatar" id="userAvatar" style="cursor:pointer;">
+                <div class="user-menu-wrapper">
+                    <img src="../../<?php echo htmlspecialchars($currentUserProfile['avt']); ?>" alt="User" class="user-avatar" id="userAvatar">
                     <div class="user-dropdown" id="userDropdown" style="display:none;">
+                        <a href="../goivip/index.php" class="user-dropdown-item">
+                            <i class="fas fa-crown"></i>
+                            <span>Nâng cấp tài khoản</span>
+                            <span class="vip-badge"></span>
+                        </a>
                         <a href="../hoso/index.php" class="user-dropdown-item">
                             <i class="fas fa-user"></i>
-                            Hồ sơ của tôi
+                            Xem hồ sơ cá nhân
                         </a>
                         <a href="../hoso/chinhsua.php" class="user-dropdown-item">
                             <i class="fas fa-edit"></i>
                             Chỉnh sửa hồ sơ
                         </a>
-                        <a href="../taikhoan/doimatkhau.php" class="user-dropdown-item">
-                            <i class="fas fa-key"></i>
-                            Đổi mật khẩu
-                        </a>
-                        <a href="../ghepdoi/index.php" class="user-dropdown-item">
-                            <i class="fas fa-heart"></i>
-                            Đã ghép đôi
-                        </a>
                         <a href="../thich/nguoithichban.php" class="user-dropdown-item">
                             <i class="fas fa-heart"></i>
-                            Xem danh sách thích bạn
+                            <span>Xem danh sách thích bạn</span>
+                            <span class="vip-badge"></span>
                         </a>
                         <a href="../thich/nguoibanthich.php" class="user-dropdown-item">
                             <i class="fas fa-user-friends"></i>
-                            Xem danh sách người bạn thích
+                            <span>Xem danh sách người bạn thích</span>
+                            <span class="vip-badge"></span>
                         </a>
-                        <a href="../chan/danhsach.php" class="user-dropdown-item">
+                        <a href="../chan/danhsachchan.php" class="user-dropdown-item">
                             <i class="fas fa-ban"></i>
                             Danh sách chặn
                         </a>
-                        <a href="../goivip/index.php" class="user-dropdown-item vip">
-                            <i class="fas fa-crown"></i>
-                            Nâng cấp tài khoản
+                        <a href="../taikhoan/doimatkhau.php" class="user-dropdown-item">
+                            <i class="fas fa-key"></i>
+                            Đổi mật khẩu
                         </a>
                     </div>
                 </div>
@@ -293,7 +300,7 @@ $infoMessage = Session::getFlash('info_message');
     <section class="profiles-section">
         <div class="section-header">
             <h2>Danh sách hồ sơ nổi bật</h2>
-            <a href="../timkiem/ghepdoinhanh.php" class="btn-quick-match">Ghép đôi nhanh</a>
+            <a href="../timkiem/ghepdoinhanh.php" class="btn-register-cta">Ghép Đôi Nhanh</a>
         </div>
 
         <div class="profiles-grid">
@@ -336,6 +343,133 @@ $infoMessage = Session::getFlash('info_message');
             <?php endforeach; ?>
         </div>
 
+    </section>
+
+    <!-- VIP Upgrade Section -->
+    <section class="vip-upgrade-section">
+        <div class="vip-upgrade-container">
+            <div class="vip-header">
+                <i class="fas fa-crown vip-crown-icon"></i>
+                <h2>Nâng cấp tài khoản VIP</h2>
+                <p class="vip-subtitle">Trải nghiệm đầy đủ tính năng cao cấp và tăng cơ hội tìm được nửa kia của bạn</p>
+            </div>
+
+            <div class="vip-benefits">
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-heart-pulse"></i>
+                    </div>
+                    <h3>Ghép đôi thông minh</h3>
+                    <p>Thuật toán AI tìm kiếm người phù hợp nhất</p>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-infinity"></i>
+                    </div>
+                    <h3>Thích không giới hạn</h3>
+                    <p>Không giới hạn số lượt thích mỗi ngày</p>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3>Xem ai thích bạn</h3>
+                    <p>Biết được ai đã thích hồ sơ của bạn</p>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>Hồ sơ nổi bật</h3>
+                    <p>Xuất hiện nhiều hơn với người dùng khác</p>
+                </div>
+            </div>
+
+            <div class="vip-pricing-section">
+                <h3 class="pricing-title">Chọn gói phù hợp với bạn</h3>
+                <div class="pricing-grid">
+                    <!-- Gói 1 Tháng -->
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h4>1 Tháng</h4>
+                        </div>
+                        <div class="pricing-price">
+                            <span class="price">99.000đ</span>
+                            <span class="period">/tháng</span>
+                        </div>
+                        <a href="../goivip/thanhtoan.php?package=1" class="btn-select-package">
+                            <i class="fas fa-crown"></i>
+                            Nâng cấp ngay
+                        </a>
+                    </div>
+
+                    <!-- Gói 3 Tháng - Phổ biến -->
+                    <div class="pricing-card popular">
+                        <div class="badge-popular">
+                            <i class="fas fa-fire"></i> Phổ biến nhất
+                        </div>
+                        <div class="pricing-header">
+                            <h4>3 Tháng</h4>
+                        </div>
+                        <div class="pricing-price">
+                            <span class="price">249.000đ</span>
+                            <span class="period">/3 tháng</span>
+                        </div>
+                        <div class="pricing-save">
+                            <i class="fas fa-tag"></i> Tiết kiệm 16%
+                        </div>
+                        <a href="../goivip/thanhtoan.php?package=3" class="btn-select-package">
+                            <i class="fas fa-crown"></i>
+                            Nâng cấp ngay
+                        </a>
+                    </div>
+
+                    <!-- Gói 6 Tháng -->
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h4>6 Tháng</h4>
+                        </div>
+                        <div class="pricing-price">
+                            <span class="price">449.000đ</span>
+                            <span class="period">/6 tháng</span>
+                        </div>
+                        <div class="pricing-save">
+                            <i class="fas fa-tag"></i> Tiết kiệm 24%
+                        </div>
+                        <a href="../goivip/thanhtoan.php?package=6" class="btn-select-package">
+                            <i class="fas fa-crown"></i>
+                            Nâng cấp ngay
+                        </a>
+                    </div>
+
+                    <!-- Gói 12 Tháng - Giá trị nhất -->
+                    <div class="pricing-card best-value">
+                        <div class="badge-best">
+                            <i class="fas fa-star"></i> Giá trị nhất
+                        </div>
+                        <div class="pricing-header">
+                            <h4>12 Tháng</h4>
+                        </div>
+                        <div class="pricing-price">
+                            <span class="price">799.000đ</span>
+                            <span class="period">/năm</span>
+                        </div>
+                        <div class="pricing-save">
+                            <i class="fas fa-tag"></i> Tiết kiệm 33%
+                        </div>
+                        <a href="../goivip/thanhtoan.php?package=12" class="btn-select-package">
+                            <i class="fas fa-crown"></i>
+                            Nâng cấp ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="main-footer">
         <div class="footer-container">
@@ -346,14 +480,14 @@ $infoMessage = Session::getFlash('info_message');
                     <a href="#">Pháp lý</a>
                 </div>
                 <div class="footer-social">
-                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.facebook.com/profile.php?id=61583156011828" class="social-icon" target="_blank"><i class="fab fa-facebook-f"></i></a>
                     <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
                     <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
                     <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Kết Nối Yêu Thương. Mọi quyền được bảo lưu.</p>
+                <p>&copy; Kết Nối Yêu Thương. Mọi quyền được bảo lưu.</p>
             </div>
         </div>
     </footer>
@@ -362,7 +496,7 @@ $infoMessage = Session::getFlash('info_message');
     <div class="search-modal-overlay" id="searchModal">
         <div class="search-modal">
             <div class="modal-header">
-                <h2>Tìm kiếm nâng cao</h2>
+                <h2>Tìm kiếm </h2>
                 <button class="modal-close" onclick="closeSearchModal()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -485,71 +619,92 @@ $infoMessage = Session::getFlash('info_message');
                                 <option value="51-100">Trên 50 tuổi</option>
                             </select>
                         </div>
+                    </div>
 
-                        <div class="modal-form-group full-width">
-                            <label>Sở thích (chọn nhiều)</label>
-                            <div class="interests-selection" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-top: 10px;">
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Đọc sách"> Đọc sách
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Xem phim"> Xem phim
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Nghe nhạc"> Nghe nhạc
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Du lịch"> Du lịch
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Thể thao"> Thể thao
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Nấu ăn"> Nấu ăn
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Chụp ảnh"> Chụp ảnh
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Học ngoại ngữ"> Học ngoại ngữ
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Làm vườn"> Làm vườn
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Chơi game"> Chơi game
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Thiền"> Thiền
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Vẽ"> Vẽ
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Khiêu vũ"> Khiêu vũ
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Ca hát"> Ca hát
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Tập gym"> Tập gym
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Bơi lội"> Bơi lội
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Leo núi"> Leo núi
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Cắm trại"> Cắm trại
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Mua sắm"> Mua sắm
-                                </label>
-                                <label class="interest-checkbox">
-                                    <input type="checkbox" value="Thời trang"> Thời trang
-                                </label>
-                            </div>
+                    <!-- Interests Section -->
+                    <div class="modal-interests-section">
+                        <h3>Sở thích (chọn nhiều)</h3>
+                        <div class="interests-grid">
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Đọc sách">
+                                <label>Đọc sách</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Xem phim">
+                                <label>Xem phim</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Nghe nhạc">
+                                <label>Nghe nhạc</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Du lịch">
+                                <label>Du lịch</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Thể thao">
+                                <label>Thể thao</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Nấu ăn">
+                                <label>Nấu ăn</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Chụp ảnh">
+                                <label>Chụp ảnh</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Học ngoại ngữ">
+                                <label>Học ngoại ngữ</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Làm vườn">
+                                <label>Làm vườn</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Chơi game">
+                                <label>Chơi game</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Thiền">
+                                <label>Thiền</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Vẽ">
+                                <label>Vẽ</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Khiêu vũ">
+                                <label>Khiêu vũ</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Ca hát">
+                                <label>Ca hát</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Tập gym">
+                                <label>Tập gym</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Bơi lội">
+                                <label>Bơi lội</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Leo núi">
+                                <label>Leo núi</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Cắm trại">
+                                <label>Cắm trại</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Mua sắm">
+                                <label>Mua sắm</label>
+                            </label>
+                            <label class="interest-checkbox">
+                                <input type="checkbox" value="Thời trang">
+                                <label>Thời trang</label>
+                            </label>
                         </div>
                     </div>
 

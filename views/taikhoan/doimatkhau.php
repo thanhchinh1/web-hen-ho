@@ -36,128 +36,160 @@ $errorMessage = Session::getFlash('error_message');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đổi mật khẩu - DuyenHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../../public/css/change-password.css">
+    <link rel="stylesheet" href="../../public/css/doimatkhau.css?v=<?php echo time(); ?>">
 </head>
 <body>
-    <header class="profile-header">
-        <a href="../trangchu/index.php" class="logo">
-            <img src="../../public/img/logo.jpg" alt="Kết Nối Yêu Thương">
-            <span class="logo-text">DuyenHub</span>
-        </a>
-    </header>
-
-    <div class="page-wrapper">
-        <div class="back-button-container">
-            <button class="btn-back" onclick="window.location.href='../trangchu/index.php'">
-                <i class="fas fa-arrow-left"></i>
-            </button>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="../trangchu/index.php" class="logo">
+                    <img src="../../public/img/logo.jpg" alt="DuyenHub Logo">
+                    <span class="logo-text">DuyenHub</span>
+                </a>
+                <nav class="header-menu">
+                    <a href="../trangchu/index.php" class="menu-item active">
+                        <i class="fas fa-home"></i>
+                        <span>Trang chủ</span>
+                    </a>
+                    <a href="../nhantin/chat.php" class="menu-item">
+                        <i class="fas fa-comments"></i>
+                        <span>Tin nhắn</span>
+                    </a>
+                    <a href="../timkiem/ghepdoinhanh.php" class="menu-item">
+                        <i class="fas fa-search"></i>
+                        <span>Tìm kiếm</span>
+                    </a>
+                    <a href="#" class="menu-item">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Trợ giúp</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="header-actions">
+                <a href="../../controller/cLogout.php" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Đăng xuất</span>
+                </a>
+            </div>
         </div>
+    </header>
+    <!-- Password Wrapper -->
+    <div class="password-wrapper">
+        <!-- Back Button -->
+        <button class="back-btn" onclick="window.location.href='../trangchu/index.php'">
+            <i class="fas fa-arrow-left"></i>
+        </button>
 
-        <div class="profile-content">
-            <div class="profile-details">
-                <!-- Page Title -->
-                <div class="page-title-section">
-                    <h2 class="page-title">Đổi mật khẩu</h2>
+        <!-- Password Container -->
+        <div class="password-container">
+        <!-- Password Container -->
+        <div class="password-container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="header-icon">
+                    <i class="fas fa-lock"></i>
                 </div>
+                <h1>Đổi mật khẩu</h1>
+                <p>Cập nhật mật khẩu để bảo mật tài khoản của bạn</p>
+            </div>
 
-                <!-- Alert Messages -->
-                <?php if ($successMessage): ?>
-                    <div class="alert alert-success">
-                        <i class="fas fa-check-circle"></i>
-                        <span><?php echo htmlspecialchars($successMessage); ?></span>
-                    </div>
-                <?php endif; ?>
+            <!-- Alert Messages -->
+            <?php if ($successMessage): ?>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <span><?php echo htmlspecialchars($successMessage); ?></span>
+                </div>
+            <?php endif; ?>
+            
+            <?php if ($errorMessage): ?>
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span><?php echo htmlspecialchars($errorMessage); ?></span>
+                </div>
+            <?php endif; ?>
+
+            <!-- Password Requirements -->
+            <div class="info-box">
+                <h4>
+                    <i class="fas fa-info-circle"></i>
+                    Yêu cầu mật khẩu mới
+                </h4>
+                <ul>
+                    <li><i class="fas fa-check"></i> Mật khẩu phải có ít nhất <strong>8 ký tự</strong></li>
+                    <li><i class="fas fa-check"></i> Bao gồm ít nhất <strong>1 chữ thường</strong> (a-z)</li>
+                    <li><i class="fas fa-check"></i> Bao gồm ít nhất <strong>1 chữ hoa</strong> (A-Z)</li>
+                    <li><i class="fas fa-check"></i> Bao gồm ít nhất <strong>1 ký tự đặc biệt</strong> (!@#$%^&*...)</li>
+                </ul>
+            </div>
+
+            <!-- Change Password Form -->
+            <form method="POST" action="../../controller/cChangePassword.php" id="changePasswordForm">
+                <!-- CSRF Token -->
+                <input type="hidden" name="csrf_token" value="<?php echo Session::generateCSRFToken(); ?>">
                 
-                <?php if ($errorMessage): ?>
-                    <div class="alert alert-error">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <span><?php echo htmlspecialchars($errorMessage); ?></span>
-                    </div>
-                <?php endif; ?>
-
-                <div class="info-box">
-                    <h4>
-                        <i class="fas fa-info-circle"></i>
-                        Yêu cầu mật khẩu mới
-                    </h4>
-                    <ul>
-                        <li>Mật khẩu phải có ít nhất <strong>8 ký tự</strong></li>
-                        <li>Bao gồm ít nhất <strong>1 chữ thường</strong> (a-z)</li>
-                        <li>Bao gồm ít nhất <strong>1 chữ hoa</strong> (A-Z)</li>
-                        <li>Bao gồm ít nhất <strong>1 ký tự đặc biệt</strong> (!@#$%^&*...)</li>
-                    </ul>
-                </div>
-
-                <form method="POST" action="../../controller/cChangePassword.php" id="changePasswordForm">
-                    <!-- CSRF Token -->
-                    <input type="hidden" name="csrf_token" value="<?php echo Session::generateCSRFToken(); ?>">
-                    
-                    <div class="detail-section">
-                        <h2 class="section-title">
+                <div class="form-section">
+                    <div class="form-group">
+                        <label class="form-label">
                             <i class="fas fa-lock"></i>
-                            Thay đổi mật khẩu
-                        </h2>
-                        
-                        <div class="info-list">
-                            <div class="info-item">
-                                <label class="info-label">
-                                    <i class="fas fa-lock"></i>
-                                    Mật khẩu hiện tại <span class="required">*</span>
-                                </label>
-                                <div class="input-wrapper">
-                                    <input type="password" 
-                                           name="current_password" 
-                                           id="currentPassword" 
-                                           required>
-                                    <i class="fas fa-eye toggle-password" onclick="togglePassword('currentPassword')"></i>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <label class="info-label">
-                                    <i class="fas fa-key"></i>
-                                    Mật khẩu mới <span class="required">*</span>
-                                </label>
-                                <div class="input-wrapper">
-                                    
-                                    <input type="password" 
-                                           name="new_password" 
-                                           id="newPassword" 
-                                          
-                                           required>
-                                    <i class="fas fa-eye toggle-password" onclick="togglePassword('newPassword')"></i>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <label class="info-label">
-                                    <i class="fas fa-check-circle"></i>
-                                    Xác nhận mật khẩu mới <span class="required">*</span>
-                                </label>
-                                <div class="input-wrapper">
-                                    
-                                    <input type="password" 
-                                           name="confirm_password" 
-                                           id="confirmPassword" 
-                                        
-                                           required>
-                                    <i class="fas fa-eye toggle-password" onclick="togglePassword('confirmPassword')"></i>
-                                </div>
-                            </div>
+                            Mật khẩu hiện tại <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="password" 
+                                   name="current_password" 
+                                   id="currentPassword"
+                                   class="form-input"
+                                   placeholder="Nhập mật khẩu hiện tại"
+                                   required>
+                            <i class="fas fa-eye toggle-password" onclick="togglePassword('currentPassword')"></i>
                         </div>
                     </div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="btn-submit">
-                            <i class="fas fa-save"></i>
-                            Đổi mật khẩu
-                        </button>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-key"></i>
+                            Mật khẩu mới <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="password" 
+                                   name="new_password" 
+                                   id="newPassword"
+                                   class="form-input"
+                                   placeholder="Nhập mật khẩu mới"
+                                   required>
+                            <i class="fas fa-eye toggle-password" onclick="togglePassword('newPassword')"></i>
+                        </div>
                     </div>
-                </form>
-            </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-check-circle"></i>
+                            Xác nhận mật khẩu mới <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="password" 
+                                   name="confirm_password" 
+                                   id="confirmPassword"
+                                   class="form-input"
+                                   placeholder="Nhập lại mật khẩu mới"
+                                   required>
+                            <i class="fas fa-eye toggle-password" onclick="togglePassword('confirmPassword')"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-save"></i> Đổi mật khẩu
+                </button>
+            </form>
         </div>
     </div>
+
 
     <script>
         function togglePassword(inputId) {

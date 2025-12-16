@@ -28,18 +28,32 @@ $successMessage = Session::getFlash('register_success');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng ký tài khoản - Kết Nối Yêu Thương</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../../public/css/register.css">
+    <link rel="stylesheet" href="../../public/css/register.css?v=<?php echo time(); ?>">
 </head>
 <body>
-    <div class="register-container">
-        <button class="close-btn" onclick="window.location.href='../../index.php'" aria-label="Đóng">
-            <i class="fas fa-times"></i>
-        </button>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <a href="../../index.php" class="logo">
+                <img src="../../public/img/logo.jpg" alt="DuyenHub Logo">
+                <span class="logo-text">DuyenHub</span>
+            </a>
+        </div>
+    </header>
 
-        <div class="register-header">
-            <h1>Đăng ký tài khoản</h1>
-            <p>Hãy tham gia cộng đồng của chúng tôi để tìm thấy tình yêu!</p>
+    <div class="register-wrapper">
+        <div class="register-container">
+            <button class="back-btn" onclick="goBackAndClearCache()" title="Quay lại">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            
+            <div class="register-header">
+                <h1>Tạo tài khoản mới</h1>
+                <p>Bắt đầu hành trình tìm kiếm tình yêu của bạn</p>
             
             <?php if ($action === 'like' && !empty($targetUser)): ?>
                 <div class="info-container" style="background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 8px; margin: 10px 0;">
@@ -131,15 +145,27 @@ $successMessage = Session::getFlash('register_success');
                 <span class="error-message">Mật khẩu xác nhận không khớp</span>
             </div>
 
+            <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                    <input 
+                        type="checkbox" 
+                        id="accept_terms" 
+                        name="accept_terms" 
+                        required
+                    >
+                    <span class="checkmark"></span>
+                    <span class="checkbox-text">
+                        Tôi đồng ý với 
+                        <a href="#" target="_blank">Điều khoản dịch vụ</a> và 
+                        <a href="#" target="_blank">Chính sách bảo mật</a>
+                    </span>
+                </label>
+                <span class="error-message">Bạn phải chấp nhận điều khoản để tiếp tục</span>
+            </div>
+
             <button type="submit" class="btn-register">
                 Đăng ký
             </button>
-
-            <div class="terms">
-                Bằng việc đăng ký, bạn đồng ý với 
-                <a href="#">Điều khoản dịch vụ</a> và 
-                <a href="#">Chính sách bảo mật</a> của chúng tôi
-            </div>
         </form>
 
         <div class="divider">
@@ -171,12 +197,23 @@ $successMessage = Session::getFlash('register_success');
         }
         ?>
 
-        <div class="login-link">
-            Đã có tài khoản? <a href="<?php echo $loginLink; ?>">Đăng nhập</a>
+            <div class="login-link">
+                Đã có tài khoản? <a href="<?php echo $loginLink; ?>">Đăng nhập ngay</a>
+            </div>
         </div>
     </div>
 
     <script>
+        // Go back and clear cache
+        function goBackAndClearCache() {
+            // Clear cache by reloading without cache
+            if (window.history.length > 1) {
+                window.location.href = document.referrer || '../../index.php';
+            } else {
+                window.location.href = '../../index.php';
+            }
+        }
+
         // Toggle password visibility
         function togglePassword(inputId, iconId) {
             const passwordInput = document.getElementById(inputId);
@@ -264,6 +301,13 @@ $successMessage = Session::getFlash('register_success');
             const confirmPassword = document.getElementById('confirm_password').value;
             if (password !== confirmPassword) {
                 document.getElementById('confirm_password').closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+            
+            // Validate terms acceptance
+            const acceptTerms = document.getElementById('accept_terms');
+            if (!acceptTerms.checked) {
+                acceptTerms.closest('.form-group').classList.add('error');
                 isValid = false;
             }
             

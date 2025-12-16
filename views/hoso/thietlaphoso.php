@@ -24,43 +24,53 @@ $currentUserId = Session::getUserId();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thiết lập Hồ sơ Cá nhân - Kết Nối Yêu Thương</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../../public/css/profile-setup.css">
+    <link rel="stylesheet" href="../../public/css/thietlaphoso.css?v=<?php echo uniqid(); ?>">
 </head>
 <body>
-    <div class="profile-setup-container">
-        <!-- Header -->
-        <header class="main-header">
-            <div class="header-container">
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
             <a href="../trangchu/index.php" class="logo">
-                <img src="../../public/img/logo.jpg" alt="Kết Nối Yêu Thương">
+                <img src="../../public/img/logo.jpg" alt="DuyenHub Logo">
                 <span class="logo-text">DuyenHub</span>
             </a>
-            <div class="nav-right">
-                <a href="../../controller/cLogout.php" class="btn-logout">
-                <i class="fas fa-sign-out-alt"></i>
-                Đăng Xuất
+            <nav class="header-nav">
+                <a href="../../controller/cLogout.php" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
                 </a>
-            </div>
-            </div>
-        </header>
+            </nav>
+        </div>
+    </header>
 
-        <!-- Main Content -->
-        <div class="profile-main">
-            <div class="profile-card">
-                <h1 class="profile-title">Thiết lập Hồ sơ Cá nhân</h1>
-                <p class="profile-subtitle">Cập nhật thông tin của bạn để chúng tôi có thể cung cấp trải nghiệm tốt hơn.</p>
+    <div class="profile-setup-wrapper">
+        <div class="profile-setup-container">
+            <button class="back-btn" onclick="goBack()" title="Quay lại">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+
+            <div class="profile-setup-header">
+                <h1>Thiết lập Hồ sơ Cá nhân</h1>
+                <p>Cập nhật thông tin của bạn để chúng tôi có thể cung cấp trải nghiệm tốt hơn</p>
+            </div>
 
                 <!-- Avatar Upload Section -->
                 <div class="avatar-section">
                     <div class="avatar-preview" id="avatarPreview">
                         <img src="" alt="" id="avatarImage">
+                        <div class="avatar-placeholder">
+                            <i class="fas fa-user"></i>
+                        </div>
                     </div>
-                    <button class="btn-upload-avatar" onclick="document.getElementById('avatarInput').click()">
-                        <i class="fas fa-plus"></i>
+                    <button type="button" class="btn-upload-avatar" onclick="document.getElementById('avatarInput').click()">
+                        <i class="fas fa-camera"></i>
                         Tải ảnh lên
                     </button>
                     <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="previewAvatar(event)">
+                    <p class="avatar-hint">Kích thước tối đa: 5MB</p>
                 </div>
 
                 <!-- Profile Form -->
@@ -110,7 +120,6 @@ $currentUserId = Session::getUserId();
                                         <?php endfor; ?>
                                     </select>
                                 </div>
-                            </div>
                             </div>
 
                             <div class="form-group">
@@ -240,69 +249,68 @@ $currentUserId = Session::getUserId();
                             </div>
                         </div>
 
-                        <div class="form-group full-width">
-                            <label>Sở thích</label>
-                            <div class="interests-grid">
-                                <button type="button" class="interest-tag" data-interest="Đọc sách">Đọc sách</button>
-                                <button type="button" class="interest-tag" data-interest="Xem phim">Xem phim</button>
-                                <button type="button" class="interest-tag" data-interest="Nghe nhạc">Nghe nhạc</button>
-                                <button type="button" class="interest-tag" data-interest="Du lịch">Du lịch</button>
-                                <button type="button" class="interest-tag" data-interest="Thể thao">Thể thao</button>
-                                <button type="button" class="interest-tag" data-interest="Nấu ăn">Nấu ăn</button>
-                                <button type="button" class="interest-tag" data-interest="Chụp ảnh">Chụp ảnh</button>
-                                <button type="button" class="interest-tag" data-interest="Học ngoại ngữ">Học ngoại ngữ</button>
-                                <button type="button" class="interest-tag" data-interest="Làm vườn">Làm vườn</button>
-                                <button type="button" class="interest-tag" data-interest="Chơi game">Chơi game</button>
-                                <button type="button" class="interest-tag" data-interest="Thiền">Thiền</button>
-                                <button type="button" class="interest-tag" data-interest="Vẽ">Vẽ</button>
-                                <button type="button" class="interest-tag" data-interest="Khiêu vũ">Khiêu vũ</button>
-                                <button type="button" class="interest-tag" data-interest="Ca hát">Ca hát</button>
-                                <button type="button" class="interest-tag" data-interest="Tập gym">Tập gym</button>
-                                <button type="button" class="interest-tag" data-interest="Bơi lội">Bơi lội</button>
-                                <button type="button" class="interest-tag" data-interest="Leo núi">Leo núi</button>
-                                <button type="button" class="interest-tag" data-interest="Cắm trại">Cắm trại</button>
-                                <button type="button" class="interest-tag" data-interest="Mua sắm">Mua sắm</button>
-                                <button type="button" class="interest-tag" data-interest="Thời trang">Thời trang</button>
-                                <button type="button" class="interest-tag" data-interest="Viết lách">Viết lách</button>
-                                <button type="button" class="interest-tag" data-interest="Thủ công mỹ nghệ">Thủ công mỹ nghệ</button>
-                                <button type="button" class="interest-tag" data-interest="Chơi nhạc cụ">Chơi nhạc cụ</button>
-                                <button type="button" class="interest-tag" data-interest="Xem thể thao">Xem thể thao</button>
-                                <button type="button" class="interest-tag" data-interest="Tình nguyện">Tình nguyện</button>
-                                <button type="button" class="interest-tag" data-interest="Sưu tầm">Sưu tầm</button>
-                                <button type="button" class="interest-tag" data-interest="Nghiên cứu khoa học">Nghiên cứu khoa học</button>
-                                <button type="button" class="interest-tag" data-interest="Chơi cờ">Chơi cờ</button>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label>Sở thích</label>
+                                <div class="interests-grid">
+                                    <button type="button" class="interest-tag" data-interest="Đọc sách">Đọc sách</button>
+                                    <button type="button" class="interest-tag" data-interest="Xem phim">Xem phim</button>
+                                    <button type="button" class="interest-tag" data-interest="Nghe nhạc">Nghe nhạc</button>
+                                    <button type="button" class="interest-tag" data-interest="Du lịch">Du lịch</button>
+                                    <button type="button" class="interest-tag" data-interest="Thể thao">Thể thao</button>
+                                    <button type="button" class="interest-tag" data-interest="Nấu ăn">Nấu ăn</button>
+                                    <button type="button" class="interest-tag" data-interest="Chụp ảnh">Chụp ảnh</button>
+                                    <button type="button" class="interest-tag" data-interest="Học ngoại ngữ">Học ngoại ngữ</button>
+                                    <button type="button" class="interest-tag" data-interest="Làm vườn">Làm vườn</button>
+                                    <button type="button" class="interest-tag" data-interest="Chơi game">Chơi game</button>
+                                    <button type="button" class="interest-tag" data-interest="Thiền">Thiền</button>
+                                    <button type="button" class="interest-tag" data-interest="Vẽ">Vẽ</button>
+                                    <button type="button" class="interest-tag" data-interest="Khiêu vũ">Khiêu vũ</button>
+                                    <button type="button" class="interest-tag" data-interest="Ca hát">Ca hát</button>
+                                    <button type="button" class="interest-tag" data-interest="Tập gym">Tập gym</button>
+                                    <button type="button" class="interest-tag" data-interest="Bơi lội">Bơi lội</button>
+                                    <button type="button" class="interest-tag" data-interest="Leo núi">Leo núi</button>
+                                    <button type="button" class="interest-tag" data-interest="Cắm trại">Cắm trại</button>
+                                    <button type="button" class="interest-tag" data-interest="Mua sắm">Mua sắm</button>
+                                    <button type="button" class="interest-tag" data-interest="Thời trang">Thời trang</button>
+                                    <button type="button" class="interest-tag" data-interest="Viết lách">Viết lách</button>
+                                    <button type="button" class="interest-tag" data-interest="Thủ công mỹ nghệ">Thủ công mỹ nghệ</button>
+                                    <button type="button" class="interest-tag" data-interest="Chơi nhạc cụ">Chơi nhạc cụ</button>
+                                    <button type="button" class="interest-tag" data-interest="Xem thể thao">Xem thể thao</button>
+                                    <button type="button" class="interest-tag" data-interest="Tình nguyện">Tình nguyện</button>
+                                    <button type="button" class="interest-tag" data-interest="Sưu tầm">Sưu tầm</button>
+                                    <button type="button" class="interest-tag" data-interest="Nghiên cứu khoa học">Nghiên cứu khoa học</button>
+                                    <button type="button" class="interest-tag" data-interest="Chơi cờ">Chơi cờ</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-section">
-                        <div class="form-group full-width">
-                            <label for="description">Mô tả</label>
-                            <textarea id="description" name="description" rows="5" maxlength="500" placeholder="Viết đôi nét về bản thân bạn..." required></textarea>
+
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="description">Mô tả</label>
+                                <textarea id="description" name="description" rows="5" maxlength="500" placeholder="Viết đôi nét về bản thân bạn..." required></textarea>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Submit Button -->
                     <div class="form-actions">
-                        <button type="submit" class="btn-save">
-                            Lưu Thông tin
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-check-circle"></i> Lưu Thông tin
                         </button>
                     </div>
                 </form>
             </div>
         </div>
-
-        <!-- Footer -->
-        <footer class="profile-footer">
-            <div class="social-links">
-                <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-            </div>
-        </footer>
     </div>
 
     <script>
+        // Go back function
+        function goBack() {
+            if (confirm('Bạn có chắc muốn quay lại? Các thay đổi chưa lưu sẽ bị mất.')) {
+                window.history.back();
+            }
+        }
         // Preview avatar before upload
         function previewAvatar(event) {
             const file = event.target.files[0];

@@ -4,7 +4,7 @@ require_once 'models/mProfile.php';
 
 // Lấy danh sách hồ sơ để hiển thị (không cần đăng nhập)
 $profileModel = new Profile();
-$allProfiles = $profileModel->getAllProfiles(12);
+$allProfiles = $profileModel->getAllProfiles(20); // 4 cột x 5 dòng = 20 profiles
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -12,6 +12,9 @@ $allProfiles = $profileModel->getAllProfiles(12);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang chủ - Kết Nối Yêu Thương</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="public/css/home.css">
 </head>
@@ -20,17 +23,21 @@ $allProfiles = $profileModel->getAllProfiles(12);
     <!-- Header -->
     <header class="main-header">
         <div class="header-container">
-            <a href="index.php" class="logo">
-                <img src="./public/img/logo.jpg" alt="">
-                <span class="logo-text">DuyenHub</span>
-            </a>
+            <div class="nav-left">
+                <a href="index.php" class="logo">
+                    <img src="./public/img/logo.jpg" alt="DuyenHub Logo">
+                    <span class="logo-text">DuyenHub</span>
+                </a>
+                
+                
+            </div>
 
             <div class="nav-right">
-                <a href="views/dangnhap/login.php" class="btn-logout" style="margin-left: 10px; background: #2196F3;">
+                <a href="views/dangnhap/login.php" class="btn-logout btn-login">
                     <i class="fas fa-user"></i>
                     Đăng Nhập
                 </a>
-                <a href="views/dangky/register.php" class="btn-logout" style="margin-left: 10px; background: #3f9452ff;">
+                <a href="views/dangky/register.php" class="btn-logout btn-register">
                     <i class="fas fa-user-plus"></i>
                     Đăng Ký
                 </a>
@@ -158,17 +165,18 @@ $allProfiles = $profileModel->getAllProfiles(12);
         </div>
     </section>
 
-    <!-- Profiles Section -->
+    <!-- Profiles Section with 3-column layout -->
     <section class="profiles-section">
         <div class="section-header">
             <h2>Danh sách hồ sơ nổi bật</h2>
+            <a href="views/ghepdoi/index.php" class="btn-register-cta">Ghép Đôi Nhanh</a>
         </div>
 
         <div class="profiles-grid">
             <?php foreach ($allProfiles as $profile): ?>
                 <?php 
                     $age = $profileModel->calculateAge($profile['ngaySinh']);
-                    $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt']) : 'https://i.pravatar.cc/200';
+                    $avatarSrc = !empty($profile['avt']) ? htmlspecialchars($profile['avt']) : 'https://i.pravatar.cc/180';
                 ?>
                 <div class="profile-card" onclick="viewProfile(<?php echo $profile['maNguoiDung']; ?>)">
                     <div class="profile-avatar-wrapper">
@@ -179,7 +187,9 @@ $allProfiles = $profileModel->getAllProfiles(12);
                         <p class="profile-location"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($profile['noiSong']); ?></p>
                         <p class="profile-status"><?php echo htmlspecialchars($profile['mucTieuPhatTrien']); ?></p>
                     </div>
-                    <button class="btn-like" onclick="event.stopPropagation(); likeProfile(<?php echo $profile['maNguoiDung']; ?>)"><i class="fas fa-heart"></i></button>
+                    <button class="btn-like" onclick="event.stopPropagation(); likeProfile(<?php echo $profile['maNguoiDung']; ?>)">
+                        <i class="fas fa-heart"></i>
+                    </button>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -275,6 +285,32 @@ $allProfiles = $profileModel->getAllProfiles(12);
             `;
             document.body.appendChild(notification);
         }
+
+        // Header scroll behavior
+        let lastScrollTop = 0;
+        const header = document.querySelector('.main-header');
+        
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Add scrolled class for shadow effect
+            if (scrollTop > 50) {
+                header.classList.add('header-scrolled');
+            } else {
+                header.classList.remove('header-scrolled');
+            }
+            
+            // Hide/show header on scroll
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scrolling down
+                header.classList.add('header-hidden');
+            } else {
+                // Scrolling up
+                header.classList.remove('header-hidden');
+            }
+            
+            lastScrollTop = scrollTop;
+        });
     </script>
     </div>
 </body>

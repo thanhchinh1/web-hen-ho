@@ -1,19 +1,21 @@
-// Toggle dropdown menu
-document.addEventListener('DOMContentLoaded', function() {
-    const userAvatar = document.querySelector('.user-avatar-btn');
-    const dropdownMenu = document.querySelector('.dropdown-menu');
-    
-    if (userAvatar && dropdownMenu) {
-        userAvatar.addEventListener('click', function(e) {
-            e.stopPropagation();
-            dropdownMenu.classList.toggle('show');
-        });
-        
-        // Đóng dropdown khi click bên ngoài
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.user-menu')) {
-                dropdownMenu.classList.remove('show');
-            }
-        });
+let lastScrollTop = 0;
+const header = document.querySelector('.main-header');
+
+window.addEventListener('scroll', function () {
+    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+    if (scrollTop > 50) {
+        header.classList.add('header-scrolled');
+    } else {
+        header.classList.remove('header-scrolled');
     }
+
+    // Thu nhỏ khi scroll xuống
+    if (scrollTop > lastScrollTop && scrollTop > 100) {
+        header.classList.add('header-shrink');
+    } else {
+        header.classList.remove('header-shrink');
+    }
+
+    lastScrollTop = scrollTop;
 });

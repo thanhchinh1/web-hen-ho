@@ -72,49 +72,79 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hồ sơ <?php echo htmlspecialchars($profile['ten']); ?> - WebHenHo</title>
-    <link rel="stylesheet" href="/public/css/profile.css">
+    <title>Hồ sơ <?php echo htmlspecialchars($profile['ten']); ?> - DuyenHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../public/css/xemnguoikhac.css?v=<?php echo time(); ?>">
 </head>
 <body>
-    <div class="page-wrapper">
-    <div class="profile-container">
-        <!-- Header -->
-        <header class="profile-header">
-           <a href="../trangchu/index.php" class="logo">
-                <img src="/public/img/logo.jpg" alt="WebHenHo">
-                <span class="logo-text">WebHenHo</span>
-            </a>
-        </header>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="../trangchu/index.php" class="logo">
+                    <img src="../../public/img/logo.jpg" alt="DuyenHub Logo">
+                    <span class="logo-text">DuyenHub</span>
+                </a>
+                <nav class="header-menu">
+                    <a href="../trangchu/index.php" class="menu-item active">
+                        <i class="fas fa-home"></i>
+                        <span>Trang chủ</span>
+                    </a>
+                    <a href="../nhantin/chat.php" class="menu-item">
+                        <i class="fas fa-comments"></i>
+                        <span>Tin nhắn</span>
+                    </a>
+                    <a href="../timkiem/ghepdoinhanh.php" class="menu-item">
+                        <i class="fas fa-search"></i>
+                        <span>Tìm kiếm</span>
+                    </a>
+                    <a href="#" class="menu-item">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Trợ giúp</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="header-actions">
+                <a href="../../controller/cLogout.php" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Đăng xuất</span>
+                </a>
+            </div>
+        </div>
+    </header>
 
-        <!-- Back button -->
-        <div class="back-button-container">
-            <button class="btn-back" onclick="window.location.href='../trangchu/index.php'">
+    <div class="profile-view-wrapper">
+        <div class="profile-view-container">
+            <button class="back-btn" onclick="window.history.back()" title="Quay lại">
                 <i class="fas fa-arrow-left"></i>
             </button>
-        </div>
 
-        <!-- Profile Content -->
-        <div class="profile-content">
-            <!-- Profile Header Section -->
-            <div class="profile-hero">
-                <div class="profile-avatar-section">
-                    <img src="<?php echo $avatarSrc; ?>" alt="<?php echo htmlspecialchars($profile['ten']); ?>" class="profile-avatar" id="userAvatar">
-                    <h1 class="profile-name" id="userName"><?php echo htmlspecialchars($profile['ten']); ?></h1>
+            <div class="profile-view-header">
+                <h1>Hồ sơ người dùng</h1>
+               
+            </div>
+
+            <!-- Avatar Section -->
+            <div class="avatar-section">
+                <div class="avatar-preview">
+                    <img src="<?php echo $avatarSrc; ?>" alt="Avatar" id="avatarImage">
                 </div>
+                <h2 class="profile-name"><?php echo htmlspecialchars($profile['ten']); ?></h2>
+                <p class="profile-age"><?php echo $age; ?> tuổi</p>
 
                 <!-- Action Buttons -->
                 <div class="profile-actions">
                     <?php if ($isMatched): ?>
-                        <!-- Đã ghép đôi -->
                         <button class="btn-action btn-matched" 
                                 onclick="confirmUnmatch(<?php echo $profileId; ?>)" 
                                 id="matchBtn">
                             <i class="fas fa-check-circle"></i>
-                            <span>Đã ghép đôi</span>
+                            Đã ghép đôi
                         </button>
                     <?php else: ?>
-                        <!-- Chưa ghép đôi - hiển thị nút like bình thường -->
                         <button class="btn-action btn-like <?php echo $hasLiked ? 'liked' : ''; ?>" 
                                 onclick="toggleLike(<?php echo $profileId; ?>)" 
                                 id="likeBtn">
@@ -133,11 +163,12 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
                 </div>
             </div>
 
-            <!-- Profile Details -->
-            <div class="profile-details">
+            <!-- Profile Form View -->
+            <div class="profile-form-view">
                 <!-- Personal Information -->
                 <section class="detail-section">
                     <h2 class="section-title">Thông tin cá nhân</h2>
+                   
                     <div class="info-list">
                         <div class="info-item">
                             <i class="fas fa-venus-mars"></i>
@@ -146,18 +177,28 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
                         </div>
                         <div class="info-item">
                             <i class="fas fa-calendar-alt"></i>
-                            <span class="info-label">Tuổi</span>
-                            <span class="info-value"><?php echo $age; ?> tuổi</span>
+                            <span class="info-label">Ngày sinh</span>
+                            <span class="info-value"><?php echo date('d/m/Y', strtotime($profile['ngaySinh'])); ?></span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span class="info-label">Địa chỉ</span>
+                            <span class="info-label">Nơi ở</span>
                             <span class="info-value"><?php echo htmlspecialchars($profile['noiSong'] ?? 'N/A'); ?></span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-heart"></i>
-                            <span class="info-label">Tình trạng hôn nhân</span>
+                            <span class="info-label">Tình trạng</span>
                             <span class="info-value"><?php echo htmlspecialchars($profile['tinhTrangHonNhan'] ?? 'N/A'); ?></span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span class="info-label">Học vấn</span>
+                            <span class="info-value"><?php echo htmlspecialchars($profile['hocVan'] ?? 'N/A'); ?></span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-bullseye"></i>
+                            <span class="info-label">Mục tiêu</span>
+                            <span class="info-value"><?php echo htmlspecialchars($profile['mucTieuPhatTrien'] ?? 'N/A'); ?></span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-weight"></i>
@@ -172,28 +213,11 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
                     </div>
                 </section>
 
-                <!-- Career & Education -->
-                <section class="detail-section">
-                    <h2 class="section-title">Học vấn & Mục tiêu</h2>
-                    
-                    <div class="info-list">
-                        <div class="info-item">
-                            <i class="fas fa-graduation-cap"></i>
-                            <span class="info-label">Học vấn</span>
-                            <span class="info-value"><?php echo htmlspecialchars($profile['hocVan'] ?? 'N/A'); ?></span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-bullseye"></i>
-                            <span class="info-label">Mục tiêu</span>
-                            <span class="info-value"><?php echo htmlspecialchars($profile['mucTieuPhatTrien'] ?? 'N/A'); ?></span>
-                        </div>
-                    </div>
-                </section>
-
                 <!-- Interests -->
                 <section class="detail-section">
                     <h2 class="section-title">Sở thích</h2>
-                    <div class="interests-tags">
+                   
+                    <div class="interests-list">
                         <?php foreach ($interests as $interest): ?>
                             <?php if (!empty(trim($interest))): ?>
                                 <span class="interest-tag"><?php echo htmlspecialchars(trim($interest)); ?></span>
@@ -204,10 +228,11 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
 
                 <!-- About Me -->
                 <section class="detail-section">
-                    <h2 class="section-title">Về tôi</h2>
-                    <p class="about-text">
+                    <h2 class="section-title">Giới thiệu bản thân</h2>
+                    
+                    <div class="description-text">
                         <?php echo nl2br(htmlspecialchars($profile['moTa'] ?? 'Chưa có giới thiệu')); ?>
-                    </p>
+                    </div>
                 </section>
             </div>
         </div>
@@ -653,48 +678,6 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
             }
         }
     </script>
-    <style>
-        .btn-like.liked {
-            background: linear-gradient(135deg, #e94057 0%, #ff6b9d 100%) !important;
-            color: white !important;
-        }
-        
-        .btn-matched {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
-            color: white !important;
-            cursor: pointer;
-        }
-        
-        .btn-matched:hover {
-            background: linear-gradient(135deg, #218838 0%, #1ea87a 100%) !important;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes heartBeat {
-            0%, 100% { transform: scale(1); }
-            10%, 30% { transform: scale(0.9); }
-            20%, 40%, 60%, 80% { transform: scale(1.1); }
-            50%, 70% { transform: scale(1.05); }
-        }
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -20px);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, 0);
-            }
-        }
-    </style>
-    </div>
-    </div>
+
 </body>
 </html>
