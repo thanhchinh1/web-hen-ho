@@ -1,8 +1,13 @@
 <?php
-// Bật hiển thị lỗi cho debugging
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// Tắt hiển thị lỗi ra màn hình (để không làm hỏng JSON response)
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
+// Vẫn log lỗi vào file
 error_reporting(E_ALL);
+ini_set('log_errors', 1);
+
+// Set content type là JSON
+header('Content-Type: application/json');
 
 require_once '../models/mSession.php';
 require_once '../models/mProfile.php';

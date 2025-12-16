@@ -7,6 +7,8 @@ error_reporting(E_ALL);
 require_once '../models/mSession.php';
 require_once '../models/mUser.php';
 require_once '../models/mPasswordValidator.php';
+require_once '../models/mEmailVerification.php';
+require_once '../models/mEmailService.php';
 
 Session::start();
 
@@ -80,30 +82,47 @@ if ($userModel->checkEmailExists($email)) {
     exit;
 }
 
-// Đăng ký người dùng mới
-$userId = $userModel->register($email, $password);
+// ============================================
+// TẠO OTP VÀ GỬI EMAIL XÁC THỰC
+// ============================================
 
-if ($userId) {
-    // Đăng ký thành công
-    // Lưu thông báo và email vào session
-    Session::setFlash('register_success', 'Đăng ký tài khoản thành công! Vui lòng đăng nhập.');
-    Session::set('registered_email', $email);
-    
-    // Kiểm tra có pending action không
-    $redirectUrl = '../views/dangnhap/login.php';
-    if (isset($_GET['action']) && $_GET['action'] === 'like' && isset($_GET['targetUser'])) {
-        $redirectUrl .= '?action=like&targetUser=' . urlencode($_GET['targetUser']);
-    }
-    
-    // Chuyển đến trang đăng nhập
-    header('Location: ' . $redirectUrl);
-    exit;
-} else {
-    // Đăng ký thất bại
-    $errors[] = 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại!';
+// Hash mật khẩu
+$passwordHash = md5($password);
+
+// Tạo OTP
+$emailVerification = new EmailVerification();
+$otpResult = $emailVerification->createOTP($email, $passwordHash);
+
+if (!$otpResult['success']) {
+    $errors[] = $otpResult['message'];
     Session::set('register_errors', $errors);
     Session::set('register_data', ['email' => $email]);
     header('Location: ../views/dangky/register.php');
     exit;
 }
+
+// Gửi email OTP
+$emailService = new EmailService();
+$emailSent = $emailService->sendOTPEmail($email, $otpResult['otp'], $otpResult['expires_minutes']);
+
+if (!$emailSent) {
+    $errors[] = 'Không thể gửi email xác thực. Vui lòng kiểm tra email và thử lại!';
+    Session::set('register_errors', $errors);
+    Session::set('register_data', ['email' => $email]);
+    header('Location: ../views/dangky/register.php');
+    exit;
+}
+
+// Lưu email vào session để dùng ở trang verify
+Session::set('verify_email', $email);
+Session::setFlash('otp_sent', 'Mã xác thực đã được gửi đến ' . $email);
+
+// Chuyển đến trang nhập OTP
+$redirectUrl = '../views/dangky/verify-email.php';
+if (isset($_GET['action']) && $_GET['action'] === 'like' && isset($_GET['targetUser'])) {
+    $redirectUrl .= '?action=like&targetUser=' . urlencode($_GET['targetUser']);
+}
+
+header('Location: ' . $redirectUrl);
+exit;
 ?>

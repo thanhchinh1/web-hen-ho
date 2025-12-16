@@ -561,7 +561,19 @@ $currentUserId = Session::getUserId();
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                // Debug: xem response text trước
+                return response.text().then(text => {
+                    console.log('Raw response:', text);
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('JSON parse error:', e);
+                        console.error('Response was:', text);
+                        throw new Error('Server trả về không phải JSON. Check console để xem response.');
+                    }
+                });
+            })
             .then(data => {
                 if (data.success) {
                     showNotification(data.message, 'success');
@@ -576,7 +588,7 @@ $currentUserId = Session::getUserId();
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('Có lỗi xảy ra, vui lòng thử lại!', 'error');
+                showNotification(error.message || 'Có lỗi xảy ra, vui lòng thử lại!', 'error');
             });
         }
         

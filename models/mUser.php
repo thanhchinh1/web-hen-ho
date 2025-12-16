@@ -42,7 +42,7 @@ class User {
     
     // Đăng nhập
     public function login($email, $password) {
-        $stmt = $this->conn->prepare("SELECT maNguoiDung, matKhau, trangThaiNguoiDung, role FROM nguoidung WHERE tenDangNhap = ?");
+        $stmt = $this->conn->prepare("SELECT maNguoiDung, matKhau, trangThaiNguoiDung, role, email_verified FROM nguoidung WHERE tenDangNhap = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -52,6 +52,11 @@ class User {
             
             // Kiểm tra mật khẩu bằng MD5
             if (md5($password) === $user['matKhau']) {
+                // Kiểm tra email đã xác thực chưa
+                if ($user['email_verified'] == 0) {
+                    return ['status' => 'not_verified', 'message' => 'Email chưa được xác thực. Vui lòng kiểm tra email và hoàn tất xác thực!'];
+                }
+                
                 // Kiểm tra trạng thái tài khoản
                 if ($user['trangThaiNguoiDung'] === 'banned' || $user['trangThaiNguoiDung'] === 'locked') {
                     return ['status' => 'banned', 'message' => 'Tài khoản của bạn đã bị khóa do vi phạm chính sách. Vui lòng liên hệ admin để biết thêm chi tiết.'];

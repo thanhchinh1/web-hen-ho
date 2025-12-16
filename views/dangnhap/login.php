@@ -148,22 +148,6 @@ $targetUser = $_GET['targetUser'] ?? '';
                 </button>
             </form>
 
-            <div class="divider">
-                <span>hoặc đăng nhập với</span>
-            </div>
-
-            <div class="social-login">
-                <button class="btn-social facebook" onclick="loginWithFacebook()">
-                    <i class="fab fa-facebook-f"></i>
-                </button>
-                <button class="btn-social google" onclick="loginWithGoogle()">
-                    <i class="fab fa-google"></i>
-                </button>
-                <button class="btn-social twitter" onclick="loginWithTwitter()">
-                    <i class="fab fa-twitter"></i>
-                </button>
-            </div>
-
             <?php
             // Build register link with params
             $registerLink = '../dangky/register.php';

@@ -11,6 +11,7 @@ if (Session::isLoggedIn()) {
 
 $errors = Session::getFlash('forgot_errors') ?? [];
 $successMessage = Session::getFlash('forgot_success');
+$otpSentMessage = Session::getFlash('otp_sent');
 $step = Session::get('forgot_password_step') ?? 1;
 $userEmail = Session::get('forgot_user_email') ?? '';
 ?>
@@ -80,22 +81,29 @@ $userEmail = Session::get('forgot_user_email') ?? '';
                 <div class="steps">
                     <div class="step <?php echo $step >= 1 ? 'active' : ''; ?> <?php echo $step > 1 ? 'completed' : ''; ?>">
                         <div class="step-number">1</div>
-                        <div class="step-label">Xác minh</div>
+                        <div class="step-label">Xác minh Email</div>
                     </div>
                     <div class="step <?php echo $step >= 2 ? 'active' : ''; ?> <?php echo $step > 2 ? 'completed' : ''; ?>">
                         <div class="step-number">2</div>
-                        <div class="step-label">Đặt lại</div>
+                        <div class="step-label">Nhập OTP</div>
                     </div>
                     <div class="step <?php echo $step >= 3 ? 'active' : ''; ?>">
                         <div class="step-number">3</div>
-                        <div class="step-label">Hoàn tất</div>
+                        <div class="step-label">Đặt lại MK</div>
                     </div>
                 </div>
+
+                <?php if ($otpSentMessage): ?>
+                    <div class="success-container" style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 8px; margin: 10px 0; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-check-circle" style="font-size: 20px;"></i>
+                        <span><?php echo htmlspecialchars($otpSentMessage); ?></span>
+                    </div>
+                <?php endif; ?>
 
                 <?php if ($step == 1): ?>
                     <!-- Bước 1: Nhập email -->
                     <div class="info-box">
-                        <i class="fas fa-info-circle"></i> Nhập email hoặc số điện thoại bạn đã đăng ký để xác minh tài khoản
+                        <i class="fas fa-info-circle"></i> Nhập email hoặc số điện thoại bạn đã đăng ký
                     </div>
 
                     <form action="../../controller/cForgotPassword.php" method="POST">
@@ -115,18 +123,55 @@ $userEmail = Session::get('forgot_user_email') ?? '';
                         </div>
 
                         <button type="submit" class="btn-submit">
-                            <i class="fas fa-arrow-right"></i> Tiếp tục
+                            <i class="fas fa-paper-plane"></i> Gửi mã OTP
                         </button>
                     </form>
 
                 <?php elseif ($step == 2): ?>
-                    <!-- Bước 2: Đặt mật khẩu mới -->
+                    <!-- Bước 2: Nhập OTP -->
+                    <div class="info-box info-account">
+                        <i class="fas fa-envelope"></i> Mã OTP đã được gửi đến: <strong><?php echo htmlspecialchars($userEmail); ?></strong>
+                    </div>
+
+                    <form action="../../controller/cForgotPassword.php" method="POST" id="otpForm">
+                        <input type="hidden" name="step" value="2">
+
+                        <div class="form-group">
+                            <label>Mã OTP (6 số)</label>
+                            <div class="otp-input-group" style="display: flex; gap: 10px; justify-content: center; margin: 30px 0;">
+                                <input type="text" class="otp-input" maxlength="1" name="otp1" id="otp1" required autofocus style="width: 50px; height: 60px; text-align: center; font-size: 24px; font-weight: bold; border: 2px solid #ddd; border-radius: 8px;">
+                                <input type="text" class="otp-input" maxlength="1" name="otp2" id="otp2" required style="width: 50px; height: 60px; text-align: center; font-size: 24px; font-weight: bold; border: 2px solid #ddd; border-radius: 8px;">
+                                <input type="text" class="otp-input" maxlength="1" name="otp3" id="otp3" required style="width: 50px; height: 60px; text-align: center; font-size: 24px; font-weight: bold; border: 2px solid #ddd; border-radius: 8px;">
+                                <input type="text" class="otp-input" maxlength="1" name="otp4" id="otp4" required style="width: 50px; height: 60px; text-align: center; font-size: 24px; font-weight: bold; border: 2px solid #ddd; border-radius: 8px;">
+                                <input type="text" class="otp-input" maxlength="1" name="otp5" id="otp5" required style="width: 50px; height: 60px; text-align: center; font-size: 24px; font-weight: bold; border: 2px solid #ddd; border-radius: 8px;">
+                                <input type="text" class="otp-input" maxlength="1" name="otp6" id="otp6" required style="width: 50px; height: 60px; text-align: center; font-size: 24px; font-weight: bold; border: 2px solid #ddd; border-radius: 8px;">
+                            </div>
+                            <input type="hidden" name="otp_code" id="otp_code">
+                        </div>
+
+                        <div style="text-align: center; margin: 20px 0; color: #666; font-size: 14px;">
+                            ⏱️ Mã có hiệu lực trong: <span id="countdown" style="font-weight: bold; color: #FF6B6B;">10:00</span>
+                        </div>
+
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-check"></i> Xác thực OTP
+                        </button>
+
+                        <div style="text-align: center; margin-top: 15px;">
+                            <button type="button" class="btn-link" onclick="resendOTP()" style="background: none; border: none; color: #FF6B6B; text-decoration: underline; cursor: pointer;">
+                                <i class="fas fa-redo"></i> Gửi lại mã OTP
+                            </button>
+                        </div>
+                    </form>
+
+                <?php elseif ($step == 3): ?>
+                    <!-- Bước 3: Đặt mật khẩu mới -->
                     <div class="info-box info-account">
                         <i class="fas fa-shield-alt"></i> Tài khoản: <strong><?php echo htmlspecialchars($userEmail); ?></strong>
                     </div>
 
                     <form action="../../controller/cForgotPassword.php" method="POST" id="resetPasswordForm">
-                        <input type="hidden" name="step" value="2">
+                        <input type="hidden" name="step" value="3">
 
                         <div class="form-group">
                             <label for="new_password">Mật khẩu mới <span class="required">*</span></label>
@@ -203,6 +248,99 @@ $userEmail = Session::get('forgot_user_email') ?? '';
 
         // Form validation
         <?php if ($step == 2): ?>
+        // OTP Input Auto-focus và validation
+        const otpInputs = document.querySelectorAll('.otp-input');
+        
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                
+                // Chỉ cho phép số
+                if (!/^\d*$/.test(value)) {
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Auto focus ô tiếp theo
+                if (value && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+            
+            // Xử lý phím Backspace
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+            
+            // Xử lý paste
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text');
+                const digits = pastedData.replace(/\D/g, '').slice(0, 6);
+                
+                digits.split('').forEach((digit, i) => {
+                    if (otpInputs[i]) {
+                        otpInputs[i].value = digit;
+                    }
+                });
+                
+                if (digits.length > 0) {
+                    otpInputs[Math.min(digits.length, 5)].focus();
+                }
+            });
+        });
+        
+        // Submit form - ghép các số OTP lại
+        document.getElementById('otpForm').addEventListener('submit', (e) => {
+            let otpCode = '';
+            otpInputs.forEach(input => {
+                otpCode += input.value;
+            });
+            
+            if (otpCode.length !== 6) {
+                e.preventDefault();
+                alert('Vui lòng nhập đủ 6 số!');
+                return;
+            }
+            
+            document.getElementById('otp_code').value = otpCode;
+        });
+        
+        // Countdown timer (10 phút = 600 giây)
+        let timeLeft = 600;
+        const countdownEl = document.getElementById('countdown');
+        
+        const countdown = setInterval(() => {
+            timeLeft--;
+            
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            countdownEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Cảnh báo khi còn 2 phút
+            if (timeLeft <= 120) {
+                countdownEl.style.color = '#dc3545';
+            }
+            
+            // Hết thời gian
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                countdownEl.textContent = 'Đã hết hạn';
+                alert('Mã OTP đã hết hạn! Vui lòng gửi lại mã mới.');
+            }
+        }, 1000);
+        
+        // Resend OTP function
+        function resendOTP() {
+            if (!confirm('Bạn có chắc muốn gửi lại mã OTP?')) {
+                return;
+            }
+            window.location.href = '../../controller/cResendForgotOTP.php';
+        }
+        
+        <?php elseif ($step == 3): ?>
         document.getElementById('resetPasswordForm').addEventListener('submit', function(e) {
             const newPassword = document.getElementById('new_password').value;
             const confirmPassword = document.getElementById('confirm_password').value;

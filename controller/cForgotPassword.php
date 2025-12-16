@@ -2,6 +2,8 @@
 require_once '../models/mSession.php';
 require_once '../models/mUser.php';
 require_once '../models/mDbconnect.php';
+require_once '../models/mEmailVerification.php';
+require_once '../models/mEmailService.php';
 
 Session::start();
 
@@ -15,7 +17,9 @@ $step = intval($_POST['step'] ?? 1);
 $errors = [];
 
 if ($step == 1) {
-    // Bước 1: Xác minh email/SĐT
+    // ============================================
+    // BƯỚC 1: XÁC MINH EMAIL VÀ GỬI OTP
+    // ============================================
     $email = trim($_POST['email'] ?? '');
     
     if (empty($email)) {
@@ -29,7 +33,7 @@ if ($step == 1) {
     $db = clsConnect::getInstance();
     $conn = $db->connect();
     
-    $stmt = $conn->prepare("SELECT maNguoiDung, tenDangNhap, trangThaiNguoiDung FROM NguoiDung WHERE tenDangNhap = ?");
+    $stmt = $conn->prepare("SELECT maNguoiDung, tenDangNhap, trangThaiNguoiDung FROM nguoidung WHERE tenDangNhap = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -51,20 +55,96 @@ if ($step == 1) {
         exit;
     }
     
+    // Tạo OTP cho quên mật khẩu
+    $tempHash = 'forgot_password_' . $user['maNguoiDung'];
+    
+    $emailVerification = new EmailVerification();
+    $otpResult = $emailVerification->createOTP($email, $tempHash);
+    
+    if (!$otpResult['success']) {
+        $errors[] = $otpResult['message'];
+        Session::setFlash('forgot_errors', $errors);
+        header('Location: ../views/dangnhap/quenmatkhau.php');
+        exit;
+    }
+    
+    // Gửi email OTP
+    $emailService = new EmailService();
+    $emailSent = $emailService->sendForgotPasswordOTP($email, $otpResult['otp'], $otpResult['expires_minutes']);
+    
+    if (!$emailSent) {
+        $errors[] = 'Không thể gửi email xác thực. Vui lòng kiểm tra email và thử lại!';
+        Session::setFlash('forgot_errors', $errors);
+        header('Location: ../views/dangnhap/quenmatkhau.php');
+        exit;
+    }
+    
     // Lưu thông tin vào session
     Session::set('forgot_user_id', $user['maNguoiDung']);
     Session::set('forgot_user_email', $user['tenDangNhap']);
     Session::set('forgot_password_step', 2);
+    Session::setFlash('otp_sent', 'Mã xác thực đã được gửi đến ' . $email);
     
     header('Location: ../views/dangnhap/quenmatkhau.php');
     exit;
     
 } elseif ($step == 2) {
-    // Bước 2: Đặt lại mật khẩu
+    // ============================================
+    // BƯỚC 2: XÁC THỰC OTP
+    // ============================================
+    $email = Session::get('forgot_user_email');
     $userId = Session::get('forgot_user_id');
     
-    if (!$userId) {
+    if (!$email || !$userId) {
         $errors[] = 'Phiên làm việc đã hết hạn. Vui lòng thử lại!';
+        Session::setFlash('forgot_errors', $errors);
+        Session::set('forgot_password_step', 1);
+        header('Location: ../views/dangnhap/quenmatkhau.php');
+        exit;
+    }
+    
+    $otpCode = trim($_POST['otp_code'] ?? '');
+    
+    if (empty($otpCode)) {
+        $errors[] = 'Vui lòng nhập mã OTP!';
+    } elseif (!preg_match('/^\d{6}$/', $otpCode)) {
+        $errors[] = 'Mã OTP phải là 6 chữ số!';
+    }
+    
+    if (!empty($errors)) {
+        Session::setFlash('forgot_errors', $errors);
+        header('Location: ../views/dangnhap/quenmatkhau.php');
+        exit;
+    }
+    
+    // Xác thực OTP
+    $emailVerification = new EmailVerification();
+    $verifyResult = $emailVerification->verifyOTP($email, $otpCode);
+    
+    if (!$verifyResult['success']) {
+        $errors[] = $verifyResult['message'];
+        Session::setFlash('forgot_errors', $errors);
+        header('Location: ../views/dangnhap/quenmatkhau.php');
+        exit;
+    }
+    
+    // OTP hợp lệ - chuyển sang bước 3
+    Session::set('forgot_password_step', 3);
+    Session::set('otp_verified', true);
+    Session::setFlash('forgot_success', 'Xác thực thành công! Vui lòng nhập mật khẩu mới.');
+    
+    header('Location: ../views/dangnhap/quenmatkhau.php');
+    exit;
+    
+} elseif ($step == 3) {
+    // ============================================
+    // BƯỚC 3: ĐẶT MẬT KHẨU MỚI
+    // ============================================
+    $userId = Session::get('forgot_user_id');
+    $otpVerified = Session::get('otp_verified');
+    
+    if (!$userId || !$otpVerified) {
+        $errors[] = 'Phiên làm việc không hợp lệ. Vui lòng thử lại!';
         Session::setFlash('forgot_errors', $errors);
         Session::set('forgot_password_step', 1);
         header('Location: ../views/dangnhap/quenmatkhau.php');
@@ -113,9 +193,10 @@ if ($step == 1) {
         Session::delete('forgot_user_id');
         Session::delete('forgot_user_email');
         Session::delete('forgot_password_step');
+        Session::delete('otp_verified');
         
         // Thông báo thành công
-        Session::setFlash('login_errors', ['Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.']);
+        Session::setFlash('login_success', 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.');
         header('Location: ../views/dangnhap/login.php');
         exit;
     } else {
