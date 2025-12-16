@@ -86,7 +86,7 @@ $interests = explode(', ', $profile['soThich']);
 
     <div class="profile-view-wrapper">
         <div class="profile-view-container">
-            <button class="back-btn" onclick="window.history.back()" title="Quay lại">
+            <button class="back-btn" onclick="window.location.href='../trangchu/index.php';" title="Quay lại">
                 <i class="fas fa-arrow-left"></i>
             </button>
 

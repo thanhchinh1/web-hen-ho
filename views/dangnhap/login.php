@@ -42,7 +42,7 @@ $targetUser = $_GET['targetUser'] ?? '';
 
     <div class="login-wrapper">
         <div class="login-container">
-            <button class="back-btn" onclick="goBackAndClearCache()" title="Quay lại">
+            <button class="back-btn" onclick="window.location.href='../../index.php';" title="Quay lại">
                 <i class="fas fa-arrow-left"></i>
             </button>
             
