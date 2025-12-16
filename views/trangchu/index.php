@@ -201,7 +201,7 @@ $infoMessage = Session::getFlash('info_message');
                     </a>
                     <a href="../nhantin/chat.php" class="nav-link">
                         <i class="fas fa-comment"></i>
-                        Tin nhẫn
+                        Tin nhắn
                         <?php if ($newMatchesCount > 0): ?>
                             <span class="notification-badge"><?php echo $newMatchesCount; ?></span>
                         <?php endif; ?>

@@ -211,9 +211,27 @@ $successMessage = Session::getFlash('register_success');
     </div>
 
     <script>
+          // Lưu referrer vào localStorage khi lần đầu vào trang
+        (function() {
+            if (!localStorage.getItem('register_referrer')) {
+                // Không lưu nếu referrer là chính trang đăng ký
+                if (document.referrer && !window.location.href.includes(document.referrer)) {
+                    localStorage.setItem('register_referrer', document.referrer);
+                }
+            }
+        })();
+
         // Go back and clear cache
         function goBackAndClearCache() {
             // Clear cache by reloading without cache
+            // Ưu tiên referrer đã lưu trong localStorage
+            const savedRef = localStorage.getItem('register_referrer');
+            if (savedRef) {
+                localStorage.removeItem('register_referrer');
+                window.location.href = savedRef;
+                return;
+            }
+            // Nếu không có thì fallback như cũ
             if (window.history.length > 1) {
                 window.location.href = document.referrer || '../../index.php';
             } else {
