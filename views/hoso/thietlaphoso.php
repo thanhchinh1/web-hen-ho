@@ -39,7 +39,7 @@ $currentUserId = Session::getUserId();
                 <span class="logo-text">DuyenHub</span>
             </a>
             <nav class="header-nav">
-                <a href="../../controller/cLogout.php" class="nav-link">
+                <a href="#" class="nav-link" onclick="confirmLogout(event)">
                     <i class="fas fa-sign-out-alt"></i> Đăng xuất
                 </a>
             </nav>
@@ -48,10 +48,6 @@ $currentUserId = Session::getUserId();
 
     <div class="profile-setup-wrapper">
         <div class="profile-setup-container">
-            <!-- <button class="back-btn" onclick="goBack()" title="Quay lại">
-                <i class="fas fa-arrow-left"></i>
-            </button> -->
-
             <div class="profile-setup-header">
                 <h1>Thiết lập Hồ sơ Cá nhân</h1>
                 <p>Cập nhật thông tin của bạn để chúng tôi có thể cung cấp trải nghiệm tốt hơn</p>
@@ -671,6 +667,14 @@ $currentUserId = Session::getUserId();
                 }, autoCloseTime);
             }
         }
+    </script>
+    <script>
+    function confirmLogout(e) {
+        e.preventDefault();
+        if (confirm('Bạn có chắc chắn muốn đăng xuất không?')) {
+            window.location.href = '../../controller/cLogout.php';
+        }
+    }
     </script>
 </body>
 </html>

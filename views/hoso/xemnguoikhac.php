@@ -108,10 +108,7 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
                 </nav>
             </div>
             <div class="header-actions">
-                <a href="../../controller/cLogout.php" class="btn-logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Đăng xuất</span>
-                </a>
+                <!-- Đã xóa nút đăng xuất để đồng bộ với yêu cầu -->
             </div>
         </div>
     </header>

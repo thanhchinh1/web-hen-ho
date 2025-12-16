@@ -218,10 +218,18 @@ $infoMessage = Session::getFlash('info_message');
             </div>
 
             <div class="header-right">
-                <a href="../../controller/cLogout.php" class="btn-logout">
+                <a href="#" class="btn-logout" onclick="confirmLogout(event)">
                     <i class="fas fa-sign-out-alt"></i>
                     Đăng Xuất
                 </a>
+    <script>
+    function confirmLogout(e) {
+        e.preventDefault();
+        if (confirm('Bạn có chắc chắn muốn đăng xuất không?')) {
+            window.location.href = '../../controller/cLogout.php';
+        }
+    }
+    </script>
                 <div class="user-menu-wrapper">
                     <img src="../../<?php echo htmlspecialchars($currentUserProfile['avt']); ?>" alt="User" class="user-avatar" id="userAvatar">
                     <div class="user-dropdown" id="userDropdown" style="display:none;">
