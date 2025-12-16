@@ -20,9 +20,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $email = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
 $confirmPassword = $_POST['confirm_password'] ?? '';
+$acceptTerms = isset($_POST['accept_terms']) ? true : false;
 
 // Mảng lưu lỗi
 $errors = [];
+
+// Validate chấp nhận điều khoản
+if (!$acceptTerms) {
+    $errors[] = 'Bạn phải đồng ý với Điều khoản dịch vụ và Chính sách bảo mật để đăng ký!';
+}
 
 // Validate email/SĐT
 if (empty($email)) {
@@ -80,7 +86,7 @@ $userId = $userModel->register($email, $password);
 if ($userId) {
     // Đăng ký thành công
     // Lưu thông báo và email vào session
-    Session::set('register_success', 'Đăng ký tài khoản thành công! Vui lòng đăng nhập.');
+    Session::setFlash('register_success', 'Đăng ký tài khoản thành công! Vui lòng đăng nhập.');
     Session::set('registered_email', $email);
     
     // Kiểm tra có pending action không

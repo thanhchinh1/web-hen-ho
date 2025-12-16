@@ -55,6 +55,13 @@ $successMessage = Session::getFlash('register_success');
                 <h1>Tạo tài khoản mới</h1>
                 <p>Bắt đầu hành trình tìm kiếm tình yêu của bạn</p>
             
+            <?php if (!empty($successMessage)): ?>
+                <div class="success-container" style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 8px; margin: 10px 0; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-check-circle" style="font-size: 20px;"></i>
+                    <span><?php echo htmlspecialchars($successMessage); ?></span>
+                </div>
+            <?php endif; ?>
+
             <?php if ($action === 'like' && !empty($targetUser)): ?>
                 <div class="info-container" style="background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 8px; margin: 10px 0;">
                     <i class="fas fa-heart"></i> Đăng ký để thích hồ sơ này
@@ -278,6 +285,7 @@ $successMessage = Session::getFlash('register_success');
             });
             
             let isValid = true;
+            let errorMessages = [];
             
             // Validate email/phone
             const email = document.getElementById('email').value.trim();
@@ -287,6 +295,7 @@ $successMessage = Session::getFlash('register_success');
             
             if (!emailRegex.test(email) && !phoneRegex.test(email)) {
                 document.getElementById('email').closest('.form-group').classList.add('error');
+                errorMessages.push('Email hoặc số điện thoại không hợp lệ');
                 isValid = false;
             }
             
@@ -294,6 +303,7 @@ $successMessage = Session::getFlash('register_success');
             const password = document.getElementById('password').value;
             if (password.length < 6) {
                 document.getElementById('password').closest('.form-group').classList.add('error');
+                errorMessages.push('Mật khẩu phải có ít nhất 6 ký tự');
                 isValid = false;
             }
             
@@ -301,20 +311,39 @@ $successMessage = Session::getFlash('register_success');
             const confirmPassword = document.getElementById('confirm_password').value;
             if (password !== confirmPassword) {
                 document.getElementById('confirm_password').closest('.form-group').classList.add('error');
+                errorMessages.push('Mật khẩu xác nhận không khớp');
                 isValid = false;
             }
             
-            // Validate terms acceptance
+            // Validate terms acceptance - QUAN TRỌNG
             const acceptTerms = document.getElementById('accept_terms');
             if (!acceptTerms.checked) {
                 acceptTerms.closest('.form-group').classList.add('error');
                 isValid = false;
+                // Hiển thị thông báo nổi bật
+                e.preventDefault();
+                showNotification('Bạn phải đồng ý với Điều khoản dịch vụ và Chính sách bảo mật để đăng ký!', 'error');
+                // Scroll đến checkbox
+                acceptTerms.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
             }
             
             if (!isValid) {
                 e.preventDefault();
+                if (errorMessages.length > 0 && !acceptTerms.checked) {
+                    // Nếu có nhiều lỗi, hiển thị lỗi đầu tiên
+                    showNotification(errorMessages[0], 'error');
+                }
             }
             // Form sẽ được submit tự động nếu isValid = true
+        });
+
+        // Thêm validation realtime cho checkbox
+        document.getElementById('accept_terms').addEventListener('change', function() {
+            const formGroup = this.closest('.form-group');
+            if (this.checked) {
+                formGroup.classList.remove('error');
+            }
         });
 
         function registerWithFacebook() {
@@ -327,6 +356,74 @@ $successMessage = Session::getFlash('register_success');
 
         function registerWithTwitter() {
             alert('Tính năng đăng ký bằng Twitter sẽ sớm được cập nhật!');
+        }
+
+        // Hàm hiển thị thông báo
+        function showNotification(message, type) {
+            // Xóa notification cũ nếu có
+            const oldNotif = document.querySelector('.custom-notification');
+            if (oldNotif) oldNotif.remove();
+            
+            const notification = document.createElement('div');
+            notification.className = 'custom-notification';
+            
+            let icon = '';
+            let color = '';
+            
+            if (type === 'success') {
+                icon = '<i class="fas fa-check-circle"></i>';
+                color = '#28a745';
+            } else if (type === 'error') {
+                icon = '<i class="fas fa-exclamation-circle"></i>';
+                color = '#dc3545';
+            } else if (type === 'info') {
+                icon = '<i class="fas fa-info-circle"></i>';
+                color = '#17a2b8';
+            }
+            
+            notification.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    padding: 30px 50px;
+                    border-radius: 15px;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+                    z-index: 10000;
+                    text-align: center;
+                    max-width: 90%;
+                    width: 400px;
+                ">
+                    <div style="font-size: 48px; color: ${color}; margin-bottom: 15px;">${icon}</div>
+                    <h3 style="margin: 0 0 20px 0; color: #2C3E50; font-size: 18px;">${message}</h3>
+                    <button onclick="this.closest('.custom-notification').remove()" style="
+                        padding: 10px 30px;
+                        background: ${color};
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 14px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                        Đóng
+                    </button>
+                </div>
+                <div onclick="this.parentElement.remove()" style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0,0,0,0.5);
+                    z-index: 9999;
+                    cursor: pointer;
+                "></div>
+            `;
+            document.body.appendChild(notification);
         }
     </script>
 </body>

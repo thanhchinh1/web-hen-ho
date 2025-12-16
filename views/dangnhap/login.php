@@ -222,6 +222,20 @@ $targetUser = $_GET['targetUser'] ?? '';
             }
             // Form sẽ được submit tự động
         });
+
+        // Tự động ẩn thông báo thành công sau 5 giây
+        window.addEventListener('DOMContentLoaded', function() {
+            const successContainer = document.querySelector('.success-container');
+            if (successContainer) {
+                setTimeout(function() {
+                    successContainer.style.transition = 'opacity 0.5s ease-out';
+                    successContainer.style.opacity = '0';
+                    setTimeout(function() {
+                        successContainer.style.display = 'none';
+                    }, 500);
+                }, 5000);
+            }
+        });
     </script>
 </body>
 </html>

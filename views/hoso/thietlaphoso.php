@@ -48,9 +48,9 @@ $currentUserId = Session::getUserId();
 
     <div class="profile-setup-wrapper">
         <div class="profile-setup-container">
-            <button class="back-btn" onclick="goBack()" title="Quay lại">
+            <!-- <button class="back-btn" onclick="goBack()" title="Quay lại">
                 <i class="fas fa-arrow-left"></i>
-            </button>
+            </button> -->
 
             <div class="profile-setup-header">
                 <h1>Thiết lập Hồ sơ Cá nhân</h1>
@@ -344,7 +344,7 @@ $currentUserId = Session::getUserId();
         // Go back function
         function goBack() {
             if (confirm('Bạn có chắc muốn quay lại? Các thay đổi chưa lưu sẽ bị mất.')) {
-                window.history.back();
+                window.location.href = '../trangchu/index.php';
             }
         }
 
