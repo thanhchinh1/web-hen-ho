@@ -1,8 +1,15 @@
 {
   "require": {
-    "phpmailer/phpmailer": "^7.0"
+    "phpmailer/phpmailer": "^7.0",
+    "php": ">=8.0",
+    "ext-pdo": "*",
+    "ext-pdo_mysql": "*",
+    "ext-mbstring": "*"
   },
+  "require-dev": {},
   "scripts": {
-    "start": "php -S 0.0.0.0:8080 -t public"
+    "post-install-cmd": [
+      "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+    ]
   }
 }
