@@ -75,5 +75,35 @@ class Notification {
         }
         return $newMatches;
     }
+    
+    /**
+     * Lấy thông báo hệ thống từ admin
+     */
+    public function getSystemNotifications($limit = 3) {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                maThongBao,
+                tieuDe,
+                noiDung,
+                loai,
+                doUuTien,
+                thoiDiemGui,
+                thoiDiemTao
+            FROM thongbaoheothong
+            WHERE trangThai = 'sent'
+            AND (thoiDiemGui IS NULL OR thoiDiemGui <= NOW())
+            ORDER BY doUuTien DESC, thoiDiemGui DESC
+            LIMIT ?
+        ");
+        $stmt->bind_param("i", $limit);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $notifications = [];
+        while ($row = $result->fetch_assoc()) {
+            $notifications[] = $row;
+        }
+        return $notifications;
+    }
 }
 ?>

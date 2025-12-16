@@ -1,52 +1,65 @@
 <?php
 require_once '../../models/mSession.php';
-require_once '../../models/mAdmin.php';
-require_once '../../models/mReport.php';
+require_once '../../models/mDbconnect.php';
 
 Session::start();
 
-// Kiểm tra đăng nhập admin từ bảng admin hoặc role admin từ bảng nguoidung
-$isAdminSession = Session::get('is_admin');
-$userRole = Session::get('user_role');
-
-if (!$isAdminSession && $userRole !== 'admin') {
+if (!Session::get('is_admin') && Session::get('user_role') !== 'admin') {
+    Session::destroy();
     header('Location: ../dangnhap/login.php');
     exit;
 }
 
-// Kiểm tra timeout (30 phút không hoạt động)
-$timeout = 1800; // 30 phút
-if (Session::get('admin_last_activity') && (time() - Session::get('admin_last_activity') > $timeout)) {
-    Session::setFlash('admin_error', 'Session đã hết hạn. Vui lòng đăng nhập lại!');
-    Session::delete('is_admin');
-    Session::delete('admin_id');
-    Session::delete('admin_name');
-    Session::delete('admin_role');
-    Session::delete('admin_username');
-    header('Location: dangnhap.php');
+Session::set('admin_last_activity', time());
+$adminId = Session::get('admin_id');
+$adminName = Session::get('admin_name');
+
+$db = clsConnect::getInstance()->connect();
+
+// Xử lý action
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    $action = $_POST['action'];
+    $reportId = intval($_POST['reportId'] ?? 0);
+    
+    if ($action === 'resolve' && $reportId > 0) {
+        $note = $_POST['note'] ?? '';
+        $stmt = $db->prepare("UPDATE baocao SET trangThai = 'DaXuLy', maAdminXuLy = ?, ghiChuAdmin = ?, thoiDiemXuLy = NOW() WHERE maBaoCao = ?");
+        $stmt->bind_param("isi", $adminId, $note, $reportId);
+        $stmt->execute();
+        Session::setFlash('success', 'Đã xử lý báo cáo');
+    } elseif ($action === 'reject' && $reportId > 0) {
+        $stmt = $db->prepare("UPDATE baocao SET trangThaiAD = 'rejected', maAdminXuLy = ?, thoiDiemXuLy = NOW() WHERE maBaoCao = ?");
+        $stmt->bind_param("ii", $adminId, $reportId);
+        $stmt->execute();
+        Session::setFlash('success', 'Đã từ chối báo cáo');
+    }
+    header('Location: quanlybaocao.php');
     exit;
 }
 
-// Cập nhật thời gian hoạt động
-Session::set('admin_last_activity', time());
+// Lấy danh sách báo cáo
+$filter = $_GET['filter'] ?? 'pending';
+$sql = "SELECT b.*, 
+        nb.tenDangNhap as nguoiBaoCao,
+        nbb.tenDangNhap as nguoiBiBaoCao,
+        hb.ten as tenNguoiBiBaoCao
+        FROM baocao b
+        LEFT JOIN nguoidung nb ON b.maNguoiBaoCao = nb.maNguoiDung
+        LEFT JOIN nguoidung nbb ON b.maNguoiBiBaoCao = nbb.maNguoiDung
+        LEFT JOIN hoso hb ON b.maNguoiBiBaoCao = hb.maNguoiDung";
 
-$adminId = Session::get('admin_id');
-$adminName = Session::get('admin_name');
-$adminRole = Session::get('admin_role');
+if ($filter === 'pending') {
+    $sql .= " WHERE b.trangThai = 'ChuaXuLy'";
+} elseif ($filter === 'resolved') {
+    $sql .= " WHERE b.trangThai = 'DaXuLy'";
+}
 
-// Phân trang
-$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$limit = 20;
-$offset = ($page - 1) * $limit;
-$status = isset($_GET['status']) ? $_GET['status'] : 'all';
+$sql .= " ORDER BY b.thoiDiemBaoCao DESC LIMIT 100";
 
-$reportModel = new Report();
-$reports = $reportModel->getAllReports($limit, $offset, $status);
-$totalReports = $reportModel->getTotalReports($status);
-$totalPages = ceil($totalReports / $limit);
+$result = $db->query($sql);
+$reports = $result->fetch_all(MYSQLI_ASSOC);
 
-$successMessage = Session::getFlash('admin_success');
-$errorMessage = Session::getFlash('admin_error');
+$success = Session::getFlash('success');
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -55,105 +68,32 @@ $errorMessage = Session::getFlash('admin_error');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý báo cáo - Admin Panel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link rel="stylesheet" href="../../public/css/admin.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <div class="admin-wrapper">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2><i class="fas fa-user-shield"></i> Admin Panel</h2>
-                <p>Hệ thống quản trị</p>
-            </div>
-            
-            <ul class="sidebar-menu">
-                <li>
-                    <a href="index.php">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="quanlynguoidung.php">
-                        <i class="fas fa-users"></i>
-                        <span>Quản lý người dùng</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="quanlybaocao.php" class="active">
-                        <i class="fas fa-flag"></i>
-                        <span>Quản lý báo cáo</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="doimatkhau.php">
-                        <i class="fas fa-key"></i>
-                        <span>Đổi mật khẩu</span>
-                    </a>
-                </li>
-            </ul>
-        </aside>
+        <?php include 'sidebar.php'; ?>
         
-        <!-- Main Content -->
         <main class="main-content">
             <div class="top-bar">
-                <div>
-                    <h1 class="page-title">Quản lý báo cáo vi phạm</h1>
-                </div>
-                <div class="admin-info">
-                    <div>
-                        <div style="font-weight: 600; color: #333;">
-                            <?php echo htmlspecialchars($adminName); ?>
-                        </div>
-                        <div style="font-size: 13px; color: #999;">
-                            <?php 
-                            $roles = [
-                                'super_admin' => 'Super Admin',
-                                'moderator' => 'Moderator',
-                                'support' => 'Support'
-                            ];
-                            echo $roles[$adminRole] ?? $adminRole; 
-                            ?>
-                        </div>
+                <h1>Quản lý báo cáo vi phạm</h1>
+            </div>
+            
+            <div class="content-area">
+                <?php if ($success): ?>
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($success); ?>
                     </div>
-                    <a href="../../controller/cAdminLogout.php" class="btn-logout">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Đăng xuất
-                    </a>
+                <?php endif; ?>
+                
+                <div class="filter-tabs">
+                    <a href="?filter=pending" class="<?php echo $filter === 'pending' ? 'active' : ''; ?>">Chưa xử lý</a>
+                    <a href="?filter=resolved" class="<?php echo $filter === 'resolved' ? 'active' : ''; ?>">Đã xử lý</a>
+                    <a href="?filter=all" class="<?php echo $filter === 'all' ? 'active' : ''; ?>">Tất cả</a>
                 </div>
-            </div>
-            
-            <?php if ($successMessage): ?>
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i>
-                    <?php echo htmlspecialchars($successMessage); ?>
-                </div>
-            <?php endif; ?>
-            
-            <?php if ($errorMessage): ?>
-                <div class="alert alert-error">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <?php echo htmlspecialchars($errorMessage); ?>
-                </div>
-            <?php endif; ?>
-            
-            <!-- Filter Tabs -->
-            <div class="filter-tabs">
-                <a href="?status=all" class="filter-tab <?php echo $status === 'all' ? 'active' : ''; ?>">
-                    <i class="fas fa-list"></i> Tất cả (<?php echo $reportModel->getTotalReports('all'); ?>)
-                </a>
-                <a href="?status=ChuaXuLy" class="filter-tab <?php echo $status === 'ChuaXuLy' ? 'active' : ''; ?>">
-                    <i class="fas fa-clock"></i> Chờ xử lý (<?php echo $reportModel->getTotalReports('ChuaXuLy'); ?>)
-                </a>
-                <a href="?status=DaXuLy" class="filter-tab <?php echo $status === 'DaXuLy' ? 'active' : ''; ?>">
-                    <i class="fas fa-check"></i> Đã xử lý (<?php echo $reportModel->getTotalReports('DaXuLy'); ?>)
-                </a>
-            </div>
-            
-            <!-- Reports Table -->
-            <div class="reports-table-container">
-                <?php if (count($reports) > 0): ?>
-                    <table class="reports-table">
+                
+                <div class="table-container">
+                    <table class="data-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -161,143 +101,96 @@ $errorMessage = Session::getFlash('admin_error');
                                 <th>Người bị báo cáo</th>
                                 <th>Loại vi phạm</th>
                                 <th>Lý do</th>
-                                <th>Ngày báo cáo</th>
+                                <th>Thời gian</th>
                                 <th>Trạng thái</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($reports as $report): ?>
-                                <tr>
-                                    <td>#<?php echo $report['maBaoCao']; ?></td>
-                                    <td>
-                                        <strong><?php echo htmlspecialchars($report['reporter_name'] ?? 'N/A'); ?></strong><br>
-                                        <small>@<?php echo htmlspecialchars($report['reporter_username']); ?></small>
-                                    </td>
-                                    <td>
-                                        <strong><?php echo htmlspecialchars($report['reported_name'] ?? 'N/A'); ?></strong><br>
-                                        <small>@<?php echo htmlspecialchars($report['reported_username']); ?></small>
-                                    </td>
-                                    <td>
-                                        <?php
-                                        // Loại báo cáo - sẽ được thêm trong tương lai
-                                        echo isset($report['loaiBaoCao']) ? htmlspecialchars($report['loaiBaoCao']) : 'N/A';
-                                        ?>
-                                    </td>
-                                    <td>
-                                        <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                            <?php echo htmlspecialchars($report['lyDoBaoCao']); ?>
-                                        </div>
-                                    </td>
-                                    <td><?php echo date('d/m/Y H:i', strtotime($report['thoiDiemBaoCao'])); ?></td>
-                                    <td>
-                                        <?php
-                                        $statusClass = 'badge-pending';
-                                        $statusText = 'Chờ xử lý';
-                                        
-                                        if ($report['trangThai'] === 'DaXuLy') {
-                                            $statusClass = 'badge-resolved';
-                                            $statusText = 'Đã xử lý';
-                                        }
-                                        ?>
-                                        <span class="badge <?php echo $statusClass; ?>">
-                                            <?php echo $statusText; ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <?php if ($adminRole !== 'support' && $report['trangThai'] === 'ChuaXuLy'): ?>
-                                            <button onclick="updateReportStatus(<?php echo $report['maBaoCao']; ?>, 'DaXuLy')" 
-                                                    class="btn-action btn-resolve"
-                                                    title="Đánh dấu đã xử lý">
-                                                <i class="fas fa-check"></i>
+                            <tr>
+                                <td><?php echo $report['maBaoCao']; ?></td>
+                                <td><?php echo htmlspecialchars($report['nguoiBaoCao'] ?? 'N/A'); ?></td>
+                                <td>
+                                    <strong><?php echo htmlspecialchars($report['tenNguoiBiBaoCao'] ?? $report['nguoiBiBaoCao'] ?? 'N/A'); ?></strong>
+                                </td>
+                                <td>
+                                    <span class="badge badge-warning"><?php echo htmlspecialchars($report['loaiBaoCao']); ?></span>
+                                </td>
+                                <td>
+                                    <div class="report-reason">
+                                        <?php echo htmlspecialchars(substr($report['lyDoBaoCao'] ?? '', 0, 50)); ?>
+                                        <?php if (strlen($report['lyDoBaoCao'] ?? '') > 50): ?>...<?php endif; ?>
+                                    </div>
+                                </td>
+                                <td><?php echo date('d/m/Y H:i', strtotime($report['thoiDiemBaoCao'])); ?></td>
+                                <td>
+                                    <?php if ($report['trangThai'] === 'ChuaXuLy'): ?>
+                                        <span class="badge badge-danger">Chưa xử lý</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-success">Đã xử lý</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="action-buttons">
+                                    <?php if ($report['trangThai'] === 'ChuaXuLy'): ?>
+                                        <button onclick="showResolveModal(<?php echo $report['maBaoCao']; ?>)" class="btn-action btn-success" title="Xử lý">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <form method="POST" style="display: inline;">
+                                            <input type="hidden" name="action" value="reject">
+                                            <input type="hidden" name="reportId" value="<?php echo $report['maBaoCao']; ?>">
+                                            <button type="submit" class="btn-action btn-danger" title="Từ chối">
+                                                <i class="fas fa-times"></i>
                                             </button>
-                                        <?php endif; ?>
-                                        <a href="xemnguoidung.php?id=<?php echo $report['maNguoiBiBaoCao']; ?>" 
-                                           class="btn-action btn-view"
-                                           title="Xem hồ sơ người bị báo cáo">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
+                                        </form>
+                                    <?php endif; ?>
+                                    <a href="xemnguoidung.php?id=<?php echo $report['maNguoiBiBaoCao']; ?>" class="btn-action btn-view" title="Xem người bị báo cáo">
+                                        <i class="fas fa-user"></i>
+                                    </a>
+                                </td>
+                            </tr>
                             <?php endforeach; ?>
+                            
+                            <?php if (empty($reports)): ?>
+                            <tr>
+                                <td colspan="8" class="text-center">Không có báo cáo nào</td>
+                            </tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
-                    
-                    <!-- Pagination -->
-                    <?php if ($totalPages > 1): ?>
-                        <div class="pagination">
-                            <?php if ($page > 1): ?>
-                                <a href="?page=<?php echo $page - 1; ?>&status=<?php echo $status; ?>">
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                            <?php endif; ?>
-                            
-                            <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
-                                <?php if ($i == $page): ?>
-                                    <span class="active"><?php echo $i; ?></span>
-                                <?php else: ?>
-                                    <a href="?page=<?php echo $i; ?>&status=<?php echo $status; ?>">
-                                        <?php echo $i; ?>
-                                    </a>
-                                <?php endif; ?>
-                            <?php endfor; ?>
-                            
-                            <?php if ($page < $totalPages): ?>
-                                <a href="?page=<?php echo $page + 1; ?>&status=<?php echo $status; ?>">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            <?php endif; ?>
-                        </div>
-                    <?php endif; ?>
-                <?php else: ?>
-                    <div class="no-reports">
-                        <i class="fas fa-flag"></i>
-                        <h3>Không có báo cáo</h3>
-                        <p>
-                            <?php if ($status === 'pending'): ?>
-                                Không có báo cáo nào đang chờ xử lý
-                            <?php elseif ($status === 'resolved'): ?>
-                                Chưa có báo cáo nào được xử lý
-                            <?php elseif ($status === 'rejected'): ?>
-                                Chưa có báo cáo nào bị từ chối
-                            <?php else: ?>
-                                Chưa có báo cáo vi phạm nào trong hệ thống
-                            <?php endif; ?>
-                        </p>
-                    </div>
-                <?php endif; ?>
+                </div>
             </div>
         </main>
     </div>
     
+    <!-- Modal xử lý báo cáo -->
+    <div id="resolveModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Xử lý báo cáo</h2>
+            <form method="POST">
+                <input type="hidden" name="action" value="resolve">
+                <input type="hidden" name="reportId" id="resolveReportId">
+                <div class="form-group">
+                    <label>Ghi chú xử lý:</label>
+                    <textarea name="note" rows="4" class="form-control" required></textarea>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Xác nhận</button>
+                    <button type="button" onclick="closeModal()" class="btn btn-secondary">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
     <script>
-        function updateReportStatus(reportId, newStatus) {
-            const statusText = newStatus === 'resolved' ? 'đã xử lý' : 'từ chối';
-            
-            if (!confirm(`Bạn có chắc muốn đánh dấu báo cáo này là ${statusText}?`)) {
-                return;
-            }
-            
-            fetch('../../controller/cAdminUpdateReport.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `report_id=${reportId}&status=${newStatus}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Lỗi: ' + (data.message || 'Không thể cập nhật'));
-                }
-            })
-            .catch(error => {
-                alert('Lỗi kết nối');
-                console.error(error);
-            });
-        }
+    function showResolveModal(reportId) {
+        document.getElementById('resolveReportId').value = reportId;
+        document.getElementById('resolveModal').style.display = 'flex';
+    }
+    
+    function closeModal() {
+        document.getElementById('resolveModal').style.display = 'none';
+    }
     </script>
 </body>
 </html>

@@ -53,7 +53,18 @@ if (is_array($loginResult) && $loginResult['status'] === 'success') {
     
     // Kiểm tra role và chuyển hướng phù hợp
     if ($userRole === 'admin') {
-        // Nếu là admin, chuyển về trang admin
+        // Lấy thông tin admin từ bảng nguoidung
+        $adminInfo = $userModel->getUserById($userId);
+        
+        // Set các session cần thiết cho admin
+        Session::set('is_admin', true);
+        Session::set('admin_id', $userId);
+        Session::set('admin_name', $adminInfo['tenDangNhap'] ?? 'Admin');
+        Session::set('admin_role', 'admin');
+        Session::set('admin_username', $adminInfo['tenDangNhap'] ?? '');
+        Session::set('admin_last_activity', time());
+        
+        // Chuyển về trang admin
         header('Location: ../views/admin/index.php');
         exit;
     }

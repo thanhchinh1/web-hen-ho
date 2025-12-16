@@ -1,43 +1,63 @@
 <?php
 require_once '../../models/mSession.php';
-require_once '../../models/mAdmin.php';
+require_once '../../models/mDbconnect.php';
 
 Session::start();
 
-// Kiểm tra đăng nhập admin từ bảng admin
+// Kiểm tra đăng nhập admin
 $isAdminSession = Session::get('is_admin');
 $userRole = Session::get('user_role');
 
-// Chỉ cho phép truy cập nếu:
-// 1. Đăng nhập qua hệ thống admin (is_admin = true) HOẶC
-// 2. Đăng nhập qua bảng nguoidung với role = 'admin'
 if (!$isAdminSession && $userRole !== 'admin') {
+    Session::destroy();
     header('Location: ../dangnhap/login.php');
     exit;
 }
 
-// Kiểm tra timeout (30 phút không hoạt động)
-$timeout = 1800; // 30 phút
+// Kiểm tra timeout (30 phút)
+$timeout = 1800;
 if (Session::get('admin_last_activity') && (time() - Session::get('admin_last_activity') > $timeout)) {
     Session::setFlash('admin_error', 'Session đã hết hạn. Vui lòng đăng nhập lại!');
-    Session::delete('is_admin');
-    Session::delete('admin_id');
-    Session::delete('admin_name');
-    Session::delete('admin_role');
-    Session::delete('admin_username');
+    Session::destroy();
     header('Location: ../dangnhap/login.php');
     exit;
 }
 
-// Cập nhật thời gian hoạt động
 Session::set('admin_last_activity', time());
 
 $adminId = Session::get('admin_id');
 $adminName = Session::get('admin_name');
-$adminRole = Session::get('admin_role');
 
-$adminModel = new Admin();
-$stats = $adminModel->getDashboardStats();
+// Lấy thống kê từ database
+$db = clsConnect::getInstance()->connect();
+
+// Tổng số người dùng
+$result = $db->query("SELECT COUNT(*) as total FROM nguoidung");
+$totalUsers = $result->fetch_assoc()['total'];
+
+// Người dùng mới hôm nay
+$result = $db->query("SELECT COUNT(*) as total FROM nguoidung WHERE DATE(lanHoatDongCuoi) = CURDATE()");
+$newUsersToday = $result->fetch_assoc()['total'];
+
+// Người dùng VIP
+$result = $db->query("SELECT COUNT(*) as total FROM goidangky WHERE loaiGoi = 'VIP' AND trangThaiGoi = 'Active'");
+$vipUsers = $result->fetch_assoc()['total'];
+
+// Báo cáo chưa xử lý
+$result = $db->query("SELECT COUNT(*) as total FROM baocao WHERE trangThai = 'ChuaXuLy'");
+$pendingReports = $result->fetch_assoc()['total'];
+
+// Ghép đôi hôm nay
+$result = $db->query("SELECT COUNT(*) as total FROM ghepdoi WHERE DATE(thoiDiemGhepDoi) = CURDATE()");
+$matchesToday = $result->fetch_assoc()['total'];
+
+// Tin nhắn hôm nay
+$result = $db->query("SELECT COUNT(*) as total FROM tinnhan WHERE DATE(thoiDiemGui) = CURDATE()");
+$messagesToday = $result->fetch_assoc()['total'];
+
+// Hỗ trợ đang chờ
+$result = $db->query("SELECT COUNT(*) as total FROM hotro WHERE trangThai IN ('pending', 'in_progress')");
+$pendingSupport = $result->fetch_assoc()['total'];
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -46,14 +66,20 @@ $stats = $adminModel->getDashboardStats();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Admin Panel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../public/css/admin.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <div class="admin-wrapper">
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2><i class="fas fa-user-shield"></i> Admin Panel</h2>
-                <p>Hệ thống quản trị</p>
+                <div class="logo">
+                    <i class="fas fa-heart"></i>
+                    <h2>DuyenHub Admin</h2>
+                </div>
+                <p class="admin-info">
+                    <i class="fas fa-user-shield"></i> <?php echo htmlspecialchars($adminName); ?>
+                </p>
             </div>
             
             <ul class="sidebar-menu">
@@ -72,24 +98,50 @@ $stats = $adminModel->getDashboardStats();
                 <li>
                     <a href="quanlybaocao.php">
                         <i class="fas fa-flag"></i>
-                        <span>Quản lý báo cáo</span>
-                        <?php if ($stats['pendingReports'] > 0): ?>
-                            <span style="margin-left: auto; background: #dc3545; padding: 2px 8px; border-radius: 10px; font-size: 12px;">
-                                <?php echo $stats['pendingReports']; ?>
-                            </span>
+                        <span>Báo cáo vi phạm</span>
+                        <?php if ($pendingReports > 0): ?>
+                            <span class="badge"><?php echo $pendingReports; ?></span>
                         <?php endif; ?>
                     </a>
                 </li>
+                <li>
+                    <a href="hotro.php">
+                        <i class="fas fa-headset"></i>
+                        <span>Hỗ trợ khách hàng</span>
+                        <?php if ($pendingSupport > 0): ?>
+                            <span class="badge"><?php echo $pendingSupport; ?></span>
+                        <?php endif; ?>
+                    </a>
+                </li>
+                <li>
+                    <a href="magiamgia.php">
+                        <i class="fas fa-ticket-alt"></i>
+                        <span>Mã giảm giá</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="thongbao.php">
+                        <i class="fas fa-bell"></i>
+                        <span>Thông báo hệ thống</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="thongke.php">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Thống kê</span>
+                    </a>
+                </li>
+                <li class="menu-separator"></li>
                 <li>
                     <a href="doimatkhau.php">
                         <i class="fas fa-key"></i>
                         <span>Đổi mật khẩu</span>
                     </a>
                 </li>
-                <li style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">
-                    <a href="../../index.php" target="_blank">
-                        <i class="fas fa-external-link-alt"></i>
-                        <span>Xem trang chủ</span>
+                <li>
+                    <a href="../../controller/cAdminLogout.php" class="logout-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Đăng xuất</span>
                     </a>
                 </li>
             </ul>
@@ -98,127 +150,129 @@ $stats = $adminModel->getDashboardStats();
         <!-- Main Content -->
         <main class="main-content">
             <div class="top-bar">
-                <div>
-                    <h1 class="page-title">Dashboard</h1>
-                </div>
-                <div class="admin-info">
-                    <div>
-                        <div style="font-weight: 600; color: #333;">
-                            <?php echo htmlspecialchars($adminName); ?>
-                        </div>
-                        <div style="font-size: 13px; color: #999;">
-                            <?php 
-                            $roles = [
-                                'super_admin' => 'Super Admin',
-                                'moderator' => 'Moderator',
-                                'support' => 'Support'
-                            ];
-                            echo $roles[$adminRole] ?? $adminRole; 
-                            ?>
-                        </div>
-                    </div>
-                    <a href="../../controller/cAdminLogout.php" class="btn-logout">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Đăng xuất
+                <h1>Dashboard</h1>
+                <div class="top-actions">
+                    <a href="../../index.php" target="_blank" class="btn-view-site">
+                        <i class="fas fa-external-link-alt"></i>
+                        Xem trang chủ
                     </a>
                 </div>
             </div>
             
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-card-header">
-                        <div>
-                            <div class="stat-value"><?php echo number_format($stats['totalUsers']); ?></div>
-                            <div class="stat-label">Tổng người dùng</div>
-                            <div class="stat-change">
-                                <i class="fas fa-arrow-up"></i> +<?php echo $stats['newUsersToday']; ?> hôm nay
-                            </div>
-                        </div>
-                        <div class="stat-card-icon blue">
+            <div class="dashboard-content">
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card blue">
+                        <div class="stat-icon">
                             <i class="fas fa-users"></i>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-card-header">
-                        <div>
-                            <div class="stat-value"><?php echo number_format($stats['totalMatches']); ?></div>
-                            <div class="stat-label">Tổng ghép đôi</div>
-                            <div class="stat-change">
-                                <i class="fas fa-arrow-up"></i> +<?php echo $stats['newMatchesToday']; ?> hôm nay
-                            </div>
+                        <div class="stat-details">
+                            <h3><?php echo number_format($totalUsers); ?></h3>
+                            <p>Tổng người dùng</p>
+                            <span class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i> +<?php echo $newUsersToday; ?> hôm nay
+                            </span>
                         </div>
-                        <div class="stat-card-icon green">
+                    </div>
+                    
+                    <div class="stat-card gold">
+                        <div class="stat-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3><?php echo number_format($vipUsers); ?></h3>
+                            <p>Thành viên VIP</p>
+                            <span class="stat-label">Đang hoạt động</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card green">
+                        <div class="stat-icon">
                             <i class="fas fa-heart"></i>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-card-header">
-                        <div>
-                            <div class="stat-value"><?php echo number_format($stats['pendingReports']); ?></div>
-                            <div class="stat-label">Báo cáo chờ xử lý</div>
-                            <div class="stat-change" style="color: <?php echo $stats['pendingReports'] > 0 ? '#dc3545' : '#28a745'; ?>">
-                                <i class="fas fa-exclamation-circle"></i> Cần xử lý
-                            </div>
+                        <div class="stat-details">
+                            <h3><?php echo number_format($matchesToday); ?></h3>
+                            <p>Ghép đôi hôm nay</p>
+                            <span class="stat-label">Kết nối thành công</span>
                         </div>
-                        <div class="stat-card-icon red">
+                    </div>
+                    
+                    <div class="stat-card red">
+                        <div class="stat-icon">
                             <i class="fas fa-flag"></i>
                         </div>
+                        <div class="stat-details">
+                            <h3><?php echo number_format($pendingReports); ?></h3>
+                            <p>Báo cáo chưa xử lý</p>
+                            <?php if ($pendingReports > 0): ?>
+                                <span class="stat-change negative">
+                                    <i class="fas fa-exclamation-circle"></i> Cần xử lý
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card purple">
+                        <div class="stat-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3><?php echo number_format($messagesToday); ?></h3>
+                            <p>Tin nhắn hôm nay</p>
+                            <span class="stat-label">Hoạt động tích cực</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card orange">
+                        <div class="stat-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3><?php echo number_format($pendingSupport); ?></h3>
+                            <p>Yêu cầu hỗ trợ</p>
+                            <?php if ($pendingSupport > 0): ?>
+                                <span class="stat-change negative">
+                                    <i class="fas fa-clock"></i> Đang chờ
+                                </span>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="stat-card">
-                    <div class="stat-card-header">
-                        <div>
-                            <div class="stat-value"><?php echo number_format($stats['totalMessages']); ?></div>
-                            <div class="stat-label">Tổng tin nhắn</div>
-                            <div class="stat-change">
-                                <i class="fas fa-comment"></i> Đang hoạt động
-                            </div>
-                        </div>
-                        <div class="stat-card-icon orange">
-                            <i class="fas fa-comments"></i>
-                        </div>
-                    </div>
+                <!-- Quick Actions -->
+                <div class="section-title">
+                    <h2>Thao tác nhanh</h2>
                 </div>
-            </div>
-            
-            <!-- Quick Actions -->
-            <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                <h2 style="margin-bottom: 20px; color: #333;">
-                    <i class="fas fa-bolt"></i> Thao tác nhanh
-                </h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                    <a href="quanlynguoidung.php" style="
-                        padding: 20px;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                        color: white;
-                        text-decoration: none;
-                        border-radius: 12px;
-                        text-align: center;
-                        transition: all 0.3s;
-                    " onmouseover="this.style.transform='translateY(-5px)'" 
-                       onmouseout="this.style.transform='translateY(0)'">
-                        <i class="fas fa-users" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
-                        <strong>Quản lý người dùng</strong>
+                
+                <div class="actions-grid">
+                    <a href="quanlynguoidung.php" class="action-card">
+                        <i class="fas fa-user-plus"></i>
+                        <h3>Quản lý người dùng</h3>
+                        <p>Xem và quản lý tài khoản người dùng</p>
                     </a>
                     
-                    <a href="quanlybaocao.php" style="
-                        padding: 20px;
-                        background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
-                        color: white;
-                        text-decoration: none;
-                        border-radius: 12px;
-                        text-align: center;
-                        transition: all 0.3s;
-                    " onmouseover="this.style.transform='translateY(-5px)'" 
-                       onmouseout="this.style.transform='translateY(0)'">
-                        <i class="fas fa-flag" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
-                        <strong>Xử lý báo cáo</strong>
+                    <a href="quanlybaocao.php" class="action-card urgent">
+                        <i class="fas fa-flag"></i>
+                        <h3>Xử lý báo cáo</h3>
+                        <p><?php echo $pendingReports; ?> báo cáo đang chờ xử lý</p>
+                    </a>
+                    
+                    <a href="hotro.php" class="action-card">
+                        <i class="fas fa-headset"></i>
+                        <h3>Hỗ trợ khách hàng</h3>
+                        <p><?php echo $pendingSupport; ?> yêu cầu hỗ trợ</p>
+                    </a>
+                    
+                    <a href="magiamgia.php" class="action-card">
+                        <i class="fas fa-ticket-alt"></i>
+                        <h3>Mã giảm giá</h3>
+                        <p>Tạo và quản lý mã khuyến mãi</p>
+                    </a>
+                    
+                    <a href="thongbao.php" class="action-card">
+                        <i class="fas fa-bell"></i>
+                        <h3>Gửi thông báo</h3>
+                        <p>Thông báo cho người dùng</p>
                     </a>
                 </div>
             </div>

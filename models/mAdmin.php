@@ -107,14 +107,24 @@ class Admin {
      * Log hành động admin
      */
     public function logAction($adminId, $action, $details = null) {
-        $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-        
-        $stmt = $this->conn->prepare("
-            INSERT INTO AdminLog (maAdmin, hanhDong, chiTiet, ipAddress)
-            VALUES (?, ?, ?, ?)
-        ");
-        $stmt->bind_param("isss", $adminId, $action, $details, $ipAddress);
-        return $stmt->execute();
+        try {
+            $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+            
+            $stmt = $this->conn->prepare("
+                INSERT INTO adminlog (maAdmin, hanhDong, chiTiet, ipAddress)
+                VALUES (?, ?, ?, ?)
+            ");
+            
+            if ($stmt) {
+                $stmt->bind_param("isss", $adminId, $action, $details, $ipAddress);
+                return $stmt->execute();
+            }
+            return false;
+        } catch (Exception $e) {
+            // Ghi log vào file nếu không thể ghi vào database
+            error_log("Admin Log Error: " . $e->getMessage());
+            return false;
+        }
     }
     
     /**

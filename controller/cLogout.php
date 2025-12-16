@@ -13,10 +13,13 @@ if ($userId) {
     $userModel->updateOfflineStatus($userId);
 }
 
+// Thiết lập thông báo đăng xuất
+Session::setFlash('success', 'Đã đăng xuất thành công!');
+
 // Hủy session và đăng xuất
 Session::destroy();
 
-// Chuyển về trang chủ
-header('Location: ../index.php');
+// Chuyển về trang đăng nhập
+header('Location: ../views/dangnhap/login.php');
 exit;
 ?>

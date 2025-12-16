@@ -61,6 +61,15 @@ $excludeIds = array_unique(array_merge([$currentUserId], $likedUserIds, $whoLike
 // Lấy danh sách hồ sơ để hiển thị (loại trừ những người đã like và được like)
 $allProfiles = $profileModel->getAllProfiles(12, 0, $excludeIds);
 
+// Lấy thông báo hệ thống từ admin
+$systemNotifications = $notificationModel->getSystemNotifications(3);
+
+// Lấy phản hồi hỗ trợ từ admin
+require_once '../../models/mSupport.php';
+$supportModel = new Support();
+$newRepliesCount = $supportModel->countNewReplies($currentUserId);
+$latestReplies = $supportModel->getLatestReplies($currentUserId, 3);
+
 // Lấy flash message nếu có
 $successMessage = Session::getFlash('success_message');
 $errorMessage = Session::getFlash('error_message');
@@ -201,7 +210,7 @@ $infoMessage = Session::getFlash('info_message');
                     </a>
                     <a href="../nhantin/chat.php" class="nav-link">
                         <i class="fas fa-comment"></i>
-                        Tin nhắn
+                        Tin nhấn
                         <?php if ($newMatchesCount > 0): ?>
                             <span class="notification-badge"><?php echo $newMatchesCount; ?></span>
                         <?php endif; ?>
@@ -210,26 +219,21 @@ $infoMessage = Session::getFlash('info_message');
                         <i class="fas fa-search"></i>
                         Tìm kiếm
                     </a>
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-question-circle"></i>
-                        Trợ giúp
+                    <a href="../hotro/index.php" class="nav-link">
+                        <i class="fas fa-headset"></i>
+                        Hỗ trợ
+                        <?php if ($newRepliesCount > 0): ?>
+                            <span class="notification-badge pulse"><?php echo $newRepliesCount; ?></span>
+                        <?php endif; ?>
                     </a>
                 </nav>
             </div>
 
             <div class="header-right">
-                <a href="#" class="btn-logout" onclick="confirmLogout(event)">
+                <a href="../../controller/cLogout.php" class="btn-logout">
                     <i class="fas fa-sign-out-alt"></i>
                     Đăng Xuất
                 </a>
-    <script>
-    function confirmLogout(e) {
-        e.preventDefault();
-        if (confirm('Bạn có chắc chắn muốn đăng xuất không?')) {
-            window.location.href = '../../controller/cLogout.php';
-        }
-    }
-    </script>
                 <div class="user-menu-wrapper">
                     <img src="../../<?php echo htmlspecialchars($currentUserProfile['avt']); ?>" alt="User" class="user-avatar" id="userAvatar">
                     <div class="user-dropdown" id="userDropdown" style="display:none;">
@@ -303,6 +307,65 @@ $infoMessage = Session::getFlash('info_message');
             </div>
         </div>
     </section>
+
+    <!-- System Notifications Section -->
+    <?php if (!empty($systemNotifications)): ?>
+    <section class="notifications-section">
+        <div class="section-header">
+            <h2><i class="fas fa-bell"></i> Thông báo</h2>
+        </div>
+        <div class="notifications-container">
+            <?php foreach ($systemNotifications as $notification): ?>
+                <?php 
+                    $iconClass = '';
+                    $notifClass = '';
+                    switch($notification['loai']) {
+                        case 'warning':
+                            $iconClass = 'fa-exclamation-triangle';
+                            $notifClass = 'warning';
+                            break;
+                        case 'promotion':
+                            $iconClass = 'fa-gift';
+                            $notifClass = 'promotion';
+                            break;
+                        case 'maintenance':
+                            $iconClass = 'fa-tools';
+                            $notifClass = 'maintenance';
+                            break;
+                        default:
+                            $iconClass = 'fa-info-circle';
+                            $notifClass = 'info';
+                    }
+                ?>
+                <div class="notification-card <?php echo $notifClass; ?>">
+                    <div class="notification-icon">
+                        <i class="fas <?php echo $iconClass; ?>"></i>
+                    </div>
+                    <div class="notification-content">
+                        <h3><?php echo htmlspecialchars($notification['tieuDe']); ?></h3>
+                        <p><?php echo htmlspecialchars($notification['noiDung']); ?></p>
+                        <span class="notification-time">
+                            <i class="far fa-clock"></i>
+                            <?php 
+                                $time = strtotime($notification['thoiDiemGui'] ?? $notification['thoiDiemTao']);
+                                $now = time();
+                                $diff = $now - $time;
+                                
+                                if ($diff < 3600) {
+                                    echo floor($diff / 60) . ' phút trước';
+                                } elseif ($diff < 86400) {
+                                    echo floor($diff / 3600) . ' giờ trước';
+                                } else {
+                                    echo date('d/m/Y', $time);
+                                }
+                            ?>
+                        </span>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </section>
+    <?php endif; ?>
 
     <!-- Profiles Section -->
     <section class="profiles-section">
@@ -1106,6 +1169,172 @@ $infoMessage = Session::getFlash('info_message');
             document.addEventListener(event, resetActivityTimer, true);
         });
     </script>
+
+    <!-- Contact Admin Modal -->
+    <div id="contactAdminModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:10000; align-items:center; justify-content:center; overflow-y:auto;">
+        <div style="background:#fff; border-radius:20px; padding:40px; max-width:600px; width:90%; position:relative; box-shadow:0 10px 40px rgba(0,0,0,0.3); margin:20px;">
+            <button onclick="closeContactAdmin()" style="position:absolute; top:15px; right:15px; background:transparent; border:none; font-size:28px; cursor:pointer; color:#999; transition:color 0.3s;">&times;</button>
+            
+            <div style="text-align:center; margin-bottom:25px;">
+                <i class="fas fa-headset" style="font-size:50px; color:#FF6B9D; margin-bottom:15px;"></i>
+                <h2 style="color:#2c3e50; font-size:24px; font-weight:600; margin-bottom:10px;">Liên hệ với Admin</h2>
+                <p style="color:#7f8c8d; font-size:14px;">Gửi yêu cầu hỗ trợ hoặc liên hệ trực tiếp</p>
+            </div>
+
+            <!-- Form gửi yêu cầu hỗ trợ -->
+            <form id="supportForm" style="margin-bottom:25px;">
+                <div style="margin-bottom:20px;">
+                    <label style="display:block; margin-bottom:8px; color:#2c3e50; font-weight:500; font-size:14px;">
+                        <i class="fas fa-tag" style="color:#FF6B9D; margin-right:5px;"></i>Loại yêu cầu
+                    </label>
+                    <select name="type" style="width:100%; padding:12px; border:2px solid #e0e0e0; border-radius:10px; font-size:14px; font-family:'Poppins', sans-serif; transition:all 0.3s;">
+                        <option value="general">Câu hỏi chung</option>
+                        <option value="payment">Thanh toán</option>
+                        <option value="technical">Kỹ thuật</option>
+                        <option value="report">Báo cáo</option>
+                        <option value="other">Khác</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom:20px;">
+                    <label style="display:block; margin-bottom:8px; color:#2c3e50; font-weight:500; font-size:14px;">
+                        <i class="fas fa-heading" style="color:#FF6B9D; margin-right:5px;"></i>Tiêu đề
+                    </label>
+                    <input type="text" name="title" placeholder="Nhập tiêu đề yêu cầu" required
+                           style="width:100%; padding:12px; border:2px solid #e0e0e0; border-radius:10px; font-size:14px; font-family:'Poppins', sans-serif; transition:all 0.3s;">
+                </div>
+
+                <div style="margin-bottom:20px;">
+                    <label style="display:block; margin-bottom:8px; color:#2c3e50; font-weight:500; font-size:14px;">
+                        <i class="fas fa-align-left" style="color:#FF6B9D; margin-right:5px;"></i>Nội dung
+                    </label>
+                    <textarea name="content" rows="5" placeholder="Mô tả chi tiết vấn đề của bạn..." required
+                              style="width:100%; padding:12px; border:2px solid #e0e0e0; border-radius:10px; font-size:14px; font-family:'Poppins', sans-serif; resize:vertical; transition:all 0.3s;"></textarea>
+                </div>
+
+                <button type="submit" style="width:100%; padding:14px; background:linear-gradient(135deg, #FF6B9D, #ff4d6d); color:#fff; border:none; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer; transition:all 0.3s; font-family:'Poppins', sans-serif;">
+                    <i class="fas fa-paper-plane" style="margin-right:8px;"></i>Gửi yêu cầu hỗ trợ
+                </button>
+            </form>
+
+            <div style="border-top:2px dashed #e0e0e0; padding-top:20px; margin-top:20px;">
+                <p style="text-align:center; color:#7f8c8d; font-size:13px; margin-bottom:15px;">Hoặc liên hệ trực tiếp qua:</p>
+                
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <a href="https://www.facebook.com/profile.php?id=61583156011828" target="_blank" 
+                       style="display:flex; align-items:center; gap:10px; padding:12px; background:#f8f9fa; border-radius:10px; text-decoration:none; transition:all 0.3s;">
+                        <div style="width:35px; height:35px; background:linear-gradient(135deg, #FF6B9D, #ff4d6d); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff;">
+                            <i class="fab fa-facebook-messenger"></i>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-size:12px; color:#2c3e50; font-weight:600;">Messenger</div>
+                        </div>
+                    </a>
+                    
+                    <a href="mailto:support@duyenhub.vn" 
+                       style="display:flex; align-items:center; gap:10px; padding:12px; background:#f8f9fa; border-radius:10px; text-decoration:none; transition:all 0.3s;">
+                        <div style="width:35px; height:35px; background:linear-gradient(135deg, #3498db, #2980b9); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff;">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-size:12px; color:#2c3e50; font-weight:600;">Email</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openContactAdmin() {
+            const modal = document.getElementById('contactAdminModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeContactAdmin() {
+            const modal = document.getElementById('contactAdminModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            // Reset form
+            document.getElementById('supportForm').reset();
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('contactAdminModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeContactAdmin();
+            }
+        });
+
+        // Handle support form submission
+        document.getElementById('supportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+            
+            fetch('../../controller/cCreateSupport.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    const successDiv = document.createElement('div');
+                    successDiv.style.cssText = 'position:fixed; top:20px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg, #27ae60, #229954); color:#fff; padding:15px 30px; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.2); z-index:10001; font-family:Poppins, sans-serif; animation:slideDown 0.3s ease;';
+                    successDiv.innerHTML = '<i class="fas fa-check-circle" style="margin-right:10px;"></i>' + data.message;
+                    document.body.appendChild(successDiv);
+                    
+                    setTimeout(() => {
+                        successDiv.remove();
+                        closeContactAdmin();
+                    }, 3000);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra. Vui lòng thử lại!');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            });
+        });
+
+        // Add focus styles
+        document.querySelectorAll('#supportForm input, #supportForm textarea, #supportForm select').forEach(el => {
+            el.addEventListener('focus', function() {
+                this.style.borderColor = '#FF6B9D';
+                this.style.boxShadow = '0 0 0 3px rgba(255, 107, 157, 0.1)';
+            });
+            el.addEventListener('blur', function() {
+                this.style.borderColor = '#e0e0e0';
+                this.style.boxShadow = 'none';
+            });
+        });
+    </script>
+    
+    <style>
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+    </style>
     </div>
 </body>
 </html>

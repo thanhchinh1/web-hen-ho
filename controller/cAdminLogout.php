@@ -9,13 +9,6 @@ $isAdminSession = Session::get('is_admin');
 $userRole = Session::get('user_role');
 
 if ($isAdminSession || $userRole === 'admin') {
-    // Log đăng xuất nếu là admin từ bảng admin
-    if ($isAdminSession && Session::get('admin_id')) {
-        $adminId = Session::get('admin_id');
-        $adminModel = new Admin();
-        $adminModel->logAction($adminId, 'logout', 'Đăng xuất hệ thống');
-    }
-    
     // Xóa tất cả session liên quan đến admin và user
     Session::delete('admin_id');
     Session::delete('admin_username');

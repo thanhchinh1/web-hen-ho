@@ -3,10 +3,21 @@ require_once '../../models/mSession.php';
 
 Session::start();
 
-// Chuyển về trang chủ nếu đã đăng nhập
+// Chuyển về trang chủ nếu đã đăng nhập (trừ admin)
 if (Session::isLoggedIn()) {
-    header('Location: ../trangchu/index.php');
-    exit;
+    $userRole = Session::get('user_role');
+    $isAdmin = Session::get('is_admin');
+    
+    // Chỉ redirect nếu có đầy đủ thông tin session hợp lệ
+    if ($userRole === 'admin' && $isAdmin === true) {
+        header('Location: ../admin/index.php');
+        exit;
+    } elseif ($userRole === 'user') {
+        header('Location: ../trangchu/index.php');
+        exit;
+    }
+    // Nếu session không hợp lệ, xóa và cho phép đăng nhập lại
+    Session::destroy();
 }
 
 $errors = Session::getFlash('login_errors') ?? [];

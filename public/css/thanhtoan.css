@@ -17,7 +17,7 @@ html, body {
 
 body {
     font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f0f2f5;
+    background: #ffffff;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -109,7 +109,7 @@ body {
     flex: 1;
     display: block;
     padding: 100px 20px 40px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #fff5f8 100%);
+    background: #ffffff;
     min-height: 100vh;
     width: 100%;
     position: relative;
@@ -244,10 +244,11 @@ body {
 
 /* Order Summary */
 .order-summary {
-    background: linear-gradient(135deg, #fff5f8, #ffe6f0);
+    background: #ffffff;
     border-radius: 16px;
     padding: 25px;
     margin-bottom: 30px;
+    border: 1px solid #e0e0e0;
 }
 
 .order-summary h3 {
@@ -303,6 +304,176 @@ body {
     font-size: 24px;
     font-weight: 700;
     color: #ff6b9d;
+}
+
+.summary-row.discount-row {
+    background: transparent;
+    padding: 12px 0;
+    border-radius: 0;
+    margin: 0;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.summary-row.discount-row .label {
+    color: #666;
+    font-weight: 500;
+}
+
+.summary-row.discount-row .discount-value {
+    color: #27ae60;
+    font-weight: 700;
+}
+
+.discount-code {
+    font-size: 12px;
+    background: #ffc107;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 5px;
+    font-weight: 600;
+}
+
+/* Discount Section */
+.discount-section {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 30px;
+    border: 1px solid #e0e0e0;
+}
+
+.discount-section h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.discount-section h3 i {
+    color: #ffc107;
+}
+
+.discount-input-wrapper {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.discount-input {
+    flex: 1;
+    padding: 14px 18px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.discount-input:focus {
+    outline: none;
+    border-color: #ffc107;
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1);
+}
+
+.btn-apply-discount {
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-apply-discount:hover {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+}
+
+.btn-apply-discount:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.discount-message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-top: 10px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+}
+
+.discount-message.success {
+    display: flex;
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.discount-message.error {
+    display: flex;
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.available-coupons {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.coupons-hint {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.coupons-hint i {
+    color: #ffc107;
+}
+
+.coupon-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.coupon-tag {
+    display: inline-block;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #fff9e6, #fffaf0);
+    border: 1px solid #ffc107;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #e67e22;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.coupon-tag:hover {
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    color: #ffffff;
+    transform: scale(1.05);
+    box-shadow: 0 3px 10px rgba(255, 193, 7, 0.3);
 }
 
 /* QR Payment Section */
@@ -616,6 +787,23 @@ body {
 @media (max-width: 768px) {
     .main-header {
         height: 60px;
+    }
+    
+    .discount-input-wrapper {
+        flex-direction: column;
+    }
+    
+    .btn-apply-discount {
+        width: 100%;
+        padding: 14px;
+    }
+    
+    .coupon-tags {
+        justify-content: center;
+    }
+    
+    .discount-section {
+        padding: 20px;
     }
     
     .logo img {

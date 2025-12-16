@@ -19,7 +19,17 @@ if (!in_array($months, [1, 3, 6, 12])) {
 }
 
 $vipModel = new VIP();
-$price = $vipModel->getVIPPrice($months);
+$originalPrice = $vipModel->getVIPPrice($months);
+
+// Kiểm tra mã giảm giá đã áp dụng
+$appliedDiscount = Session::get('applied_discount');
+$discountAmount = 0;
+$price = $originalPrice;
+
+if ($appliedDiscount && isset($appliedDiscount['finalPrice'])) {
+    $discountAmount = $appliedDiscount['discountAmount'];
+    $price = $appliedDiscount['finalPrice'];
+}
 
 $packageNames = [
     1 => 'Gói 1 Tháng',
@@ -102,17 +112,49 @@ $errorMessage = Session::getFlash('vip_error');
                         <span class="label">Thời hạn</span>
                         <span class="value"><?php echo $months; ?> tháng</span>
                     </div>
+                    <div class="summary-row">
+                        <span class="label">Giá gốc</span>
+                        <span class="value" id="originalPrice"><?php echo number_format($originalPrice, 0, ',', '.'); ?>đ</span>
+                    </div>
+                    <?php if ($discountAmount > 0): ?>
+                    <div class="summary-row discount-row">
+                        <span class="label">
+                            <i class="fas fa-tag"></i> Giảm giá
+                            <?php if ($appliedDiscount): ?>
+                                <span class="discount-code">(<?php echo htmlspecialchars($appliedDiscount['code']); ?>)</span>
+                            <?php endif; ?>
+                        </span>
+                        <span class="value discount-value" id="discountAmount">-<?php echo number_format($discountAmount, 0, ',', '.'); ?>đ</span>
+                    </div>
+                    <?php endif; ?>
                     <div class="summary-row total">
                         <span class="label">Tổng thanh toán</span>
-                        <span class="value"><?php echo number_format($price, 0, ',', '.'); ?>đ</span>
+                        <span class="value" id="finalPrice"><?php echo number_format($price, 0, ',', '.'); ?>đ</span>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Discount Code Section -->
+            <div class="discount-section">
+                <h3><i class="fas fa-ticket-alt"></i> Mã giảm giá</h3>
+                <div class="discount-input-wrapper">
+                    <input type="text" 
+                           id="couponCode" 
+                           placeholder="Nhập mã giảm giá" 
+                           class="discount-input"
+                           value="<?php echo $appliedDiscount ? htmlspecialchars($appliedDiscount['code']) : ''; ?>">
+                    <button type="button" id="applyDiscountBtn" class="btn-apply-discount">
+                        <i class="fas fa-check"></i> Áp dụng
+                    </button>
+                </div>
+                <div id="discountMessage" class="discount-message"></div>
             </div>
             
             <!-- Payment Form -->
             <form method="POST" action="../../controller/cUpgradeVIP.php" id="paymentForm">
                 <input type="hidden" name="months" value="<?php echo $months; ?>">
-                <input type="hidden" name="price" value="<?php echo $price; ?>">
+                <input type="hidden" name="price" id="finalPriceInput" value="<?php echo $price; ?>">
+                <input type="hidden" name="discount_code" id="discountCodeInput" value="<?php echo $appliedDiscount ? htmlspecialchars($appliedDiscount['code']) : ''; ?>">
                 <input type="hidden" name="payment_method" value="bank_transfer">
                 <input type="hidden" name="fullname" value="Khách hàng">
                 <input type="hidden" name="phone" value="0000000000">
@@ -156,36 +198,97 @@ $errorMessage = Session::getFlash('vip_error');
                 <button type="submit" class="btn-pay">
                     <i class="fas fa-check-circle"></i> Tôi đã thanh toán
                 </button>
-                
-                <!-- Security Notice -->
-                <div class="secure-notice">
-                    <i class="fas fa-shield-alt"></i>
-                    <p>Sau khi xác nhận, tài khoản VIP sẽ được kích hoạt ngay lập tức. Nếu có vấn đề, vui lòng liên hệ hỗ trợ.</p>
-                </div>
             </form>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="main-footer">
-        <div class="footer-container">
-            <div class="footer-top">
-                <div class="footer-links">
-                    <a href="#">Về chúng tôi</a>
-                    <a href="#">Hỗ trợ</a>
-                    <a href="#">Pháp lý</a>
-                </div>
-                <div class="footer-social">
-                    <a href="https://www.facebook.com/profile.php?id=61583156011828" class="social-icon" target="_blank"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; Kết Nối Yêu Thương. Mọi quyền được bảo lưu.</p>
-            </div>
-        </div>
-    </footer>
+   
+    
+    <script>
+    // Apply Discount Code
+    document.getElementById('applyDiscountBtn').addEventListener('click', function() {
+        const couponCode = document.getElementById('couponCode').value.trim();
+        const months = <?php echo $months; ?>;
+        const messageDiv = document.getElementById('discountMessage');
+        const applyBtn = this;
+        
+        if (!couponCode) {
+            messageDiv.className = 'discount-message error';
+            messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vui lòng nhập mã giảm giá';
+            return;
+        }
+        
+        // Disable button
+        applyBtn.disabled = true;
+        applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+        
+        // Send AJAX request
+        fetch('../../controller/cApplyDiscount.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `coupon_code=${encodeURIComponent(couponCode)}&months=${months}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update UI
+                messageDiv.className = 'discount-message success';
+                messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message}`;
+                
+                // Update prices
+                document.getElementById('finalPrice').textContent = data.finalPrice + 'đ';
+                document.getElementById('finalPriceInput').value = data.finalPriceRaw;
+                document.getElementById('discountCodeInput').value = couponCode;
+                
+                // Show discount row if not exists
+                const summaryContent = document.querySelector('.summary-content');
+                const discountRow = summaryContent.querySelector('.discount-row');
+                
+                if (discountRow) {
+                    discountRow.querySelector('.discount-value').textContent = '-' + data.discountAmount + 'đ';
+                    discountRow.querySelector('.discount-code').textContent = '(' + couponCode + ')';
+                } else {
+                    const totalRow = summaryContent.querySelector('.total');
+                    const newDiscountRow = document.createElement('div');
+                    newDiscountRow.className = 'summary-row discount-row';
+                    newDiscountRow.innerHTML = `
+                        <span class="label">
+                            <i class="fas fa-tag"></i> Giảm giá
+                            <span class="discount-code">(${couponCode})</span>
+                        </span>
+                        <span class="value discount-value">-${data.discountAmount}đ</span>
+                    `;
+                    summaryContent.insertBefore(newDiscountRow, totalRow);
+                }
+                
+                // Reload page to update session
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                messageDiv.className = 'discount-message error';
+                messageDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${data.message}`;
+            }
+        })
+        .catch(error => {
+            messageDiv.className = 'discount-message error';
+            messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Có lỗi xảy ra, vui lòng thử lại';
+        })
+        .finally(() => {
+            applyBtn.disabled = false;
+            applyBtn.innerHTML = '<i class="fas fa-check"></i> Áp dụng';
+        });
+    });
+    
+    // Allow Enter key to apply discount
+    document.getElementById('couponCode').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('applyDiscountBtn').click();
+        }
+    });
+    </script>
 </body>
 </html>
