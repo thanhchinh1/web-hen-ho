@@ -173,7 +173,6 @@ function timeAgo($datetime) {
         </div>
     </div>
     
-    <?php include __DIR__ . '/../layouts/footer.php'; ?>
     
     <script>
         function unlikeUser(targetUserId) {

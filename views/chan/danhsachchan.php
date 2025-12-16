@@ -187,6 +187,5 @@ $blockedUsers = $blockModel->getBlockedUsers($currentUserId);
         }
     </script>
     
-    <?php include __DIR__ . '/../layouts/footer.php'; ?>
 </body>
 </html>
