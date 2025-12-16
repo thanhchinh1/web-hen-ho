@@ -111,9 +111,34 @@ $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt
                 <p class="avatar-hint">Kích thước tối đa: 5MB</p>
             </div>
 
+            <!-- Avatar Editor Modal -->
+            <div id="avatarEditorModal" class="avatar-editor-modal" style="display: none;">
+                <div class="avatar-editor-content">
+                    <div class="avatar-editor-header">
+                        <h3>Chỉnh vị trí ảnh đại diện</h3>
+                        <button type="button" class="close-modal" onclick="closeAvatarEditor()">&times;</button>
+                    </div>
+                    <div class="avatar-editor-body">
+                        <div class="avatar-crop-container" id="avatarCropContainer">
+                            <img src="" alt="" id="avatarCropImage">
+                        </div>
+                        <div class="avatar-controls">
+                            <div class="control-group">
+                                <label><i class="fas fa-search-minus"></i> Zoom</label>
+                                <input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="avatar-editor-footer">
+                        <button type="button" class="btn-cancel" onclick="closeAvatarEditor()">Hủy</button>
+                        <button type="button" class="btn-apply" onclick="applyCrop()">Áp dụng</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Profile Form -->
             <form id="profileForm" method="POST" action="../../controller/cProfile_update.php" enctype="multipart/form-data">
-                <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none;" onchange="previewAvatar(event)">
+                <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none;" onchange="openAvatarEditor(event)">
                 
                 <!-- Profile Details -->
                 <div class="profile-details">
@@ -322,7 +347,167 @@ $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt
 
 
     <script>
-        // Preview avatar before upload
+        // Avatar editor state
+        let currentFile = null;
+        let cropData = {
+            scale: 1,
+            x: 0,
+            y: 0
+        };
+        let isDragging = false;
+        let startPos = { x: 0, y: 0 };
+        let croppedBlob = null;
+        let hasNewAvatar = false;
+
+        // Open avatar editor modal
+        function openAvatarEditor(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file size
+            if (file.size > 5000000) {
+                alert('Kích thước file không được vượt quá 5MB!');
+                event.target.value = '';
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Chỉ chấp nhận file ảnh (jpg, jpeg, png, gif)!');
+                event.target.value = '';
+                return;
+            }
+
+            currentFile = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('avatarCropImage');
+                img.src = e.target.result;
+                
+                // Reset crop data
+                cropData = { scale: 1, x: 0, y: 0 };
+                document.getElementById('zoomSlider').value = 1;
+                
+                // Show modal
+                document.getElementById('avatarEditorModal').style.display = 'flex';
+                
+                // Initialize drag handlers
+                setTimeout(() => initializeDragHandlers(), 100);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Initialize drag handlers for image positioning
+        function initializeDragHandlers() {
+            const container = document.getElementById('avatarCropContainer');
+            const img = document.getElementById('avatarCropImage');
+
+            img.style.transform = `scale(${cropData.scale}) translate(${cropData.x}px, ${cropData.y}px)`;
+
+            container.addEventListener('mousedown', startDrag);
+            container.addEventListener('touchstart', startDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchend', endDrag);
+
+            // Zoom slider
+            document.getElementById('zoomSlider').addEventListener('input', function(e) {
+                cropData.scale = parseFloat(e.target.value);
+                updateImageTransform();
+            });
+        }
+
+        function startDrag(e) {
+            e.preventDefault();
+            isDragging = true;
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            startPos = { x: clientX - cropData.x, y: clientY - cropData.y };
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            cropData.x = clientX - startPos.x;
+            cropData.y = clientY - startPos.y;
+            updateImageTransform();
+        }
+
+        function endDrag() {
+            isDragging = false;
+        }
+
+        function updateImageTransform() {
+            const img = document.getElementById('avatarCropImage');
+            img.style.transform = `scale(${cropData.scale}) translate(${cropData.x}px, ${cropData.y}px)`;
+        }
+
+        // Close avatar editor
+        function closeAvatarEditor() {
+            // Cảnh báo nếu có file được chọn nhưng chưa crop
+            if (currentFile && !hasNewAvatar) {
+                const confirmClose = confirm('Bạn chưa nhấn "Áp dụng" để lưu ảnh đã chỉnh. Bạn có chắc muốn hủy?');
+                if (!confirmClose) {
+                    return; // Không đóng modal
+                }
+            }
+            
+            document.getElementById('avatarEditorModal').style.display = 'none';
+            document.getElementById('avatarInput').value = '';
+            currentFile = null;
+        }
+
+        // Apply crop and set preview
+        async function applyCrop() {
+            const img = document.getElementById('avatarCropImage');
+            const container = document.getElementById('avatarCropContainer');
+            
+            // Create canvas to crop image
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to container size (circular preview size)
+            const size = 400; // High resolution for better quality
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Calculate source dimensions
+            const rect = container.getBoundingClientRect();
+            const imgRect = img.getBoundingClientRect();
+            
+            // Draw image with transformations
+            const sourceX = (rect.left - imgRect.left) * (img.naturalWidth / imgRect.width);
+            const sourceY = (rect.top - imgRect.top) * (img.naturalHeight / imgRect.height);
+            const sourceWidth = rect.width * (img.naturalWidth / imgRect.width);
+            const sourceHeight = rect.height * (img.naturalHeight / imgRect.height);
+            
+            ctx.drawImage(
+                img,
+                sourceX, sourceY, sourceWidth, sourceHeight,
+                0, 0, size, size
+            );
+            
+            // Convert to blob
+            canvas.toBlob(function(blob) {
+                croppedBlob = blob;
+                hasNewAvatar = true;
+                
+                // Update preview
+                const previewImg = document.getElementById('avatarImage');
+                previewImg.src = URL.createObjectURL(blob);
+                
+                // Close modal
+                closeAvatarEditor();
+                
+                alert('Đã cập nhật ảnh đại diện!');
+            }, 'image/jpeg', 0.95);
+        }
+
+        // Preview avatar before upload (old function - now handled by editor)
         function previewAvatar(event) {
             const file = event.target.files[0];
             if (file) {
@@ -362,6 +547,11 @@ $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt
 
             // Tạo FormData
             const formData = new FormData(this);
+            
+            // Nếu có ảnh mới đã crop, thay thế file avatar
+            if (hasNewAvatar && croppedBlob) {
+                formData.set('avatar', croppedBlob, 'avatar.jpg');
+            }
             
             // Hiển thị loading
             const submitBtn = this.querySelector('button[type="submit"]');

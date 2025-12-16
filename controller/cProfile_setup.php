@@ -56,8 +56,12 @@ $fileTmpName = $file['tmp_name'];
 $fileSize = $file['size'];
 $fileError = $file['error'];
 
-// Lấy extension
+// Lấy extension (ảnh đã crop sẽ luôn là jpg)
 $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+// Nếu không có extension hoặc không hợp lệ, mặc định dùng jpg
+if (empty($fileExt) || !in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif'])) {
+    $fileExt = 'jpg';
+}
 $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
 
 // Validate file
