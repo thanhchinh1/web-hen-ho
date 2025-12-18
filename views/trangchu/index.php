@@ -291,22 +291,11 @@ $infoMessage = Session::getFlash('info_message');
 
     <!-- Hero Section -->
     <section class="hero-section">
+        <img src="../../public/img/header1.jpg" alt="1Love - Chỉ một tình yêu" class="hero-bg-image">
         <div class="hero-content">
             <div class="hero-text">
                 <h1>Tìm kiếm một nửa yêu thương của bạn</h1>
                 <p>Kết Nối Yêu Thương là nơi bạn có thể tìm thấy những người phù hợp, chia sẻ sở thích và bắt đầu những câu chuyện tình yêu đẹp.</p>
-            </div>
-            <div class="hero-illustration">
-                <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="heart-illustration">
-                    <path d="M200,350 C120,290 50,220 50,150 C50,100 80,70 130,70 C160,70 180,85 200,110 C220,85 240,70 270,70 C320,70 350,100 350,150 C350,220 280,290 200,350 Z" fill="#FFE5EC" stroke="#FF6B9D" stroke-width="3"/>
-                    <circle cx="160" cy="180" r="35" fill="#FFD7BA"/>
-                    <path d="M160,145 Q145,135 150,155 Q155,145 160,145 Q165,145 170,155 Q175,135 160,145 Z" fill="#5C3D2E"/>
-                    <rect x="145" y="200" width="30" height="45" rx="5" fill="#98D8C8"/>
-                    <circle cx="240" cy="180" r="35" fill="#FFD7BA"/>
-                    <path d="M240,145 Q225,135 230,155 Q235,145 240,145 Q245,145 250,155 Q255,135 240,145 Z" fill="#2C1810"/>
-                    <rect x="225" y="200" width="30" height="45" rx="5" fill="#5BC0DE"/>
-                    <circle cx="200" cy="200" r="5" fill="#FF1744"/>
-                </svg>
             </div>
         </div>
     </section>
@@ -317,57 +306,108 @@ $infoMessage = Session::getFlash('info_message');
         <div class="section-header">
             <h2><i class="fas fa-bell"></i> Thông báo</h2>
         </div>
-        <div class="notifications-container">
-            <?php foreach ($systemNotifications as $notification): ?>
-                <?php 
-                    $iconClass = '';
-                    $notifClass = '';
-                    switch($notification['loai']) {
-                        case 'warning':
-                            $iconClass = 'fa-exclamation-triangle';
-                            $notifClass = 'warning';
-                            break;
-                        case 'promotion':
-                            $iconClass = 'fa-gift';
-                            $notifClass = 'promotion';
-                            break;
-                        case 'maintenance':
-                            $iconClass = 'fa-tools';
-                            $notifClass = 'maintenance';
-                            break;
-                        default:
-                            $iconClass = 'fa-info-circle';
-                            $notifClass = 'info';
-                    }
-                ?>
-                <div class="notification-card <?php echo $notifClass; ?>">
-                    <div class="notification-icon">
-                        <i class="fas <?php echo $iconClass; ?>"></i>
+        <div class="notifications-carousel-wrapper">
+            <div class="notifications-carousel" id="notificationsCarousel">
+                <?php foreach ($systemNotifications as $notification): ?>
+                    <?php 
+                        $iconClass = '';
+                        $notifClass = '';
+                        switch($notification['loai']) {
+                            case 'warning':
+                                $iconClass = 'fa-exclamation-triangle';
+                                $notifClass = 'warning';
+                                break;
+                            case 'promotion':
+                                $iconClass = 'fa-gift';
+                                $notifClass = 'promotion';
+                                break;
+                            case 'maintenance':
+                                $iconClass = 'fa-tools';
+                                $notifClass = 'maintenance';
+                                break;
+                            default:
+                                $iconClass = 'fa-info-circle';
+                                $notifClass = 'info';
+                        }
+                    ?>
+                    <div class="notification-card <?php echo $notifClass; ?>">
+                        <div class="notification-icon">
+                            <i class="fas <?php echo $iconClass; ?>"></i>
+                        </div>
+                        <div class="notification-content">
+                            <h3><?php echo htmlspecialchars($notification['tieuDe']); ?></h3>
+                            <p><?php echo htmlspecialchars($notification['noiDung']); ?></p>
+                            <span class="notification-time">
+                                <i class="far fa-clock"></i>
+                                <?php 
+                                    $time = strtotime($notification['thoiDiemGui'] ?? $notification['thoiDiemTao']);
+                                    $now = time();
+                                    $diff = $now - $time;
+                                    if ($diff < 3600) {
+                                        echo floor($diff / 60) . ' phút trước';
+                                    } elseif ($diff < 86400) {
+                                        echo floor($diff / 3600) . ' giờ trước';
+                                    } else {
+                                        echo date('d/m/Y', $time);
+                                    }
+                                ?>
+                            </span>
+                        </div>
                     </div>
-                    <div class="notification-content">
-                        <h3><?php echo htmlspecialchars($notification['tieuDe']); ?></h3>
-                        <p><?php echo htmlspecialchars($notification['noiDung']); ?></p>
-                        <span class="notification-time">
-                            <i class="far fa-clock"></i>
-                            <?php 
-                                $time = strtotime($notification['thoiDiemGui'] ?? $notification['thoiDiemTao']);
-                                $now = time();
-                                $diff = $now - $time;
-                                
-                                if ($diff < 3600) {
-                                    echo floor($diff / 60) . ' phút trước';
-                                } elseif ($diff < 86400) {
-                                    echo floor($diff / 3600) . ' giờ trước';
-                                } else {
-                                    echo date('d/m/Y', $time);
-                                }
-                            ?>
-                        </span>
-                    </div>
-                </div>
-            <?php endforeach; ?>
+                <?php endforeach; ?>
+            </div>
+            <div class="carousel-controls">
+                <button id="carouselPrev" class="carousel-btn">&#10094;</button>
+                <button id="carouselNext" class="carousel-btn">&#10095;</button>
+            </div>
         </div>
     </section>
+    </div>
+    <script>
+    // Carousel/slider for notifications
+    document.addEventListener('DOMContentLoaded', function() {
+        const carousel = document.getElementById('notificationsCarousel');
+        const cards = carousel ? carousel.querySelectorAll('.notification-card') : [];
+        let current = 0;
+        const prevBtn = document.getElementById('carouselPrev');
+        const nextBtn = document.getElementById('carouselNext');
+        function showCard(idx) {
+            cards.forEach((card, i) => {
+                // Hiển thị 2 card liên tiếp
+                if (cards.length === 1) {
+                    card.style.display = (i === idx) ? 'block' : 'none';
+                } else {
+                    card.style.display = (i === idx || i === (idx + 1) % cards.length) ? 'block' : 'none';
+                }
+            });
+        }
+        let repeatCount = 0;
+        function nextCard() {
+            repeatCount++;
+            if (repeatCount < 2) {
+                showCard(current);
+            } else {
+                repeatCount = 0;
+                // Tăng current lên 1 (bước nhảy 1, luôn hiển thị 2 card liên tiếp)
+                current = (current + 1) % cards.length;
+                showCard(current);
+            }
+        }
+        function prevCard() {
+            repeatCount = 0;
+            current = (current - 1 + cards.length) % cards.length;
+            showCard(current);
+        }
+        if (cards.length > 0) {
+            showCard(current);
+            if (nextBtn && prevBtn) {
+                nextBtn.onclick = nextCard;
+                prevBtn.onclick = prevCard;
+            }
+            setInterval(nextCard, 3000); // Auto slide every 3s, hiển thị 2 thông báo cùng lúc
+        }
+    });
+    </script>
     <?php endif; ?>
 
     <!-- Profiles Section -->
@@ -418,6 +458,11 @@ $infoMessage = Session::getFlash('info_message');
         </div>
 
     </section>
+    <div class="reload-btn-wrapper">
+        <button onclick="window.location.reload();" class="btn-reload">
+            Làm mới danh sách hồ sơ
+        </button>
+    </div>
 
     <!-- VIP Upgrade Section -->
     <section class="vip-upgrade-section">
@@ -461,6 +506,8 @@ $infoMessage = Session::getFlash('info_message');
                     <p>Xuất hiện nhiều hơn với người dùng khác</p>
                 </div>
             </div>
+            <!-- Reload Button Section -->
+       
 
             <div class="vip-pricing-section">
                 <h3 class="pricing-title">Chọn gói phù hợp với bạn</h3>

@@ -104,7 +104,7 @@ $successMessage = Session::getFlash('register_success');
                         placeholder="Nhập email hoặc số điện thoại"
                         value="<?php echo isset($formData['email']) ? htmlspecialchars($formData['email']) : ''; ?>"
                         required
-                        pattern="(?:(?:032|033|034|035|036|037|038|039|096|097|098|081|082|083|084|085|091|094|070|076|077|078|079|090|093)\\d{7})|(?:[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})"
+                        autocomplete="off"
                     >
                 </div>
                 <span class="error-message">Vui lòng nhập email hợp lệ hoặc số điện thoại hợp lệ</span>
