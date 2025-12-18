@@ -17,7 +17,7 @@ class MatchModel {
         $userB = max($userId1, $userId2);
         
         $stmt = $this->conn->prepare("
-            SELECT maGhepDoi FROM GhepDoi 
+            SELECT maGhepDoi FROM ghepdoi 
             WHERE maNguoiA = ? AND maNguoiB = ?
             AND trangThaiGhepDoi = 'matched'
         ");
@@ -55,7 +55,7 @@ class MatchModel {
         try {
             // Kiểm tra đã match chưa (với lock để tránh race condition)
             $checkStmt = $this->conn->prepare("
-                SELECT maGhepDoi FROM GhepDoi 
+                SELECT maGhepDoi FROM ghepdoi 
                 WHERE maNguoiA = ? AND maNguoiB = ?
                 AND trangThaiGhepDoi = 'matched'
                 FOR UPDATE
@@ -78,7 +78,7 @@ class MatchModel {
             
             // Insert record ghép đôi (luôn đảm bảo maNguoiA < maNguoiB)
             $stmt = $this->conn->prepare("
-                INSERT INTO GhepDoi (maNguoiA, maNguoiB, trangThaiGhepDoi) 
+                INSERT INTO ghepdoi (maNguoiA, maNguoiB, trangThaiGhepDoi) 
                 VALUES (?, ?, 'matched')
             ");
             $stmt->bind_param("ii", $userA, $userB);
@@ -106,7 +106,7 @@ class MatchModel {
         $userB = max($userId1, $userId2);
         
         $stmt = $this->conn->prepare("
-            SELECT maGhepDoi FROM GhepDoi 
+            SELECT maGhepDoi FROM ghepdoi 
             WHERE maNguoiA = ? AND maNguoiB = ?
             AND trangThaiGhepDoi = 'matched'
         ");
@@ -136,8 +136,8 @@ class MatchModel {
                 h.avt,
                 h.ngaySinh,
                 h.noiSong
-            FROM GhepDoi g
-            JOIN HoSo h ON (
+            FROM ghepdoi g
+            JOIN hoso h ON (
                 CASE 
                     WHEN g.maNguoiA = ? THEN g.maNguoiB 
                     ELSE g.maNguoiA 
@@ -178,7 +178,7 @@ class MatchModel {
         try {
             // Bước 1: Lấy ID ghép đôi để xóa tin nhắn
             $stmt = $this->conn->prepare("
-                SELECT maGhepDoi FROM GhepDoi 
+                SELECT maGhepDoi FROM ghepdoi 
                 WHERE maNguoiA = ? AND maNguoiB = ?
                 AND trangThaiGhepDoi = 'matched'
             ");
@@ -192,7 +192,7 @@ class MatchModel {
             // Bước 2: XÓA TẤT CẢ TIN NHẮN của cuộc trò chuyện này
             if ($matchId) {
                 $stmt = $this->conn->prepare("
-                    DELETE FROM TinNhan 
+                    DELETE FROM tinnhan 
                     WHERE maGhepDoi = ?
                 ");
                 $stmt->bind_param("i", $matchId);
@@ -206,7 +206,7 @@ class MatchModel {
             // Bước 3: Xóa tất cả lượt thích giữa 2 người (cả 2 chiều)
             // Điều này làm cho hồ sơ biến mất khỏi danh sách "Người thích bạn"
             $stmt = $this->conn->prepare("
-                DELETE FROM Thich 
+                DELETE FROM thich 
                 WHERE (maNguoiThich = ? AND maNguoiDuocThich = ?)
                 OR (maNguoiThich = ? AND maNguoiDuocThich = ?)
             ");
@@ -217,7 +217,7 @@ class MatchModel {
             // Bước 4: XÓA RECORD ghép đôi thay vì UPDATE
             // (Do có UNIQUE constraint trên (maNguoiA, maNguoiB, trangThaiGhepDoi))
             $stmt = $this->conn->prepare("
-                DELETE FROM GhepDoi 
+                DELETE FROM ghepdoi 
                 WHERE maNguoiA = ? AND maNguoiB = ?
                 AND trangThaiGhepDoi = 'matched'
             ");
@@ -249,7 +249,7 @@ class MatchModel {
         $userB = max($userId1, $userId2);
         
         $stmt = $this->conn->prepare("
-            UPDATE GhepDoi 
+            UPDATE ghepdoi 
             SET trangThaiGhepDoi = ?
             WHERE maNguoiA = ? AND maNguoiB = ?
             AND trangThaiGhepDoi = 'matched'
@@ -264,7 +264,7 @@ class MatchModel {
      */
     public function isMatchMember($matchId, $userId) {
         $stmt = $this->conn->prepare("
-            SELECT maGhepDoi FROM GhepDoi
+            SELECT maGhepDoi FROM ghepdoi
             WHERE maGhepDoi = ?
             AND (maNguoiA = ? OR maNguoiB = ?)
             AND trangThaiGhepDoi = 'matched'

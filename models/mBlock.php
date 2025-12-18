@@ -19,7 +19,7 @@ class Block {
         }
         
         $stmt = $this->conn->prepare("
-            INSERT INTO ChanNguoiDung (maNguoiChan, maNguoiBiChan)
+            INSERT INTO channguoidung (maNguoiChan, maNguoiBiChan)
             VALUES (?, ?)
         ");
         $stmt->bind_param("ii", $blockerId, $blockedId);
@@ -35,7 +35,7 @@ class Block {
         try {
             // 1. Block user
             $stmt = $this->conn->prepare("
-                INSERT INTO ChanNguoiDung (maNguoiChan, maNguoiBiChan)
+                INSERT INTO channguoidung (maNguoiChan, maNguoiBiChan)
                 VALUES (?, ?)
             ");
             $stmt->bind_param("ii", $blockerId, $blockedId);
@@ -47,7 +47,7 @@ class Block {
             $userB = max($blockerId, $blockedId);
             
             $stmt = $this->conn->prepare("
-                UPDATE GhepDoi 
+                UPDATE ghepdoi 
                 SET trangThaiGhepDoi = 'blocked'
                 WHERE maNguoiA = ? AND maNguoiB = ?
                 AND trangThaiGhepDoi = 'matched'
@@ -58,7 +58,7 @@ class Block {
             
             // 3. Xóa tất cả lượt thích (2 chiều)
             $stmt = $this->conn->prepare("
-                DELETE FROM Thich 
+                DELETE FROM thich 
                 WHERE (maNguoiThich = ? AND maNguoiDuocThich = ?)
                 OR (maNguoiThich = ? AND maNguoiDuocThich = ?)
             ");
@@ -81,7 +81,7 @@ class Block {
      */
     public function unblockUser($blockerId, $blockedId) {
         $stmt = $this->conn->prepare("
-            DELETE FROM ChanNguoiDung
+            DELETE FROM channguoidung
             WHERE maNguoiChan = ? AND maNguoiBiChan = ?
         ");
         $stmt->bind_param("ii", $blockerId, $blockedId);
@@ -93,7 +93,7 @@ class Block {
      */
     public function isBlocked($blockerId, $blockedId) {
         $stmt = $this->conn->prepare("
-            SELECT id FROM ChanNguoiDung
+            SELECT id FROM channguoidung
             WHERE maNguoiChan = ? AND maNguoiBiChan = ?
         ");
         $stmt->bind_param("ii", $blockerId, $blockedId);
@@ -107,7 +107,7 @@ class Block {
      */
     public function isBlockedEitherWay($userId1, $userId2) {
         $stmt = $this->conn->prepare("
-            SELECT id FROM ChanNguoiDung
+            SELECT id FROM channguoidung
             WHERE (maNguoiChan = ? AND maNguoiBiChan = ?)
             OR (maNguoiChan = ? AND maNguoiBiChan = ?)
         ");
@@ -123,8 +123,8 @@ class Block {
     public function getBlockedUsers($userId) {
         $stmt = $this->conn->prepare("
             SELECT h.*, c.thoiDiemChan
-            FROM ChanNguoiDung c
-            JOIN HoSo h ON c.maNguoiBiChan = h.maNguoiDung
+            FROM channguoidung c
+            JOIN hoso h ON c.maNguoiBiChan = h.maNguoiDung
             WHERE c.maNguoiChan = ?
             ORDER BY c.thoiDiemChan DESC
         ");
@@ -144,7 +144,7 @@ class Block {
      */
     public function getBlockedUserIds($userId) {
         $stmt = $this->conn->prepare("
-            SELECT maNguoiBiChan FROM ChanNguoiDung
+            SELECT maNguoiBiChan FROM channguoidung
             WHERE maNguoiChan = ?
         ");
         $stmt->bind_param("i", $userId);

@@ -112,7 +112,7 @@ $matches = $matchModel->getMyMatches($userId);
                         </p>
                     </div>
                     <div class="match-actions">
-                        <a href="../nhantin/chat.php?matchId=<?php echo $match['maGhepDoi']; ?>" 
+                        <a href="../nhantin/message.php?matchId=<?php echo $match['maGhepDoi']; ?>" 
                            class="btn-chat"
                            onclick="event.stopPropagation();">
                             <i class="fas fa-comment"></i> Nhắn tin

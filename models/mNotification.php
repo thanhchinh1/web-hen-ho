@@ -16,8 +16,8 @@ class Notification {
     public function getNewMatchesCount($userId) {
         $stmt = $this->conn->prepare("
             SELECT COUNT(DISTINCT g.maGhepDoi) as newMatchCount
-            FROM GhepDoi g
-            LEFT JOIN TinNhan t ON g.maGhepDoi = t.maGhepDoi
+            FROM ghepdoi g
+            LEFT JOIN tinnhan t ON g.maGhepDoi = t.maGhepDoi
             WHERE (g.maNguoiA = ? OR g.maNguoiB = ?)
             AND g.trangThaiGhepDoi = 'matched'
             AND t.maTinNhan IS NULL
@@ -52,9 +52,9 @@ class Notification {
                 END as maNguoiDung,
                 h.ten,
                 h.avt
-            FROM GhepDoi g
-            LEFT JOIN TinNhan t ON g.maGhepDoi = t.maGhepDoi
-            JOIN HoSo h ON (
+            FROM ghepdoi g
+            LEFT JOIN tinnhan t ON g.maGhepDoi = t.maGhepDoi
+            JOIN hoso h ON (
                 CASE 
                     WHEN g.maNguoiA = ? THEN g.maNguoiB 
                     ELSE g.maNguoiA 

@@ -104,7 +104,7 @@ if (is_array($loginResult) && $loginResult['status'] === 'success') {
                         Session::setFlash('success_message', 'Ghép đôi thành công!  Bạn và người này đã thích nhau!');
                         Session::setFlash('match_id', $matchId);
                         Session::setFlash('matched_user_id', $targetUserId);
-                        header('Location: ../views/nhantin/chat.php?match=' . $matchId);
+                        header('Location: ../views/nhantin/message.php?match=' . $matchId);
                         exit;
                     }
                 }

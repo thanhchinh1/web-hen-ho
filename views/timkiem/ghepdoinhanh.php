@@ -526,7 +526,7 @@ if (!$vipModel->isVIP($userId)) {
 
         function openChat() {
             if (matchId) {
-                window.location.href = '../nhantin/chat.php?matchId=' + matchId;
+                window.location.href = '../nhantin/message.php?matchId=' + matchId;
             }
         }
     </script>

@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 require_once '../../models/mSession.php';
 require_once '../../models/mProfile.php';
 require_once '../../models/mLike.php';
@@ -208,7 +211,7 @@ $infoMessage = Session::getFlash('info_message');
                         <i class="fas fa-home"></i>
                         Trang chủ
                     </a>
-                    <a href="../nhantin/chat.php" class="nav-link">
+                    <a href="../nhantin/message.php" class="nav-link">
                         <i class="fas fa-comment"></i>
                         Tin nhắn
                         <?php if ($newMatchesCount > 0): ?>
@@ -1080,7 +1083,7 @@ $infoMessage = Session::getFlash('info_message');
                         
                         // Chuyển đến trang chat sau 2 giây
                         setTimeout(() => {
-                            window.location.href = '../../views/nhantin/chat.php?matchId=' + data.matchId;
+                            window.location.href = '../../views/nhantin/message.php?matchId=' + data.matchId;
                         }, 2000);
                     } else {
                         // Chỉ thích thôi, chưa ghép đôi

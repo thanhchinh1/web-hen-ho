@@ -75,7 +75,7 @@ if ($action === 'like_back') {
                     'matched' => true,
                     'message' => 'Ghép đôi thành công! 💕',
                     'matchId' => $matchId,
-                    'redirect' => '/views/nhantin/chat.php?match=' . $matchId
+                    'redirect' => '/views/nhantin/message.php?match=' . $matchId
                 ]);
                 exit;
             }

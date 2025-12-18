@@ -14,7 +14,7 @@ class VIP {
      */
     public function isVIP($userId) {
         $stmt = $this->conn->prepare("
-            SELECT * FROM GoiDangKy 
+            SELECT * FROM goidangky 
             WHERE maNguoiDung = ? 
             AND loaiGoi = 'VIP' 
             AND trangThaiGoi = 'Active'
@@ -31,7 +31,7 @@ class VIP {
      */
     public function getCurrentVIPPackage($userId) {
         $stmt = $this->conn->prepare("
-            SELECT * FROM GoiDangKy 
+            SELECT * FROM goidangky 
             WHERE maNguoiDung = ? 
             AND loaiGoi = 'VIP' 
             AND trangThaiGoi = 'Active'
@@ -60,7 +60,7 @@ class VIP {
         $ngayHetHan = date('Y-m-d', strtotime("+$months months"));
         
         $stmt = $this->conn->prepare("
-            INSERT INTO GoiDangKy (maNguoiDung, loaiGoi, trangThaiGoi, ngayHetHan, thoiDiemTao)
+            INSERT INTO goidangky (maNguoiDung, loaiGoi, trangThaiGoi, ngayHetHan, thoiDiemTao)
             VALUES (?, 'VIP', 'Active', ?, NOW())
         ");
         $stmt->bind_param("is", $userId, $ngayHetHan);
@@ -90,7 +90,7 @@ class VIP {
         }
         
         $stmt = $this->conn->prepare("
-            UPDATE GoiDangKy 
+            UPDATE goidangky 
             SET ngayHetHan = ?, trangThaiGoi = 'Active'
             WHERE maGoiDangKy = ?
         ");
@@ -104,7 +104,7 @@ class VIP {
      */
     public function createPayment($userId, $amount) {
         $stmt = $this->conn->prepare("
-            INSERT INTO ThanhToan (maNguoiThanhToan, soTien, thoiDiemThanhToan)
+            INSERT INTO thanhtoan (maNguoiThanhToan, soTien, thoiDiemThanhToan)
             VALUES (?, ?, NOW())
         ");
         $stmt->bind_param("id", $userId, $amount);
@@ -117,7 +117,7 @@ class VIP {
      */
     public function getPaymentHistory($userId, $limit = 10) {
         $stmt = $this->conn->prepare("
-            SELECT * FROM ThanhToan 
+            SELECT * FROM thanhtoan 
             WHERE maNguoiThanhToan = ?
             ORDER BY thoiDiemThanhToan DESC
             LIMIT ?
@@ -139,7 +139,7 @@ class VIP {
      */
     public function updateExpiredPackages() {
         $stmt = $this->conn->prepare("
-            UPDATE GoiDangKy 
+            UPDATE goidangky 
             SET trangThaiGoi = 'Expired'
             WHERE trangThaiGoi = 'Active' 
             AND loaiGoi = 'VIP'

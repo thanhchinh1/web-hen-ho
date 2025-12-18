@@ -104,7 +104,7 @@ if ($likeModel->hasLiked($userId, $targetUserId)) {
                     'action' => 'liked',
                     'matched' => true,
                     'matchId' => $matchId,
-                    'redirect' => '/views/nhantin/chat.php?match=' . $matchId
+                    'redirect' => '/views/nhantin/message.php?match=' . $matchId
                 ]);
                 exit;
             }

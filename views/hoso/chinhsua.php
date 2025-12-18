@@ -65,7 +65,7 @@ $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt
                         <i class="fas fa-home"></i>
                         <span>Trang chủ</span>
                     </a>
-                    <a href="../nhantin/chat.php" class="menu-item">
+                    <a href="../nhantin/message.php" class="menu-item">
                         <i class="fas fa-comments"></i>
                         <span>Tin nhắn</span>
                     </a>

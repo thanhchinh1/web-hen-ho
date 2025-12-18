@@ -18,7 +18,7 @@ class Like {
             return false; // Đã thích rồi
         }
         
-        $stmt = $this->conn->prepare("INSERT INTO Thich (maNguoiThich, maNguoiDuocThich) VALUES (?, ?)");
+        $stmt = $this->conn->prepare("INSERT INTO thich (maNguoiThich, maNguoiDuocThich) VALUES (?, ?)");
         $stmt->bind_param("ii", $fromUserId, $toUserId);
         return $stmt->execute();
     }
@@ -27,7 +27,7 @@ class Like {
      * Bỏ thích một người dùng
      */
     public function unlikeUser($fromUserId, $toUserId) {
-        $stmt = $this->conn->prepare("DELETE FROM Thich WHERE maNguoiThich = ? AND maNguoiDuocThich = ?");
+        $stmt = $this->conn->prepare("DELETE FROM thich WHERE maNguoiThich = ? AND maNguoiDuocThich = ?");
         $stmt->bind_param("ii", $fromUserId, $toUserId);
         return $stmt->execute();
     }
@@ -36,7 +36,7 @@ class Like {
      * Kiểm tra xem đã thích chưa
      */
     public function hasLiked($fromUserId, $toUserId) {
-        $stmt = $this->conn->prepare("SELECT maThich FROM Thich WHERE maNguoiThich = ? AND maNguoiDuocThich = ?");
+        $stmt = $this->conn->prepare("SELECT maThich FROM thich WHERE maNguoiThich = ? AND maNguoiDuocThich = ?");
         $stmt->bind_param("ii", $fromUserId, $toUserId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -49,9 +49,9 @@ class Like {
     public function getPeopleLikedByUser($userId) {
         $stmt = $this->conn->prepare("
             SELECT h.*, n.maNguoiDung, t.thoiDiemThich
-            FROM Thich t
-            INNER JOIN HoSo h ON t.maNguoiDuocThich = h.maNguoiDung
-            INNER JOIN NguoiDung n ON h.maNguoiDung = n.maNguoiDung
+            FROM thich t
+            INNER JOIN hoso h ON t.maNguoiDuocThich = h.maNguoiDung
+            INNER JOIN nguoidung n ON h.maNguoiDung = n.maNguoiDung
             WHERE t.maNguoiThich = ?
             ORDER BY t.thoiDiemThich DESC
         ");
@@ -73,9 +73,9 @@ class Like {
     public function getPeopleWhoLikedUser($userId) {
         $stmt = $this->conn->prepare("
             SELECT h.*, n.maNguoiDung, t.thoiDiemThich
-            FROM Thich t
-            INNER JOIN HoSo h ON t.maNguoiThich = h.maNguoiDung
-            INNER JOIN NguoiDung n ON h.maNguoiDung = n.maNguoiDung
+            FROM thich t
+            INNER JOIN hoso h ON t.maNguoiThich = h.maNguoiDung
+            INNER JOIN nguoidung n ON h.maNguoiDung = n.maNguoiDung
             WHERE t.maNguoiDuocThich = ?
             ORDER BY t.thoiDiemThich DESC
         ");
@@ -95,7 +95,7 @@ class Like {
      * Lấy danh sách ID người mà user đã thích (để lọc khỏi trang chủ)
      */
     public function getLikedUserIds($userId) {
-        $stmt = $this->conn->prepare("SELECT maNguoiDuocThich FROM Thich WHERE maNguoiThich = ?");
+        $stmt = $this->conn->prepare("SELECT maNguoiDuocThich FROM thich WHERE maNguoiThich = ?");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -112,7 +112,7 @@ class Like {
      * Lấy danh sách ID người đã thích user (để lọc khỏi trang chủ)
      */
     public function getUserIdsWhoLikedMe($userId) {
-        $stmt = $this->conn->prepare("SELECT maNguoiThich FROM Thich WHERE maNguoiDuocThich = ?");
+        $stmt = $this->conn->prepare("SELECT maNguoiThich FROM thich WHERE maNguoiDuocThich = ?");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -129,7 +129,7 @@ class Like {
      * Đếm số người đã thích user
      */
     public function countPeopleWhoLikedUser($userId) {
-        $stmt = $this->conn->prepare("SELECT COUNT(*) as total FROM Thich WHERE maNguoiDuocThich = ?");
+        $stmt = $this->conn->prepare("SELECT COUNT(*) as total FROM thich WHERE maNguoiDuocThich = ?");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -141,7 +141,7 @@ class Like {
      * Đếm số người mà user đã thích
      */
     public function countPeopleLikedByUser($userId) {
-        $stmt = $this->conn->prepare("SELECT COUNT(*) as total FROM Thich WHERE maNguoiThich = ?");
+        $stmt = $this->conn->prepare("SELECT COUNT(*) as total FROM thich WHERE maNguoiThich = ?");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result = $stmt->get_result();

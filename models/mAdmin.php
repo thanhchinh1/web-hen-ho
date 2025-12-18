@@ -15,7 +15,7 @@ class Admin {
     public function login($username, $password) {
         $stmt = $this->conn->prepare("
             SELECT maAdmin, matKhau, hoTen, vaiTro, trangThai
-            FROM Admin
+            FROM admin
             WHERE tenDangNhap = ?
         ");
         $stmt->bind_param("s", $username);
@@ -40,7 +40,7 @@ class Admin {
         
         // Cập nhật lần đăng nhập cuối
         $stmt = $this->conn->prepare("
-            UPDATE Admin 
+            UPDATE admin 
             SET lanDangNhapCuoi = NOW()
             WHERE maAdmin = ?
         ");
@@ -59,7 +59,7 @@ class Admin {
     public function getAdminInfo($adminId) {
         $stmt = $this->conn->prepare("
             SELECT maAdmin, tenDangNhap, hoTen, email, soDienThoai, vaiTro, lanDangNhapCuoi
-            FROM Admin
+            FROM admin
             WHERE maAdmin = ?
         ");
         $stmt->bind_param("i", $adminId);
@@ -73,7 +73,7 @@ class Admin {
      */
     public function changePassword($adminId, $oldPassword, $newPassword) {
         // Lấy mật khẩu hiện tại
-        $stmt = $this->conn->prepare("SELECT matKhau FROM Admin WHERE maAdmin = ?");
+        $stmt = $this->conn->prepare("SELECT matKhau FROM admin WHERE maAdmin = ?");
         $stmt->bind_param("i", $adminId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -89,7 +89,7 @@ class Admin {
         
         // Update
         $stmt = $this->conn->prepare("
-            UPDATE Admin 
+            UPDATE admin 
             SET matKhau = ?
             WHERE maAdmin = ?
         ");

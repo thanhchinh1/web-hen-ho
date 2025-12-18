@@ -21,7 +21,7 @@ class QuickMatch {
         
         // CẬP NHẬT thời gian hoạt động cuối để đánh dấu user đang online
         $updateStmt = $this->conn->prepare("
-            UPDATE NguoiDung 
+            UPDATE nguoidung 
             SET lanHoatDongCuoi = NOW() 
             WHERE maNguoiDung = ?
         ");
@@ -30,7 +30,7 @@ class QuickMatch {
         
         // Tạo yêu cầu tìm kiếm mới
         $stmt = $this->conn->prepare("
-            INSERT INTO TimKiemGhepDoi (maNguoiDung, trangThai, thoiDiemBatDau) 
+            INSERT INTO timkiemghepdoi (maNguoiDung, trangThai, thoiDiemBatDau) 
             VALUES (?, 'searching', NOW())
         ");
         $stmt->bind_param("i", $userId);
@@ -50,7 +50,7 @@ class QuickMatch {
     public function cancelSearching($userId) {
         // XÓA HOÀN TOÀN bản ghi thay vì chỉ update trạng thái
         $stmt = $this->conn->prepare("
-            DELETE FROM TimKiemGhepDoi 
+            DELETE FROM timkiemghepdoi
             WHERE maNguoiDung = ? AND trangThai = 'searching'
         ");
         $stmt->bind_param("i", $userId);
@@ -63,7 +63,7 @@ class QuickMatch {
     public function getSearchStatus($userId) {
         $stmt = $this->conn->prepare("
             SELECT maTimKiem, trangThai, thoiDiemBatDau 
-            FROM TimKiemGhepDoi 
+            FROM timkiemghepdoi 
             WHERE maNguoiDung = ? AND trangThai = 'searching'
             ORDER BY thoiDiemBatDau DESC 
             LIMIT 1
@@ -85,9 +85,9 @@ class QuickMatch {
         // KHÔNG tìm người online bình thường
         $stmt = $this->conn->prepare("
             SELECT DISTINCT tk.maNguoiDung 
-            FROM TimKiemGhepDoi tk
-            INNER JOIN HoSo h ON tk.maNguoiDung = h.maNguoiDung
-            INNER JOIN NguoiDung n ON tk.maNguoiDung = n.maNguoiDung
+            FROM timkiemghepdoi tk
+            INNER JOIN hoso h ON tk.maNguoiDung = h.maNguoiDung
+            INNER JOIN nguoidung n ON tk.maNguoiDung = n.maNguoiDung
             WHERE tk.trangThai = 'searching'
             AND n.trangThaiNguoiDung = 'active'
             AND tk.maNguoiDung != ?
@@ -156,7 +156,7 @@ class QuickMatch {
         
         // Người đã chặn
         $stmt = $this->conn->prepare("
-            SELECT maNguoiBiChan FROM ChanNguoiDung WHERE maNguoiChan = ?
+            SELECT maNguoiBiChan FROM channguoidung WHERE maNguoiChan = ?
         ");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
@@ -167,7 +167,7 @@ class QuickMatch {
         
         // Người đã bị chặn mình
         $stmt = $this->conn->prepare("
-            SELECT maNguoiChan FROM ChanNguoiDung WHERE maNguoiBiChan = ?
+            SELECT maNguoiChan FROM channguoidung WHERE maNguoiBiChan = ?
         ");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
@@ -178,9 +178,9 @@ class QuickMatch {
         
         // Người đã match (chỉ loại người đã match thành công)
         $stmt = $this->conn->prepare("
-            SELECT maNguoiB FROM GhepDoi WHERE maNguoiA = ? AND trangThaiGhepDoi = 'matched'
+            SELECT maNguoiB FROM ghepdoi WHERE maNguoiA = ? AND trangThaiGhepDoi = 'matched'
             UNION
-            SELECT maNguoiA FROM GhepDoi WHERE maNguoiB = ? AND trangThaiGhepDoi = 'matched'
+            SELECT maNguoiA FROM ghepdoi WHERE maNguoiB = ? AND trangThaiGhepDoi = 'matched'
         ");
         $stmt->bind_param("ii", $userId, $userId);
         $stmt->execute();
@@ -200,7 +200,7 @@ class QuickMatch {
         
         // Kiểm tra xem đã có ghép đôi chưa
         $stmt = $this->conn->prepare("
-            SELECT maGhepDoi FROM GhepDoi 
+            SELECT maGhepDoi FROM ghepdoi 
             WHERE ((maNguoiA = ? AND maNguoiB = ?) OR (maNguoiA = ? AND maNguoiB = ?))
             AND trangThaiGhepDoi = 'matched'
             LIMIT 1
@@ -228,7 +228,7 @@ class QuickMatch {
         
         // Tạo ghép đôi mới
         $stmt = $this->conn->prepare("
-            INSERT INTO GhepDoi (maNguoiA, maNguoiB, thoiDiemGhepDoi, trangThaiGhepDoi) 
+            INSERT INTO ghepdoi (maNguoiA, maNguoiB, thoiDiemGhepDoi, trangThaiGhepDoi) 
             VALUES (?, ?, NOW(), 'matched')
         ");
         $stmt->bind_param("ii", $userId1, $userId2);
@@ -261,7 +261,7 @@ class QuickMatch {
      */
     private function updateSearchStatus($userId, $status) {
         $stmt = $this->conn->prepare("
-            UPDATE TimKiemGhepDoi 
+            UPDATE timkiemghepdoi 
             SET trangThai = ?, thoiDiemKetThuc = NOW() 
             WHERE maNguoiDung = ? AND trangThai = 'searching'
         ");
@@ -276,7 +276,7 @@ class QuickMatch {
         $message = "🎉 Chúc mừng! Bạn đã được ghép đôi với độ phù hợp {$score}%! Hãy bắt đầu cuộc trò chuyện nhé! 💕";
         
         $stmt = $this->conn->prepare("
-            INSERT INTO TinNhan (maGhepDoi, maNguoiGui, noiDung, thoiDiemGui) 
+            INSERT INTO tinnhan (maGhepDoi, maNguoiGui, noiDung, thoiDiemGui) 
             VALUES (?, NULL, ?, NOW())
         ");
         $stmt->bind_param("is", $matchId, $message);
@@ -292,7 +292,7 @@ class QuickMatch {
         // BƯỚC 1: Kiểm tra xem đã có match nào được tạo chưa (do user khác tạo)
         $stmt = $this->conn->prepare("
             SELECT maGhepDoi, maNguoiA, maNguoiB, thoiDiemGhepDoi
-            FROM GhepDoi 
+            FROM ghepdoi 
             WHERE (maNguoiA = ? OR maNguoiB = ?)
             AND trangThaiGhepDoi = 'matched'
             ORDER BY thoiDiemGhepDoi DESC
@@ -355,8 +355,8 @@ class QuickMatch {
         $stmt = $this->conn->prepare("
             SELECT h.*, n.tenDangNhap,
                    TIMESTAMPDIFF(YEAR, h.ngaySinh, CURDATE()) as tuoi
-            FROM HoSo h
-            INNER JOIN NguoiDung n ON h.maNguoiDung = n.maNguoiDung
+            FROM hoso h
+            INNER JOIN nguoidung n ON h.maNguoiDung = n.maNguoiDung
             WHERE h.maNguoiDung = ?
         ");
         $stmt->bind_param("i", $partnerId);
@@ -371,7 +371,7 @@ class QuickMatch {
     public function cleanupOldSearches() {
         // XÓA các bản ghi quá cũ thay vì update
         $stmt = $this->conn->prepare("
-            DELETE FROM TimKiemGhepDoi 
+            DELETE FROM timkiemghepdoi 
             WHERE trangThai = 'searching' 
             AND thoiDiemBatDau < DATE_SUB(NOW(), INTERVAL 5 MINUTE)
         ");

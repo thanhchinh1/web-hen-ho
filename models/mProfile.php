@@ -13,7 +13,7 @@ class Profile {
      * Kiểm tra xem người dùng đã có hồ sơ chưa
      */
     public function hasProfile($userId) {
-        $stmt = $this->conn->prepare("SELECT maHoSo FROM HoSo WHERE maNguoiDung = ?");
+        $stmt = $this->conn->prepare("SELECT maHoSo FROM hoso WHERE maNguoiDung = ?");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -24,7 +24,7 @@ class Profile {
      * Lấy thông tin hồ sơ của người dùng
      */
     public function getProfile($userId) {
-        $stmt = $this->conn->prepare("SELECT * FROM HoSo WHERE maNguoiDung = ?");
+        $stmt = $this->conn->prepare("SELECT * FROM hoso WHERE maNguoiDung = ?");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -41,7 +41,7 @@ class Profile {
         }
         
         $stmt = $this->conn->prepare("
-            INSERT INTO HoSo (
+            INSERT INTO hoso (
                 maNguoiDung, ten, ngaySinh, gioiTinh, tinhTrangHonNhan,
                 canNang, chieuCao, mucTieuPhatTrien, hocVan, noiSong,
                 soThich, moTa, avt
@@ -75,7 +75,7 @@ class Profile {
         // Nếu có avatar mới thì cập nhật, không thì giữ nguyên
         if ($avatarPath) {
             $stmt = $this->conn->prepare("
-                UPDATE HoSo SET
+                UPDATE hoso SET
                     ten = ?,
                     ngaySinh = ?,
                     gioiTinh = ?,
@@ -109,7 +109,7 @@ class Profile {
             );
         } else {
             $stmt = $this->conn->prepare("
-                UPDATE HoSo SET
+                UPDATE hoso SET
                     ten = ?,
                     ngaySinh = ?,
                     gioiTinh = ?,
@@ -160,8 +160,8 @@ class Profile {
         // Đếm tổng số records để tính random offset
         $countQuery = "
             SELECT COUNT(*) as total
-            FROM HoSo h
-            INNER JOIN NguoiDung n ON h.maNguoiDung = n.maNguoiDung
+            FROM hoso h
+            INNER JOIN nguoidung n ON h.maNguoiDung = n.maNguoiDung
             WHERE n.trangThaiNguoiDung = 'active'
             $excludeCondition
         ";
@@ -190,8 +190,8 @@ class Profile {
         // Query với random offset thay vì ORDER BY RAND()
         $query = "
             SELECT h.*, n.maNguoiDung 
-            FROM HoSo h
-            INNER JOIN NguoiDung n ON h.maNguoiDung = n.maNguoiDung
+            FROM hoso h
+            INNER JOIN nguoidung n ON h.maNguoiDung = n.maNguoiDung
             WHERE n.trangThaiNguoiDung = 'active'
             $excludeCondition
             ORDER BY h.maHoSo
@@ -240,8 +240,8 @@ class Profile {
         // Base query
         $sql = "
             SELECT h.*, n.maNguoiDung, n.tenDangNhap
-            FROM HoSo h
-            INNER JOIN NguoiDung n ON h.maNguoiDung = n.maNguoiDung
+            FROM hoso h
+            INNER JOIN nguoidung n ON h.maNguoiDung = n.maNguoiDung
             WHERE n.trangThaiNguoiDung = 'active' AND n.role != 'admin'
         ";
         

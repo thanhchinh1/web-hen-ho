@@ -29,10 +29,10 @@ class clsConnect {
      */
     public function connect() {
         if (self::$connection === null || !self::$connection->ping()) {
-            $host = "localhost";
-            $user = "root";
-            $pass = "";
-            $db = "webhenho";
+            $host = "sql103.infinityfree.com";
+            $user = "if0_40707305";
+            $pass = "hTrwOhfLipP";
+            $db = "if0_40707305_webhenho";
             
             self::$connection = new mysqli($host, $user, $pass, $db);
             

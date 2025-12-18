@@ -102,8 +102,8 @@ class Matching {
         // Query lấy danh sách người dùng phù hợp
         $sql = "
             SELECT h.*, n.maNguoiDung, n.tenDangNhap
-            FROM HoSo h
-            INNER JOIN NguoiDung n ON h.maNguoiDung = n.maNguoiDung
+            FROM hoso h
+            INNER JOIN nguoidung n ON h.maNguoiDung = n.maNguoiDung
             WHERE n.trangThaiNguoiDung = 'active'
             AND n.maNguoiDung NOT IN ($placeholders)
         ";
@@ -144,7 +144,7 @@ class Matching {
         
         // Người đã thích
         $stmt = $this->conn->prepare("
-            SELECT maNguoiDuocThich FROM Thich WHERE maNguoiThich = ?
+            SELECT maNguoiDuocThich FROM thich WHERE maNguoiThich = ?
         ");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
@@ -155,7 +155,7 @@ class Matching {
         
         // Người đã chặn
         $stmt = $this->conn->prepare("
-            SELECT maNguoiBiChan FROM ChanNguoiDung WHERE maNguoiChan = ?
+            SELECT maNguoiBiChan FROM channguoidung WHERE maNguoiChan = ?
         ");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
@@ -172,7 +172,7 @@ class Matching {
      */
     private function getUserProfile($userId) {
         $stmt = $this->conn->prepare("
-            SELECT * FROM HoSo WHERE maNguoiDung = ?
+            SELECT * FROM hoso WHERE maNguoiDung = ?
         ");
         $stmt->bind_param("i", $userId);
         $stmt->execute();

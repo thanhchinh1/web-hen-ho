@@ -14,7 +14,7 @@ class Message {
      */
     public function sendMessage($matchId, $senderId, $content) {
         $stmt = $this->conn->prepare("
-            INSERT INTO TinNhan (maGhepDoi, maNguoiGui, noiDung) 
+            INSERT INTO tinnhan (maGhepDoi, maNguoiGui, noiDung) 
             VALUES (?, ?, ?)
         ");
         $stmt->bind_param("iis", $matchId, $senderId, $content);
@@ -37,8 +37,8 @@ class Message {
                 t.thoiDiemGui,
                 h.ten as tenNguoiGui,
                 h.avt as avtNguoiGui
-            FROM TinNhan t
-            JOIN HoSo h ON t.maNguoiGui = h.maNguoiDung
+            FROM tinnhan t
+            JOIN hoso h ON t.maNguoiGui = h.maNguoiDung
             WHERE t.maGhepDoi = ?
             ORDER BY t.thoiDiemGui DESC
             LIMIT ? OFFSET ?
@@ -62,7 +62,7 @@ class Message {
     public function countMessages($matchId) {
         $stmt = $this->conn->prepare("
             SELECT COUNT(*) as total
-            FROM TinNhan
+            FROM tinnhan
             WHERE maGhepDoi = ?
         ");
         $stmt->bind_param("i", $matchId);
@@ -84,8 +84,8 @@ class Message {
                 t.thoiDiemGui,
                 h.ten as tenNguoiGui,
                 h.avt as avtNguoiGui
-            FROM TinNhan t
-            JOIN HoSo h ON t.maNguoiGui = h.maNguoiDung
+            FROM tinnhan t
+            JOIN hoso h ON t.maNguoiGui = h.maNguoiDung
             WHERE t.maGhepDoi = ? AND t.maTinNhan > ?
             ORDER BY t.thoiDiemGui ASC
         ");
@@ -106,7 +106,7 @@ class Message {
     public function getUnreadCount($matchId, $userId, $lastSeenMessageId = 0) {
         $stmt = $this->conn->prepare("
             SELECT COUNT(*) as unread_count
-            FROM TinNhan
+            FROM tinnhan
             WHERE maGhepDoi = ? 
             AND maNguoiGui != ? 
             AND maTinNhan > ?
@@ -129,8 +129,8 @@ class Message {
                 t.noiDung,
                 t.thoiDiemGui,
                 h.ten as tenNguoiGui
-            FROM TinNhan t
-            JOIN HoSo h ON t.maNguoiGui = h.maNguoiDung
+            FROM tinnhan t
+            JOIN hoso h ON t.maNguoiGui = h.maNguoiDung
             WHERE t.maGhepDoi = ?
             ORDER BY t.thoiDiemGui DESC
             LIMIT 1

@@ -29,7 +29,7 @@ class Report {
         try {
             // Thêm báo cáo
             $stmt = $this->conn->prepare("
-                INSERT INTO BaoCao (maNguoiBaoCao, maNguoiBiBaoCao, lyDoBaoCao, loaiBaoCao)
+                INSERT INTO baocao (maNguoiBaoCao, maNguoiBiBaoCao, lyDoBaoCao, loaiBaoCao)
                 VALUES (?, ?, ?, ?)
             ");
             $stmt->bind_param("iiss", $reporterId, $reportedId, $reason, $type);
@@ -45,7 +45,7 @@ class Report {
             $accountLocked = false;
             if ($reportCount >= 5) {
                 $stmt = $this->conn->prepare("
-                    UPDATE NguoiDung 
+                    UPDATE nguoidung 
                     SET trangThai = 'locked'
                     WHERE maNguoiDung = ?
                 ");
@@ -75,7 +75,7 @@ class Report {
      */
     public function hasReportedRecently($reporterId, $reportedId, $days = 30) {
         $stmt = $this->conn->prepare("
-            SELECT maBaoCao FROM BaoCao
+            SELECT maBaoCao FROM baocao
             WHERE maNguoiBaoCao = ? 
             AND maNguoiBiBaoCao = ?
             AND thoiDiemBaoCao >= DATE_SUB(NOW(), INTERVAL ? DAY)
@@ -92,8 +92,8 @@ class Report {
     public function getReportsByUser($reporterId) {
         $stmt = $this->conn->prepare("
             SELECT b.*, h.ten as tenNguoiBiBaoCao, h.avt
-            FROM BaoCao b
-            JOIN HoSo h ON b.maNguoiBiBaoCao = h.maNguoiDung
+            FROM baocao b
+            JOIN hoso h ON b.maNguoiBiBaoCao = h.maNguoiDung
             WHERE b.maNguoiBaoCao = ?
             ORDER BY b.thoiDiemBaoCao DESC
         ");
@@ -114,8 +114,8 @@ class Report {
     public function getReportsAgainstUser($userId) {
         $stmt = $this->conn->prepare("
             SELECT b.*, h.ten as tenNguoiBaoCao
-            FROM BaoCao b
-            JOIN HoSo h ON b.maNguoiBaoCao = h.maNguoiDung
+            FROM baocao b
+            JOIN hoso h ON b.maNguoiBaoCao = h.maNguoiDung
             WHERE b.maNguoiBiBaoCao = ?
             ORDER BY b.thoiDiemBaoCao DESC
         ");
@@ -135,7 +135,7 @@ class Report {
      */
     public function countReportsAgainstUser($userId) {
         $stmt = $this->conn->prepare("
-            SELECT COUNT(*) as total FROM BaoCao
+            SELECT COUNT(*) as total FROM baocao
             WHERE maNguoiBiBaoCao = ?
         ");
         $stmt->bind_param("i", $userId);
@@ -156,11 +156,11 @@ class Report {
                    h2.ten as reported_name,
                    nd2.tenDangNhap as reported_username,
                    h2.avt as reported_avatar
-            FROM BaoCao b
-            LEFT JOIN HoSo h1 ON b.maNguoiBaoCao = h1.maNguoiDung
-            LEFT JOIN NguoiDung nd1 ON b.maNguoiBaoCao = nd1.maNguoiDung
-            LEFT JOIN HoSo h2 ON b.maNguoiBiBaoCao = h2.maNguoiDung
-            LEFT JOIN NguoiDung nd2 ON b.maNguoiBiBaoCao = nd2.maNguoiDung
+            FROM baocao b
+            LEFT JOIN hoso h1 ON b.maNguoiBaoCao = h1.maNguoiDung
+            LEFT JOIN nguoidung nd1 ON b.maNguoiBaoCao = nd1.maNguoiDung
+            LEFT JOIN hoso h2 ON b.maNguoiBiBaoCao = h2.maNguoiDung
+            LEFT JOIN nguoidung nd2 ON b.maNguoiBiBaoCao = nd2.maNguoiDung
         ";
         
         if ($status !== 'all') {
@@ -190,12 +190,12 @@ class Report {
     public function getTotalReports($status = 'all') {
         if ($status !== 'all') {
             $stmt = $this->conn->prepare("
-                SELECT COUNT(*) as total FROM BaoCao
+                SELECT COUNT(*) as total FROM baocao
                 WHERE trangThai = ?
             ");
             $stmt->bind_param("s", $status);
         } else {
-            $stmt = $this->conn->prepare("SELECT COUNT(*) as total FROM BaoCao");
+            $stmt = $this->conn->prepare("SELECT COUNT(*) as total FROM baocao");
         }
         
         $stmt->execute();
@@ -210,14 +210,14 @@ class Report {
     public function updateReportStatus($reportId, $status, $adminId = null) {
         if ($adminId) {
             $stmt = $this->conn->prepare("
-                UPDATE BaoCao 
+                UPDATE baocao 
                 SET trangThai = ?, maAdminXuLy = ?
                 WHERE maBaoCao = ?
             ");
             $stmt->bind_param("sii", $status, $adminId, $reportId);
         } else {
             $stmt = $this->conn->prepare("
-                UPDATE BaoCao 
+                UPDATE baocao 
                 SET trangThai = ?
                 WHERE maBaoCao = ?
             ");

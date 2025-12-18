@@ -27,7 +27,7 @@ class RateLimit {
         // Đếm số lần thực hiện action trong window
         $stmt = $this->conn->prepare("
             SELECT COUNT(*) as attempt_count
-            FROM RateLimitLog
+            FROM ratelimitlog
             WHERE maNguoiDung = ? 
             AND action = ? 
             AND thoiDiem >= ?
@@ -56,7 +56,7 @@ class RateLimit {
         }
         
         $stmt = $this->conn->prepare("
-            INSERT INTO RateLimitLog (maNguoiDung, action, ipAddress)
+            INSERT INTO ratelimitlog (maNguoiDung, action, ipAddress)
             VALUES (?, ?, ?)
         ");
         $stmt->bind_param("iss", $userId, $action, $ipAddress);
@@ -71,7 +71,7 @@ class RateLimit {
         
         $stmt = $this->conn->prepare("
             SELECT COUNT(*) as attempt_count
-            FROM RateLimitLog
+            FROM ratelimitlog
             WHERE maNguoiDung = ? 
             AND action = ? 
             AND thoiDiem >= ?
@@ -92,7 +92,7 @@ class RateLimit {
         $cutoffDate = date('Y-m-d H:i:s', time() - ($daysOld * 24 * 60 * 60));
         
         $stmt = $this->conn->prepare("
-            DELETE FROM RateLimitLog
+            DELETE FROM ratelimitlog
             WHERE thoiDiem < ?
         ");
         $stmt->bind_param("s", $cutoffDate);
