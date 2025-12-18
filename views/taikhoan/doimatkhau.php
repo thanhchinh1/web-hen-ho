@@ -77,15 +77,12 @@ $errorMessage = Session::getFlash('error_message');
     </header>
     <!-- Password Wrapper -->
     <div class="password-wrapper">
-        <!-- Back Button -->
-        <button class="back-btn" onclick="window.location.href='../trangchu/index.php'">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-
         <!-- Password Container -->
-        <div class="password-container">
-        <!-- Password Container -->
-        <div class="password-container">
+        <div class="password-container" style="position:relative;">
+            <!-- Back Button -->
+            <button class="back-btn" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
             <!-- Page Header -->
             <div class="page-header">
                 <div class="header-icon">

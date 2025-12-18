@@ -70,15 +70,13 @@ $avatarPath = !empty($profile['avt']) ? $profile['avt'] : 'public/img/default-av
 
     <!-- VIP Wrapper -->
     <div class="vip-wrapper">
-        <!-- Back Button -->
-        <button class="back-btn" onclick="window.location.href='../trangchu/index.php'">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-
         <!-- VIP Container -->
-        <div class="vip-container">
-        <!-- VIP Container -->
-        <div class="vip-container">
+        <div class="vip-container" style="position:relative;">
+            <!-- Back Button -->
+            <button class="back-btn" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            
             <?php if ($isVIP): ?>
             <!-- VIP Status Section -->
             <div class="vip-status-card">
@@ -123,7 +121,6 @@ $avatarPath = !empty($profile['avt']) ? $profile['avt'] : 'public/img/default-av
                         <p>Không giới hạn số lượng like mỗi ngày, tự do khám phá nhiều người hơn</p>
                     </div>
                 </div>
-            </div>
             </div>
             
             <!-- Pricing Section -->

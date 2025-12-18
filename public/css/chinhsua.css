@@ -273,10 +273,10 @@ body {
 /* Back Button */
 .back-btn {
   position: absolute;
-  top: 117px;
-  left: 200px;
-  width: 50px;
-  height: 50px;
+  top: 20px;
+  left: 20px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   background: white;
   border: none;
@@ -288,14 +288,14 @@ body {
   font-size: 20px;
   transition: all 0.3s ease;
   z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .back-btn:hover {
   background: linear-gradient(135deg, #ff6b9d, #ff4d6d);
   color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+  transform: translateX(-3px) translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 107, 157, 0.4), 0 4px 12px rgba(255, 107, 157, 0.2);
 }
 
 .back-btn:active {

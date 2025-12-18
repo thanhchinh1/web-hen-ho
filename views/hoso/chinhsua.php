@@ -86,11 +86,10 @@ $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt
     </header>
 
     <div class="profile-setup-wrapper">
-        <button class="back-btn" onclick="window.history.back()" title="Quay lại">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-        
-        <div class="profile-setup-container">
+        <div class="profile-setup-container" style="position:relative;">
+            <button class="back-btn" onclick="window.history.back()" title="Quay lại">
+                <i class="fas fa-arrow-left"></i>
+            </button>
             <div class="profile-setup-header">
                 <h1>Chỉnh sửa Hồ sơ</h1>
                

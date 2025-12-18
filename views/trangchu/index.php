@@ -222,12 +222,9 @@ $infoMessage = Session::getFlash('info_message');
                         <i class="fas fa-search"></i>
                         Tìm kiếm
                     </a>
-                    <a href="../hotro/index.php" class="nav-link">
-                        <i class="fas fa-headset"></i>
-                        Hỗ trợ
-                        <?php if ($newRepliesCount > 0): ?>
-                            <span class="notification-badge pulse"><?php echo $newRepliesCount; ?></span>
-                        <?php endif; ?>
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-search"></i>
+                        <span>Trợ giúp</span>
                     </a>
                 </nav>
             </div>
@@ -294,8 +291,8 @@ $infoMessage = Session::getFlash('info_message');
         <img src="../../public/img/header1.jpg" alt="1Love - Chỉ một tình yêu" class="hero-bg-image">
         <div class="hero-content">
             <div class="hero-text">
-                <h1>Tìm kiếm một nửa yêu thương của bạn</h1>
-                <p>Kết Nối Yêu Thương là nơi bạn có thể tìm thấy những người phù hợp, chia sẻ sở thích và bắt đầu những câu chuyện tình yêu đẹp.</p>
+                <h1 style="color:#fff;">Tìm kiếm một nửa yêu thương của bạn</h1>
+                <p style="color:#fff;">Kết Nối Yêu Thương là nơi bạn có thể tìm thấy những người phù hợp, chia sẻ sở thích và bắt đầu những câu chuyện tình yêu đẹp.</p>
             </div>
         </div>
     </section>
@@ -596,9 +593,9 @@ $infoMessage = Session::getFlash('info_message');
         <div class="footer-container">
             <div class="footer-top">
                 <div class="footer-links">
-                    <a href="#">Về chúng tôi</a>
-                    <a href="#">Hỗ trợ</a>
-                    <a href="#">Pháp lý</a>
+                    <a href="../pages/about.php">Về chúng tôi</a>
+                    <a href="../pages/support.php">Hỗ trợ</a>
+                    <a href="../pages/lagel.php">Pháp lý</a>
                 </div>
                 <div class="footer-social">
                     <a href="https://www.facebook.com/profile.php?id=61583156011828" class="social-icon" target="_blank"><i class="fab fa-facebook-f"></i></a>

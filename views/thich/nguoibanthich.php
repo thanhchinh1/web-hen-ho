@@ -110,11 +110,10 @@ function timeAgo($datetime) {
     </header>
 
     <div class="likes-wrapper">
-        <button class="back-btn" onclick="window.history.back()" title="Quay lại">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-        
-        <div class="likes-container">
+        <div class="likes-container" style="position:relative;">
+            <button class="back-btn" onclick="window.history.back()" title="Quay lại">
+                <i class="fas fa-arrow-left"></i>
+            </button>
             <div class="likes-header">
                 <h1>Người bạn đã thích</h1>
                 <p>Danh sách những người bạn đã thể hiện sự quan tâm</p>

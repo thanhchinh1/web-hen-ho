@@ -114,11 +114,10 @@ function timeAgo($datetime) {
     </header>
 
     <div class="likes-wrapper">
-        <button class="back-btn" onclick="window.history.back()" title="Quay lại">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-        
-        <div class="likes-container">
+        <div class="likes-container" style="position:relative;">
+            <button class="back-btn" onclick="window.history.back()" title="Quay lại">
+                <i class="fas fa-arrow-left"></i>
+            </button>
             <div class="likes-header">
                 <h1>Người thích bạn</h1>
                 <p>Những người đã thể hiện sự quan tâm đến bạn</p>
@@ -209,7 +208,7 @@ function timeAgo($datetime) {
                 console.log('Response status:', res.status);
                 return res.json();
             })
-            .then(data => {
+            .then data => {
                 console.log('Response data:', data);
                 
                 if (data.success) {

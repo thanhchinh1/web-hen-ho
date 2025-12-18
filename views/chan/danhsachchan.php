@@ -70,11 +70,10 @@ $blockedUsers = $blockModel->getBlockedUsers($currentUserId);
     </header>
 
     <div class="blocked-wrapper">
-        <button class="back-btn" onclick="window.history.back()" title="Quay lại">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-        
-        <div class="blocked-container">
+        <div class="blocked-container" style="position:relative;">
+            <button class="back-btn" onclick="window.history.back()" title="Quay lại">
+                <i class="fas fa-arrow-left"></i>
+            </button>
             <div class="blocked-header">
                 <h1>Danh sách người đã chặn</h1>
                 <p>Quản lý những người bạn đã chặn</p>

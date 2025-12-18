@@ -67,15 +67,13 @@ $errorMessage = Session::getFlash('vip_error');
 
     <!-- Payment Wrapper -->
     <div class="payment-wrapper">
-        <!-- Back Button -->
-        <button class="back-btn" onclick="window.location.href='index.php'">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-
         <!-- Payment Container -->
-        <div class="payment-container">
-        <!-- Payment Container -->
-        <div class="payment-container">
+        <div class="payment-container" style="position:relative;">
+            <!-- Back Button -->
+            <button class="back-btn" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            
             <!-- Payment Header -->
             <div class="payment-header">
                 <div class="header-icon">
