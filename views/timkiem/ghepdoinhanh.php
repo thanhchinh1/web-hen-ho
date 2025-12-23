@@ -725,10 +725,6 @@ if (!$vipModel->isVIP($userId)) {
                             <i class="fas fa-comment"></i>
                             <span>Bắt đầu trò chuyện</span>
                         </button>
-                        <button class="btn btn-secondary" onclick="searchAgain()">
-                            <i class="fas fa-redo"></i>
-                            <span>Tìm người khác</span>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -916,10 +912,6 @@ if (!$vipModel->isVIP($userId)) {
             if (matchId) {
                 window.location.href = '../nhantin/message.php?matchId=' + matchId;
             }
-        }
-
-        function searchAgain() {
-            location.reload();
         }
     </script>
 </body>

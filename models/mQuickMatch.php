@@ -119,8 +119,44 @@ class QuickMatch {
                 return false;
             }
             
-            // CHỈ tìm người ĐANG TÌM KIẾM, CHƯA BỊ KHÓA trong bảng TimKiemGhepDoi
-            // KHÔNG tìm người online bình thường
+            // Lấy giới tính của user hiện tại
+            $genderStmt = $this->conn->prepare("
+                SELECT gioiTinh FROM hoso WHERE maNguoiDung = ?
+            ");
+            $genderStmt->bind_param("i", $userId);
+            $genderStmt->execute();
+            $genderResult = $genderStmt->get_result();
+            $genderRow = $genderResult->fetch_assoc();
+            $userGender = $genderRow['gioiTinh'] ?? null;
+            
+            error_log("👤 Giới tính của user $userId: $userGender");
+            
+            // Xác định giới tính đối lập để tìm kiếm
+            $targetGender = null;
+            if ($userGender === 'Nam') {
+                $targetGender = 'Nữ';
+            } elseif ($userGender === 'Nữ') {
+                $targetGender = 'Nam';
+            }
+            
+            if (!$targetGender) {
+                // Không xác định được giới tính hoặc giới tính "Khác" - MỞ KHÓA và dừng
+                $unlockStmt = $this->conn->prepare("
+                    UPDATE timkiemghepdoi 
+                    SET isLocked = 0, lockedAt = NULL 
+                    WHERE maNguoiDung = ? AND trangThai = 'searching'
+                ");
+                $unlockStmt->bind_param("i", $userId);
+                $unlockStmt->execute();
+                
+                $this->conn->commit();
+                error_log("❌ Không thể xác định giới tính đối lập cho user $userId");
+                return false;
+            }
+            
+            error_log("🎯 Tìm người giới tính: $targetGender");
+            
+            // CHỈ tìm người ĐANG TÌM KIẾM, CHƯA BỊ KHÓA và có GIỚI TÍNH ĐỐI LẬP
             $stmt = $this->conn->prepare("
                 SELECT DISTINCT tk.maNguoiDung 
                 FROM timkiemghepdoi tk
@@ -130,10 +166,11 @@ class QuickMatch {
                 AND tk.isLocked = 0
                 AND n.trangThaiNguoiDung = 'active'
                 AND tk.maNguoiDung != ?
+                AND h.gioiTinh = ?
                 AND tk.thoiDiemBatDau >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
                 FOR UPDATE
             ");
-            $stmt->bind_param("i", $userId);
+            $stmt->bind_param("is", $userId, $targetGender);
             $stmt->execute();
             $result = $stmt->get_result();
             

@@ -164,7 +164,6 @@ $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt
                                     <option value="">Chọn giới tính</option>
                                     <option value="Nam" <?php echo $profile['gioiTinh'] == 'Nam' ? 'selected' : ''; ?>>Nam</option>
                                     <option value="Nữ" <?php echo $profile['gioiTinh'] == 'Nữ' ? 'selected' : ''; ?>>Nữ</option>
-                                    <option value="Khác" <?php echo $profile['gioiTinh'] == 'Khác' ? 'selected' : ''; ?>>Khác</option>
                                 </select>
                             </div>
                         </div>

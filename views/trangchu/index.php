@@ -72,8 +72,11 @@ $excludeIds = array_unique(array_merge(
     $matchedUserIds
 ));
 
-// Lấy danh sách hồ sơ để hiển thị (loại trừ những người đã like và được like)
-$allProfiles = $profileModel->getAllProfiles(12, 0, $excludeIds);
+// Lấy giới tính của người dùng hiện tại
+$currentUserGender = $currentUserProfile['gioiTinh'] ?? null;
+
+// Lấy danh sách hồ sơ để hiển thị (chỉ lấy giới tính đối lập)
+$allProfiles = $profileModel->getAllProfiles(12, 0, $excludeIds, $currentUserGender);
 
 // Lấy thông báo hệ thống từ admin
 $systemNotifications = $notificationModel->getSystemNotifications(3);
@@ -637,7 +640,6 @@ $infoMessage = Session::getFlash('info_message');
                                 <option value="">Tất cả</option>
                                 <option value="Nam">Nam</option>
                                 <option value="Nữ">Nữ</option>
-                                <option value="Khac">Khác</option>
                             </select>
                         </div>
 
@@ -980,6 +982,7 @@ $infoMessage = Session::getFlash('info_message');
             profiles.forEach(profile => {
                 const card = document.createElement('div');
                 card.className = 'profile-card';
+                card.setAttribute('data-user-id', profile.id);
                 card.onclick = () => viewProfile(profile.id);
                 
                 const avatarSrc = profile.avatar.startsWith('public/') ? 
