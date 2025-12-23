@@ -111,7 +111,7 @@ function timeAgo($datetime) {
 
     <div class="likes-wrapper">
         <div class="likes-container" style="position:relative;">
-            <button class="back-btn" onclick="window.history.back()" title="Quay lại">
+            <button class="back-btn" onclick="window.location.href='/views/trangchu/index.php'" title="Quay lại">
                 <i class="fas fa-arrow-left"></i>
             </button>
             <div class="likes-header">
@@ -176,16 +176,11 @@ function timeAgo($datetime) {
     <script>
         function unlikeUser(targetUserId) {
             console.log('unlikeUser called with userId:', targetUserId);
-            
-            if (!confirm('Bạn có chắc muốn bỏ thích người này?')) {
+            if (!confirm('Bạn có chắc chắn muốn bỏ thích người này?')) {
                 return;
             }
-            
-            console.log('Sending request to /controller/cLike.php');
-            
             // Lấy CSRF token
             const csrfToken = '<?php echo Session::getCSRFToken(); ?>';
-            
             fetch('/controller/cLike.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -197,7 +192,6 @@ function timeAgo($datetime) {
             })
             .then(data => {
                 console.log('Response data:', data);
-                
                 if (data.success && data.action === 'unliked') {
                     // Remove card with animation
                     const item = document.getElementById('like-' + targetUserId);
@@ -206,7 +200,6 @@ function timeAgo($datetime) {
                         item.style.transform = 'translateX(-20px)';
                         setTimeout(() => {
                             item.remove();
-                            
                             // Check if empty
                             const list = document.querySelector('.likes-list');
                             if (list && list.children.length === 0) {
@@ -214,7 +207,6 @@ function timeAgo($datetime) {
                             }
                         }, 300);
                     }   
-                    
                     showNotification('Đã bỏ thích!', 'success');
                 } else {
                     showNotification(data.message || 'Có lỗi xảy ra!', 'error');

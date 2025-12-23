@@ -51,22 +51,27 @@ $likeModel = new Like();
 
 if ($action === 'block') {
     // Chặn người dùng
+    error_log("Block action initiated by user $currentUserId against user $targetUserId");
     
     // Kiểm tra đã block chưa
     if ($blockModel->isBlocked($currentUserId, $targetUserId)) {
+        error_log("Already blocked");
         echo json_encode(['success' => false, 'message' => 'Bạn đã chặn người này rồi!']);
         exit;
     }
     
     // Block với cleanup (xóa match, like)
-    if ($blockModel->blockUserWithCleanup($currentUserId, $targetUserId)) {
+    $result = $blockModel->blockUserWithCleanup($currentUserId, $targetUserId);
+    error_log("Block result: " . ($result ? "SUCCESS" : "FAILED"));
+    
+    if ($result) {
         echo json_encode([
             'success' => true, 
             'message' => 'Đã chặn người dùng này! ⛔'
         ]);
         exit;
     } else {
-        echo json_encode(['success' => false, 'message' => 'Có lỗi xảy ra khi chặn!']);
+        echo json_encode(['success' => false, 'message' => 'Có lỗi xảy ra khi chặn! Vui lòng thử lại.']);
         exit;
     }
     

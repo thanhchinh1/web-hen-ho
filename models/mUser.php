@@ -1,4 +1,7 @@
 <?php
+// Set timezone to Vietnam
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 require_once 'mDbconnect.php';
 
 class User {
@@ -188,6 +191,20 @@ class User {
             return $result->fetch_assoc();
         }
         return null;
+    }
+    
+    /**
+     * Kiểm tra user có offline lâu không (> 2 giờ)
+     */
+    public function isUserInactive($userId) {
+        $lastActivity = $this->getLastActivity($userId);
+        
+        if (!$lastActivity || $lastActivity['lanHoatDongCuoi'] === null) {
+            return true; // Đã đăng xuất hoặc chưa từng hoạt động
+        }
+        
+        // Offline nếu không hoạt động quá 2 giờ (120 phút)
+        return $lastActivity['minutesAgo'] !== null && $lastActivity['minutesAgo'] > 120;
     }
     
     /**

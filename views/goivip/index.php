@@ -73,7 +73,7 @@ $avatarPath = !empty($profile['avt']) ? $profile['avt'] : 'public/img/default-av
         <!-- VIP Container -->
         <div class="vip-container" style="position:relative;">
             <!-- Back Button -->
-            <button class="back-btn" onclick="window.history.back()">
+            <button class="back-btn" onclick="window.location.href='../trangchu/index.php'">
                 <i class="fas fa-arrow-left"></i>
             </button>
             

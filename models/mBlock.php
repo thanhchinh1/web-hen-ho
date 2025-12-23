@@ -42,13 +42,37 @@ class Block {
             $stmt->execute();
             $stmt->close();
             
-            // 2. Unmatch nếu đang ghép đôi
+            // 2. Unmatch nếu đang ghép đôi và XÓA TIN NHẮN
             $userA = min($blockerId, $blockedId);
             $userB = max($blockerId, $blockedId);
             
+            // Lấy ID ghép đôi để xóa tin nhắn
             $stmt = $this->conn->prepare("
-                UPDATE ghepdoi 
-                SET trangThaiGhepDoi = 'blocked'
+                SELECT maGhepDoi FROM ghepdoi 
+                WHERE maNguoiA = ? AND maNguoiB = ?
+                AND trangThaiGhepDoi = 'matched'
+            ");
+            $stmt->bind_param("ii", $userA, $userB);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $match = $result->fetch_assoc();
+            $matchId = $match ? $match['maGhepDoi'] : null;
+            $stmt->close();
+            
+            // Xóa tất cả tin nhắn nếu có ghép đôi
+            if ($matchId) {
+                $stmt = $this->conn->prepare("
+                    DELETE FROM tinnhan 
+                    WHERE maGhepDoi = ?
+                ");
+                $stmt->bind_param("i", $matchId);
+                $stmt->execute();
+                $stmt->close();
+            }
+            
+            // Cập nhật trạng thái ghép đôi thành 'blocked' hoặc xóa
+            $stmt = $this->conn->prepare("
+                DELETE FROM ghepdoi 
                 WHERE maNguoiA = ? AND maNguoiB = ?
                 AND trangThaiGhepDoi = 'matched'
             ");
@@ -154,6 +178,25 @@ class Block {
         $ids = [];
         while ($row = $result->fetch_assoc()) {
             $ids[] = $row['maNguoiBiChan'];
+        }
+        return $ids;
+    }
+    
+    /**
+     * Lấy danh sách ID người đã chặn mình (để filter)
+     */
+    public function getUserIdsWhoBlockedMe($userId) {
+        $stmt = $this->conn->prepare("
+            SELECT maNguoiChan FROM channguoidung
+            WHERE maNguoiBiChan = ?
+        ");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $ids = [];
+        while ($row = $result->fetch_assoc()) {
+            $ids[] = $row['maNguoiChan'];
         }
         return $ids;
     }

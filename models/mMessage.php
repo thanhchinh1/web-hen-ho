@@ -14,8 +14,8 @@ class Message {
      */
     public function sendMessage($matchId, $senderId, $content) {
         $stmt = $this->conn->prepare("
-            INSERT INTO tinnhan (maGhepDoi, maNguoiGui, noiDung) 
-            VALUES (?, ?, ?)
+            INSERT INTO tinnhan (maGhepDoi, maNguoiGui, noiDung, trangThai) 
+            VALUES (?, ?, ?, 'sent')
         ");
         $stmt->bind_param("iis", $matchId, $senderId, $content);
         
@@ -35,6 +35,9 @@ class Message {
                 t.maNguoiGui,
                 t.noiDung,
                 t.thoiDiemGui,
+                t.trangThai,
+                t.thoiDiemNhan,
+                t.thoiDiemXem,
                 h.ten as tenNguoiGui,
                 h.avt as avtNguoiGui
             FROM tinnhan t
@@ -82,6 +85,9 @@ class Message {
                 t.maNguoiGui,
                 t.noiDung,
                 t.thoiDiemGui,
+                t.trangThai,
+                t.thoiDiemNhan,
+                t.thoiDiemXem,
                 h.ten as tenNguoiGui,
                 h.avt as avtNguoiGui
             FROM tinnhan t
@@ -139,6 +145,88 @@ class Message {
         $stmt->execute();
         $result = $stmt->get_result();
         return $result->fetch_assoc();
+    }
+    
+    /**
+     * Cập nhật trạng thái tin nhắn thành 'delivered' (đã nhận)
+     */
+    public function markAsDelivered($matchId, $userId) {
+        $stmt = $this->conn->prepare("
+            UPDATE tinnhan 
+            SET trangThai = 'delivered', thoiDiemNhan = NOW() 
+            WHERE maGhepDoi = ? 
+            AND maNguoiGui != ? 
+            AND trangThai = 'sent'
+        ");
+        $stmt->bind_param("ii", $matchId, $userId);
+        return $stmt->execute();
+    }
+    
+    /**
+     * Cập nhật trạng thái tin nhắn thành 'seen' (đã xem)
+     */
+    public function markAsSeen($matchId, $userId) {
+        $stmt = $this->conn->prepare("
+            UPDATE tinnhan 
+            SET trangThai = 'seen', thoiDiemXem = NOW() 
+            WHERE maGhepDoi = ? 
+            AND maNguoiGui != ? 
+            AND (trangThai = 'sent' OR trangThai = 'delivered')
+        ");
+        $stmt->bind_param("ii", $matchId, $userId);
+        return $stmt->execute();
+    }
+    
+    /**
+     * Lấy trạng thái tin nhắn cuối cùng của người gửi
+     */
+    public function getLastMessageStatus($matchId, $senderId) {
+        $stmt = $this->conn->prepare("
+            SELECT trangThai, thoiDiemGui, thoiDiemNhan, thoiDiemXem
+            FROM tinnhan
+            WHERE maGhepDoi = ? AND maNguoiGui = ?
+            ORDER BY thoiDiemGui DESC
+            LIMIT 1
+        ");
+        $stmt->bind_param("ii", $matchId, $senderId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
+    }
+    
+    /**
+     * Lấy trạng thái của nhiều tin nhắn (cho realtime update)
+     */
+    public function getMessagesStatus($matchId, $senderId, $messageIds) {
+        if (empty($messageIds)) {
+            return [];
+        }
+        
+        $placeholders = implode(',', array_fill(0, count($messageIds), '?'));
+        $query = "
+            SELECT maTinNhan, trangThai
+            FROM tinnhan
+            WHERE maGhepDoi = ? 
+            AND maNguoiGui = ? 
+            AND maTinNhan IN ($placeholders)
+        ";
+        
+        $stmt = $this->conn->prepare($query);
+        
+        // Bind parameters
+        $types = 'ii' . str_repeat('i', count($messageIds));
+        $params = array_merge([$matchId, $senderId], $messageIds);
+        $stmt->bind_param($types, ...$params);
+        
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $statuses = [];
+        while ($row = $result->fetch_assoc()) {
+            $statuses[$row['maTinNhan']] = $row['trangThai'];
+        }
+        
+        return $statuses;
     }
 }
 ?>

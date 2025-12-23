@@ -240,8 +240,10 @@ if ($matchedUserId) {
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <div class="sidebar-logo">
-                    <img src="../../public/img/logo.jpg" alt="DuyenHub Logo">
-                    <span>DuyenHub</span>
+                    <a href="../trangchu/index.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
+                        <img src="../../public/img/logo.jpg" alt="DuyenHub Logo">
+                        <span style="margin-left: 6px; font-weight: 600; font-size: 18px; color: #e94057;">DuyenHub</span>
+                    </a>
                 </div>
                 <h1>Tin nhắn</h1>
             </div>
@@ -278,8 +280,14 @@ if ($matchedUserId) {
                              onclick="window.location.href='?match=<?php echo $match['maGhepDoi']; ?>'">
                             <div class="message-avatar">
                                 <img src="<?php echo $avatarSrc; ?>" alt="<?php echo htmlspecialchars($match['ten']); ?>">
-                                <?php if ($userModel->isUserOnline($match['maNguoiDung'])): ?>
-                                    <div class="online-dot" title="Đang online"></div>
+                                <?php 
+                                $isOnline = $userModel->isUserOnline($match['maNguoiDung']);
+                                $isInactive = $userModel->isUserInactive($match['maNguoiDung']);
+                                if ($isOnline): 
+                                ?>
+                                    <div class="online-dot pulse" title="Đang online"></div>
+                                <?php elseif ($isInactive): ?>
+                                    <div class="offline-dot" title="Không hoạt động"></div>
                                 <?php endif; ?>
                             </div>
                             <div class="message-content">
@@ -335,10 +343,15 @@ if ($matchedUserId) {
                             <p class="online-status-text" style="font-size: 11px; margin: 4px 0 0 0;">
                                 <?php 
                                 $isOnline = $userModel->isUserOnline($selectedMatch['maNguoiDung']);
+                                $isInactive = $userModel->isUserInactive($selectedMatch['maNguoiDung']);
                                 if ($isOnline): 
                                 ?>
                                     <span style="color: #28a745; font-weight: 600;">
                                         <i class="fas fa-circle" style="font-size: 8px;"></i> Đang hoạt động
+                                    </span>
+                                <?php elseif ($isInactive): ?>
+                                    <span style="color: #95a5a6; font-weight: 500;">
+                                        <i class="fas fa-circle" style="font-size: 8px;"></i> Không hoạt động
                                     </span>
                                 <?php else:
                                     $lastActivity = $userModel->getLastActivity($selectedMatch['maNguoiDung']);
@@ -354,13 +367,7 @@ if ($matchedUserId) {
                                         }
                                 ?>
                                     <span style="color: #95a5a6; font-style: italic;">
-                                        <i class="far fa-clock"></i> Hoạt động <?php echo $lastSeenText; ?>
-                                    </span>
-                                <?php 
-                                    else:
-                                ?>
-                                    <span style="color: #95a5a6; font-style: italic;">
-                                        Không hoạt động
+                                        <i class="far fa-clock"></i> <?php echo $lastSeenText; ?>
                                     </span>
                                 <?php 
                                     endif;
@@ -369,9 +376,24 @@ if ($matchedUserId) {
                             </p>
                         </div>
                     </div>
-                    <button class="btn-close" onclick="window.location.href='../trangchu/index.php'">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    <div class="chat-header-actions">
+                        <div class="dropdown-menu-container">
+                            <button class="btn-menu" onclick="toggleChatMenu(event)">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div class="dropdown-menu" id="chatMenu">
+                                <a href="../hoso/xemnguoikhac.php?id=<?php echo $selectedMatch['maNguoiDung']; ?>" class="dropdown-item">
+                                    <i class="fas fa-user"></i> Xem hồ sơ
+                                </a>
+                                <a href="#" onclick="confirmDeleteChat(event, <?php echo $selectedMatch['maNguoiDung']; ?>)" class="dropdown-item delete-item">
+                                    <i class="fas fa-trash"></i> Xóa tin nhắn
+                                </a>
+                            </div>
+                        </div>
+                        <button class="btn-close" onclick="window.location.href='../trangchu/index.php'">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Chat messages area -->
@@ -385,7 +407,7 @@ if ($matchedUserId) {
                             $isSent = ($msg['maNguoiGui'] == $currentUserId);
                             $messageClass = $isSent ? 'sent' : 'received';
                         ?>
-                            <div class="message <?php echo $messageClass; ?>">
+                            <div class="message <?php echo $messageClass; ?>" data-message-id="<?php echo $msg['maTinNhan']; ?>">
                                 <?php if (!$isSent): ?>
                                     <img src="<?php echo $chatAvatarSrc; ?>" alt="" class="message-avatar-small">
                                 <?php endif; ?>
@@ -393,6 +415,19 @@ if ($matchedUserId) {
                                     <p><?php echo nl2br(htmlspecialchars($msg['noiDung'])); ?></p>
                                     <span class="message-time">
                                         <?php echo date('H:i', strtotime($msg['thoiDiemGui'])); ?>
+                                        <?php if ($isSent): ?>
+                                            <span class="message-status" data-status="<?php echo $msg['trangThai'] ?? 'sent'; ?>">
+                                                <?php 
+                                                $status = $msg['trangThai'] ?? 'sent';
+                                                if ($status === 'seen'): ?>
+                                                    <i class="fas fa-eye" style="color: #2E7D32;" title="Đã xem"></i>
+                                                <?php elseif ($status === 'delivered'): ?>
+                                                    <i class="fas fa-check-double" style="color: #95a5a6;" title="Đã nhận"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-check" style="color: #95a5a6;" title="Đã gửi"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        <?php endif; ?>
                                     </span>
                                 </div>
                             </div>
@@ -432,8 +467,75 @@ if ($matchedUserId) {
     <script>
         const currentMatchId = <?php echo $selectedMatchId ? $selectedMatchId : 'null'; ?>;
         const currentUserId = <?php echo $currentUserId; ?>;
+        const otherUserId = <?php echo $selectedMatch ? $selectedMatch['maNguoiDung'] : 'null'; ?>;
         let lastMessageId = <?php echo !empty($messages) ? end($messages)['maTinNhan'] : 0; ?>;
         let pollingInterval = null;
+
+        // Toggle chat menu
+        function toggleChatMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('chatMenu');
+            menu.classList.toggle('show');
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('chatMenu');
+            if (menu && menu.classList.contains('show')) {
+                menu.classList.remove('show');
+            }
+        });
+
+        // Confirm and delete chat (unmatch)
+        function confirmDeleteChat(event, targetUserId) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            console.log('confirmDeleteChat called with targetUserId:', targetUserId);
+            
+            if (!confirm('Bạn có chắc chắn muốn XÓA TIN NHẮN với người này?\n\nLưu ý: Việc này sẽ hủy ghép đôi và xóa toàn bộ tin nhắn. Bạn sẽ không thể trò chuyện với người này nữa trừ khi ghép đôi lại.')) {
+                return;
+            }
+            
+            // Close menu
+            const menu = document.getElementById('chatMenu');
+            if (menu) {
+                menu.classList.remove('show');
+            }
+            
+            console.log('Sending unmatch request to server...');
+            console.log('Current matchId:', currentMatchId);
+            
+            // Call unmatch API với matchId cụ thể
+            const formData = 'action=unmatch&targetUserId=' + targetUserId + 
+                           '&matchId=' + (currentMatchId || 0) +
+                           '&csrf_token=<?php echo Session::getCSRFToken(); ?>';
+            
+            fetch('/controller/cMatch.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: formData
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    alert('Đã xóa tin nhắn và hủy ghép đôi thành công!');
+                    window.location.href = 'message.php';
+                } else {
+                    alert(data.message || 'Không thể xóa tin nhắn!');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi xóa tin nhắn!');
+            });
+        }
 
         function sendMessage() {
             const input = document.getElementById('messageInput');
@@ -495,11 +597,25 @@ if ($matchedUserId) {
             const messagesContainer = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message ' + (isSent ? 'sent' : 'received');
+            messageDiv.setAttribute('data-message-id', message.maTinNhan);
             
             const time = new Date(message.thoiDiemGui).toLocaleTimeString('vi-VN', {
                 hour: '2-digit',
                 minute: '2-digit'
             });
+            
+            // Xác định trạng thái
+            const status = message.trangThai || 'sent';
+            let statusIcon = '';
+            if (isSent) {
+                if (status === 'seen') {
+                    statusIcon = '<span class="message-status" data-status="seen"><i class="fas fa-eye" style="color: #2E7D32;" title="Đã xem"></i></span>';
+                } else if (status === 'delivered') {
+                    statusIcon = '<span class="message-status" data-status="delivered"><i class="fas fa-check-double" style="color: #95a5a6;" title="Đã nhận"></i></span>';
+                } else {
+                    statusIcon = '<span class="message-status" data-status="sent"><i class="fas fa-check" style="color: #95a5a6;" title="Đã gửi"></i></span>';
+                }
+            }
             
             let html = '';
             if (!isSent) {
@@ -508,7 +624,7 @@ if ($matchedUserId) {
             html += `
                 <div class="message-bubble">
                     <p>${escapeHtml(message.noiDung)}</p>
-                    <span class="message-time">${time}</span>
+                    <span class="message-time">${time} ${statusIcon}</span>
                 </div>
             `;
             
@@ -559,10 +675,89 @@ if ($matchedUserId) {
 
                     // Scroll to bottom
                     scrollToBottom();
+                    
+                    // Đánh dấu đã xem tin nhắn
+                    markMessagesAsSeen();
                 }
             })
             .catch(error => {
                 console.error('Polling error:', error);
+            });
+        }
+        
+        // Polling để cập nhật status của tin nhắn đã gửi (realtime)
+        function checkMessageStatusUpdates() {
+            if (!currentMatchId) return;
+            
+            // Lấy tất cả tin nhắn đã gửi bởi user hiện tại
+            const sentMessages = document.querySelectorAll('.message.sent[data-message-id]');
+            if (sentMessages.length === 0) return;
+            
+            const messageIds = Array.from(sentMessages).map(msg => msg.getAttribute('data-message-id')).filter(id => id);
+            if (messageIds.length === 0) return;
+            
+            fetch(`/controller/cMessage.php?action=get_status_updates&matchId=${currentMatchId}&messageIds=${messageIds.join(',')}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.statuses) {
+                    // Cập nhật status cho từng tin nhắn
+                    Object.keys(data.statuses).forEach(messageId => {
+                        const newStatus = data.statuses[messageId];
+                        updateMessageStatus(messageId, newStatus);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Status polling error:', error);
+            });
+        }
+        
+        // Cập nhật status của một tin nhắn trong UI
+        function updateMessageStatus(messageId, newStatus) {
+            const messageElement = document.querySelector(`.message.sent[data-message-id="${messageId}"]`);
+            if (!messageElement) return;
+            
+            const statusElement = messageElement.querySelector('.message-status');
+            if (!statusElement) return;
+            
+            const currentStatus = statusElement.getAttribute('data-status');
+            if (currentStatus === newStatus) return; // Không thay đổi
+            
+            // Cập nhật attribute
+            statusElement.setAttribute('data-status', newStatus);
+            
+            // Cập nhật icon
+            let iconHTML = '';
+            if (newStatus === 'seen') {
+                iconHTML = '<i class="fas fa-eye" style="color: #2E7D32;" title="Đã xem"></i>';
+            } else if (newStatus === 'delivered') {
+                iconHTML = '<i class="fas fa-check-double" style="color: #95a5a6;" title="Đã nhận"></i>';
+            } else {
+                iconHTML = '<i class="fas fa-check" style="color: #95a5a6;" title="Đã gửi"></i>';
+            }
+            
+            statusElement.innerHTML = iconHTML;
+        }
+        
+        // Đánh dấu tin nhắn đã xem
+        function markMessagesAsSeen() {
+            if (!currentMatchId) return;
+            
+            fetch('/controller/cMessage.php?action=mark_seen', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'matchId=' + currentMatchId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Messages marked as seen');
+                }
+            })
+            .catch(error => {
+                console.error('Error marking messages as seen:', error);
             });
         }
 
@@ -586,7 +781,14 @@ if ($matchedUserId) {
 
             // Start polling nếu có match được chọn
             if (currentMatchId) {
-                pollingInterval = setInterval(checkNewMessages, 2000); // Poll mỗi 2 giây
+                // Poll tin nhắn mới mỗi 2 giây
+                pollingInterval = setInterval(checkNewMessages, 2000);
+                
+                // Poll status updates mỗi 3 giây (để cập nhật trạng thái realtime)
+                setInterval(checkMessageStatusUpdates, 3000);
+                
+                // Đánh dấu tin nhắn đã xem khi mở trang
+                markMessagesAsSeen();
             }
         });
 
@@ -639,20 +841,17 @@ if ($matchedUserId) {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Tìm element hiển thị status (đã có sẵn trong PHP)
                     const statusElement = document.querySelector('.online-status-text');
                     if (!statusElement) return;
-                    
-                    // Cập nhật nội dung
                     if (data.isOnline) {
                         statusElement.innerHTML = '<span style="color: #28a745; font-weight: 600;"><i class="fas fa-circle" style="font-size: 8px;"></i> Đang hoạt động</span>';
+                    } else if (data.isInactive) {
+                        statusElement.innerHTML = '<span style="color: #95a5a6; font-weight: 500;"><i class="fas fa-circle" style="font-size: 8px;"></i> Không hoạt động</span>';
                     } else if (data.lastSeen && data.lastSeen !== '') {
-                        statusElement.innerHTML = '<span style="color: #95a5a6; font-style: italic;"><i class="far fa-clock"></i> Hoạt động ' + data.lastSeen + '</span>';
+                        statusElement.innerHTML = '<span style="color: #95a5a6; font-style: italic;"><i class="far fa-clock"></i> ' + data.lastSeen + '</span>';
                     } else {
                         statusElement.innerHTML = '<span style="color: #95a5a6; font-style: italic;">Không hoạt động</span>';
                     }
-                    
-                    // Cập nhật chấm online trong sidebar
                     updateSidebarOnlineStatus(partnerUserId, data.isOnline);
                 }
             })

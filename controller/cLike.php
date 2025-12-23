@@ -3,7 +3,6 @@ require_once '../models/mSession.php';
 require_once '../models/mLike.php';
 require_once '../models/mProfile.php';
 require_once '../models/mMatch.php';
-require_once '../models/mRateLimit.php';
 
 Session::start();
 
@@ -28,18 +27,6 @@ if (!Session::verifyCSRFToken($csrfToken)) {
 
 $userId = Session::getUserId();
 
-// Rate Limiting: 20 likes/unlikes per minute
-$rateLimit = new RateLimit();
-if (!$rateLimit->checkRateLimit($userId, 'like_action', 20, 60)) {
-    $remaining = $rateLimit->getRemainingAttempts($userId, 'like_action', 20, 60);
-    echo json_encode([
-        'success' => false, 
-        'message' => 'Bạn đang thao tác quá nhanh! Vui lòng chờ 1 phút.',
-        'rateLimit' => true,
-        'remaining' => $remaining
-    ]);
-    exit;
-}
 $targetUserId = intval($_POST['targetUserId'] ?? 0);
 
 if ($targetUserId <= 0) {
@@ -60,6 +47,14 @@ if (!$profileModel->hasProfile($targetUserId)) {
     exit;
 }
 
+// Kiểm tra block (2 chiều) - Không thể like người đã chặn hoặc bị chặn
+require_once '../models/mBlock.php';
+$blockModel = new Block();
+if ($blockModel->isBlockedEitherWay($userId, $targetUserId)) {
+    echo json_encode(['success' => false, 'message' => 'Không thể thực hiện với người dùng này!']);
+    exit;
+}
+
 $likeModel = new Like();
 $matchModel = new MatchModel();
 
@@ -67,9 +62,6 @@ $matchModel = new MatchModel();
 if ($likeModel->hasLiked($userId, $targetUserId)) {
     // Đã like rồi, thực hiện unlike
     if ($likeModel->unlikeUser($userId, $targetUserId)) {
-        // Log action cho rate limiting
-        $rateLimit->logAction($userId, 'like_action');
-        
         // Kiểm tra có match không, nếu có thì unmatch
         // (Chỉ cập nhật trạng thái match, KHÔNG xóa lượt thích của người kia)
         if ($matchModel->isMatched($userId, $targetUserId)) {
@@ -87,9 +79,6 @@ if ($likeModel->hasLiked($userId, $targetUserId)) {
 } else {
     // Chưa like, thực hiện like
     if ($likeModel->likeUser($userId, $targetUserId)) {
-        // Log action cho rate limiting
-        $rateLimit->logAction($userId, 'like_action');
-        
         // Kiểm tra xem có tạo match không (người kia đã like mình chưa)
         $matchModel = new MatchModel();
         
