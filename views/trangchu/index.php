@@ -767,7 +767,7 @@ $isVIP = $vipModel->isVIP($currentUserId);
                             <label>Mục tiêu phát triển</label>
                             <select class="modal-form-select" id="purpose">
                                 <option value="">Tất cả</option>
-                                <option value="Hẹn hò nghiêm túc">Hẹn hò nghiêm túc</option>
+                                <option value="Hẹn hò">Hẹn hò</option>
                                 <option value="Kết bạn">Kết bạn</option>
                                 <option value="Kết hôn">Kết hôn</option>
                                 <option value="Tìm hiểu">Tìm hiểu</option>

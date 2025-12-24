@@ -50,6 +50,11 @@ class User {
         $stmt->execute();
         $result = $stmt->get_result();
         
+        // Kiểm tra email có tồn tại không
+        if ($result->num_rows === 0) {
+            return ['status' => 'email_not_found', 'message' => 'Email chưa được đăng ký. Vui lòng đăng ký tài khoản mới!'];
+        }
+        
         if ($result->num_rows == 1) {
             $user = $result->fetch_assoc();
             
@@ -73,9 +78,12 @@ class User {
                     'userId' => $user['maNguoiDung'],
                     'role' => $user['role']
                 ]; // Trả về ID và role của user
+            } else {
+                // Email đúng nhưng mật khẩu sai
+                return ['status' => 'wrong_password', 'message' => 'Mật khẩu không đúng. Vui lòng thử lại!'];
             }
         }
-        return ['status' => 'error', 'message' => 'Email/Số điện thoại hoặc mật khẩu không đúng!'];
+        return ['status' => 'error', 'message' => 'Đã có lỗi xảy ra!'];
     }
     
     // Lấy thông tin người dùng theo ID

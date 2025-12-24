@@ -79,16 +79,30 @@ $userEmail = Session::get('forgot_user_email') ?? '';
                 <?php endif; ?>
 
                 <div class="steps">
-                    <div class="step <?php echo $step >= 1 ? 'active' : ''; ?> <?php echo $step > 1 ? 'completed' : ''; ?>">
-                        <div class="step-number">1</div>
+                    <div class="step-item <?php echo $step >= 1 ? 'active' : ''; ?> <?php echo $step > 1 ? 'completed' : ''; ?>">
+                        <div class="step-circle">
+                            <?php if ($step > 1): ?>
+                                <i class="fas fa-check"></i>
+                            <?php else: ?>
+                                1
+                            <?php endif; ?>
+                        </div>
                         <div class="step-label">Xác minh Email</div>
                     </div>
-                    <div class="step <?php echo $step >= 2 ? 'active' : ''; ?> <?php echo $step > 2 ? 'completed' : ''; ?>">
-                        <div class="step-number">2</div>
+                    <div class="step-line <?php echo $step >= 2 ? 'active' : ''; ?>"></div>
+                    <div class="step-item <?php echo $step >= 2 ? 'active' : ''; ?> <?php echo $step > 2 ? 'completed' : ''; ?>">
+                        <div class="step-circle">
+                            <?php if ($step > 2): ?>
+                                <i class="fas fa-check"></i>
+                            <?php else: ?>
+                                2
+                            <?php endif; ?>
+                        </div>
                         <div class="step-label">Nhập OTP</div>
                     </div>
-                    <div class="step <?php echo $step >= 3 ? 'active' : ''; ?>">
-                        <div class="step-number">3</div>
+                    <div class="step-line <?php echo $step >= 3 ? 'active' : ''; ?>"></div>
+                    <div class="step-item <?php echo $step >= 3 ? 'active' : ''; ?>">
+                        <div class="step-circle">3</div>
                         <div class="step-label">Đặt lại MK</div>
                     </div>
                 </div>
@@ -103,20 +117,20 @@ $userEmail = Session::get('forgot_user_email') ?? '';
                 <?php if ($step == 1): ?>
                     <!-- Bước 1: Nhập email -->
                     <div class="info-box">
-                        <i class="fas fa-info-circle"></i> Nhập email hoặc số điện thoại bạn đã đăng ký
+                        <i class="fas fa-info-circle"></i> Nhập email bạn đã đăng ký
                     </div>
 
                     <form action="../../controller/cForgotPassword.php" method="POST">
                         <input type="hidden" name="step" value="1">
                         
                         <div class="form-group">
-                            <label for="email">Email/Số điện thoại</label>
+                            <label for="email">Email</label>
                             <div class="input-wrapper">
                                 <input type="text" 
                                        id="email" 
                                        name="email" 
                                        class="form-control"
-                                       placeholder="Nhập email hoặc số điện thoại"
+                                       placeholder="Nhập email"
                                        value="<?php echo htmlspecialchars($userEmail); ?>"
                                        required>
                             </div>
@@ -246,8 +260,34 @@ $userEmail = Session::get('forgot_user_email') ?? '';
             }
         }
 
+        // Validate email format
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
         // Form validation
-        <?php if ($step == 2): ?>
+        <?php if ($step == 1): ?>
+        // Validation cho form nhập email
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const emailInput = document.getElementById('email');
+            const email = emailInput.value.trim();
+            
+            if (!email) {
+                e.preventDefault();
+                alert('Vui lòng nhập email!');
+                emailInput.focus();
+                return;
+            }
+            
+            if (!validateEmail(email)) {
+                e.preventDefault();
+                alert('Email không đúng định dạng! Vui lòng nhập email hợp lệ.');
+                emailInput.focus();
+                return;
+            }
+        });
+        <?php elseif ($step == 2): ?>
         // OTP Input Auto-focus và validation
         const otpInputs = document.querySelectorAll('.otp-input');
         

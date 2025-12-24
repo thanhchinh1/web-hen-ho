@@ -23,7 +23,15 @@ if ($step == 1) {
     $email = trim($_POST['email'] ?? '');
     
     if (empty($email)) {
-        $errors[] = 'Vui lòng nhập email hoặc số điện thoại!';
+        $errors[] = 'Vui lòng nhập email!';
+        Session::setFlash('forgot_errors', $errors);
+        header('Location: ../views/dangnhap/quenmatkhau.php');
+        exit;
+    }
+    
+    // Kiểm tra định dạng email
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Email không đúng định dạng!';
         Session::setFlash('forgot_errors', $errors);
         header('Location: ../views/dangnhap/quenmatkhau.php');
         exit;
@@ -39,7 +47,7 @@ if ($step == 1) {
     $result = $stmt->get_result();
     
     if ($result->num_rows === 0) {
-        $errors[] = 'Email/Số điện thoại không tồn tại trong hệ thống!';
+        $errors[] = 'Email không tồn tại trong hệ thống!';
         Session::setFlash('forgot_errors', $errors);
         header('Location: ../views/dangnhap/quenmatkhau.php');
         exit;

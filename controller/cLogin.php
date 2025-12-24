@@ -15,7 +15,7 @@ $password = $_POST['password'] ?? '';
 $errors = [];
 
 if (empty($email)) {
-    $errors[] = 'Vui lòng nhập email hoặc số điện thoại!';
+    $errors[] = 'Vui lòng nhập email!';
 }
 
 if (empty($password)) {
@@ -142,10 +142,30 @@ if (is_array($loginResult) && $loginResult['status'] === 'success') {
     }
     header('Location: ' . $redirectUrl);
     exit;
+} elseif (is_array($loginResult) && $loginResult['status'] === 'email_not_found') {
+    // Email chưa đăng ký
+    $errors[] = $loginResult['message'];
+    Session::setFlash('login_errors', $errors);
+    Session::setFlash('login_data', ['email' => $email]);
+    Session::setFlash('show_register_link', true); // Flag để hiện link đăng ký
+    $redirectUrl = '../views/dangnhap/login.php';
+    $params = [];
+    if (isset($_GET['action']) && isset($_GET['targetUser'])) {
+        $params[] = 'action=' . urlencode($_GET['action']);
+        $params[] = 'targetUser=' . urlencode($_GET['targetUser']);
+    } elseif (isset($_GET['redirect']) && isset($_GET['id'])) {
+        $params[] = 'redirect=' . urlencode($_GET['redirect']);
+        $params[] = 'id=' . urlencode($_GET['id']);
+    }
+    if (!empty($params)) {
+        $redirectUrl .= '?' . implode('&', $params);
+    }
+    header('Location: ' . $redirectUrl);
+    exit;
 } else {
     $message = (is_array($loginResult) && isset($loginResult['message'])) 
                 ? $loginResult['message'] 
-                : 'Email/Số điện thoại hoặc mật khẩu không đúng!';
+                : 'Đã có lỗi xảy ra!';
     $errors[] = $message;
     Session::setFlash('login_errors', $errors);
     Session::setFlash('login_data', ['email' => $email]);

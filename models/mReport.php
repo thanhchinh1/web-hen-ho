@@ -46,7 +46,7 @@ class Report {
             if ($reportCount >= 5) {
                 $stmt = $this->conn->prepare("
                     UPDATE nguoidung 
-                    SET trangThai = 'locked'
+                    SET trangThaiNguoiDung = 'banned'
                     WHERE maNguoiDung = ?
                 ");
                 $stmt->bind_param("i", $reportedId);

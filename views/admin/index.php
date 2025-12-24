@@ -117,6 +117,12 @@ $pendingSupport = $result->fetch_assoc()['total'];
                     </a>
                 </li>
                 <li>
+                    <a href="giaodich.php">
+                        <i class="fas fa-users"></i>
+                        <span>Giao dịch</span>
+                    </a>
+                </li>
+                <li>
                     <a href="thongke.php">
                         <i class="fas fa-chart-line"></i>
                         <span>Thống kê</span>

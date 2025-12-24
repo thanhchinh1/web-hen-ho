@@ -70,7 +70,7 @@ $userModel = new User();
 
 // Kiểm tra lại email có tồn tại chưa (phòng trường hợp đã đăng ký trong lúc chờ OTP)
 if ($userModel->checkEmailExists($email)) {
-    $errors[] = 'Email/Số điện thoại này đã được đăng ký!';
+    $errors[] = 'Email này đã được đăng ký!';
     Session::set('verify_errors', $errors);
     Session::delete('verify_email');
     header('Location: ../views/dangky/register.php');

@@ -32,16 +32,15 @@ if (!$acceptTerms) {
     $errors[] = 'Bạn phải đồng ý với Điều khoản dịch vụ và Chính sách bảo mật để đăng ký!';
 }
 
-// Validate email/SĐT
+// Validate email
 if (empty($email)) {
-    $errors[] = 'Vui lòng nhập email hoặc số điện thoại!';
+    $errors[] = 'Vui lòng nhập email!';
 } else {
-    // Kiểm tra định dạng email hoặc SĐT Việt Nam
+    // Kiểm tra định dạng email
     $emailPattern = '/^[^\s@]+@[^\s@]+\.[^\s@]+$/';
-    $phonePattern = '/^(032|033|034|035|036|037|038|039|096|097|098|081|082|083|084|085|091|094|070|076|077|078|079|090|093)\d{7}$/';
     
-    if (!preg_match($emailPattern, $email) && !preg_match($phonePattern, $email)) {
-        $errors[] = 'Email hoặc số điện thoại không hợp lệ!';
+    if (!preg_match($emailPattern, $email)) {
+        $errors[] = 'Email không hợp lệ!';
     }
 }
 
@@ -75,7 +74,7 @@ $userModel = new User();
 
 // Kiểm tra email đã tồn tại
 if ($userModel->checkEmailExists($email)) {
-    $errors[] = 'Email/Số điện thoại này đã được đăng ký!';
+    $errors[] = 'Email này đã được đăng ký!';
     Session::set('register_errors', $errors);
     Session::set('register_data', ['email' => $email]);
     header('Location: ../views/dangky/register.php');

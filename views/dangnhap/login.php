@@ -23,6 +23,7 @@ if (Session::isLoggedIn()) {
 $errors = Session::getFlash('login_errors') ?? [];
 $formData = Session::getFlash('login_data') ?? [];
 $successMessage = Session::getFlash('register_success');
+$showRegisterLink = Session::getFlash('show_register_link') ?? false;
 
 // Lấy action và targetUser từ URL nếu có
 $action = $_GET['action'] ?? '';
@@ -81,6 +82,7 @@ $targetUser = $_GET['targetUser'] ?? '';
                             <li><?php echo htmlspecialchars($error); ?></li>
                         <?php endforeach; ?>
                     </ul>
+
                 </div>
             <?php endif; ?>
             
