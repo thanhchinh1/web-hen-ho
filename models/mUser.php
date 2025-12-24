@@ -167,8 +167,20 @@ class User {
             if ($data['lanHoatDongCuoi'] === null) {
                 $isOnline = false;
             } else {
-                // Online nếu hoạt động trong vòng 5 phút
-                $isOnline = $data['minutesAgo'] !== null && $data['minutesAgo'] <= 5;
+                // Online nếu hoạt động trong vòng 30 GIÂY (giảm từ 5 phút)
+                // Sử dụng SECOND để chính xác hơn
+                $stmt2 = $this->conn->prepare("
+                    SELECT TIMESTAMPDIFF(SECOND, lanHoatDongCuoi, NOW()) as secondsAgo
+                    FROM nguoidung 
+                    WHERE maNguoiDung = ?
+                ");
+                $stmt2->bind_param("i", $userId);
+                $stmt2->execute();
+                $result2 = $stmt2->get_result();
+                if ($result2->num_rows > 0) {
+                    $timeData = $result2->fetch_assoc();
+                    $isOnline = $timeData['secondsAgo'] !== null && $timeData['secondsAgo'] <= 30;
+                }
             }
         }
         

@@ -266,7 +266,10 @@ class Message {
             AND trangThai IN ('sent', 'delivered')
         ");
         $stmt->bind_param("ii", $matchId, $userId);
-        return $stmt->execute();
+        $stmt->execute();
+        
+        // Trả về số lượng tin nhắn đã được đánh dấu
+        return $stmt->affected_rows;
     }
     
     /**

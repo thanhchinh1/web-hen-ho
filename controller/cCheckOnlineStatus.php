@@ -39,19 +39,20 @@ try {
     if ($lastActivity) {
         // Kiểm tra online
         if ($lastActivity['lanHoatDongCuoi'] === null) {
-            // Đã logout
+            // Đã logout hoặc đã set offline
             $isOnline = false;
             $lastSeenText = 'Không hoạt động';
         } elseif ($lastActivity['minutesAgo'] !== null) {
-            if ($lastActivity['minutesAgo'] <= 5) {
-                // Online
+            // Giảm timeout từ 5 phút xuống 30 giây để phát hiện offline nhanh hơn
+            if ($lastActivity['minutesAgo'] * 60 <= 30) { // 30 giây
+                // Online - hoạt động trong 30 giây qua
                 $isOnline = true;
                 $lastSeenText = 'online';
             } else {
                 // Offline - hiển thị thời gian
                 $minutes = $lastActivity['minutesAgo'];
                 if ($minutes < 60) {
-                    $lastSeenText = $minutes . ' phút trước';
+                    $lastSeenText = floor($minutes) . ' phút trước';
                 } elseif ($minutes < 1440) {
                     $lastSeenText = floor($minutes / 60) . ' giờ trước';
                 } else {

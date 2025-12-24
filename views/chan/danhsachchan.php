@@ -288,5 +288,10 @@ $blockedUsers = $blockModel->getBlockedUsers($currentUserId);
         @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
     </style>
     
+    <script>
+        window.addEventListener('beforeunload', function() {
+            navigator.sendBeacon('../../controller/cSetOffline.php');
+        });
+    </script>
 </body>
 </html>

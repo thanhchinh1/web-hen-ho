@@ -164,16 +164,16 @@ if ($matchedUserId) {
                         }
                     ?>
                         <div class="message-item <?php echo $isActive; ?> <?php echo $hasUnread ? 'has-unread' : ''; ?>" 
+                             data-user-id="<?php echo $match['maNguoiDung']; ?>"
                              onclick="window.location.href='?match=<?php echo $match['maGhepDoi']; ?>'">
                             <div class="message-avatar">
                                 <img src="<?php echo $avatarSrc; ?>" alt="<?php echo htmlspecialchars($match['ten']); ?>">
                                 <?php 
                                 $isOnline = $userModel->isUserOnline($match['maNguoiDung']);
-                                $isInactive = $userModel->isUserInactive($match['maNguoiDung']);
                                 if ($isOnline): 
                                 ?>
                                     <div class="online-dot pulse" title="Đang online"></div>
-                                <?php elseif ($isInactive): ?>
+                                <?php else: ?>
                                     <div class="offline-dot" title="Không hoạt động"></div>
                                 <?php endif; ?>
                             </div>
@@ -184,16 +184,6 @@ if ($matchedUserId) {
                                         <span class="unread-badge"><?php echo $unreadCount; ?></span>
                                     <?php endif; ?>
                                 </div>
-                                <p class="message-text <?php echo $hasUnread ? 'unread-text' : ''; ?>">
-                                    <?php 
-                                    if ($lastMessage) {
-                                        echo htmlspecialchars(mb_substr($lastMessage['noiDung'], 0, 50));
-                                        if (mb_strlen($lastMessage['noiDung']) > 50) echo '...';
-                                    } else {
-                                        echo 'Bạn vừa ghép đôi với ' . htmlspecialchars($match['ten']) . ', hãy gửi lời chào!';
-                                    }
-                                    ?>
-                                </p>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -598,6 +588,14 @@ if ($matchedUserId) {
 
         function addMessageToUI(message, isSent) {
             const messagesContainer = document.getElementById('chatMessages');
+            
+            // Kiểm tra xem tin nhắn đã tồn tại chưa (tránh duplicate)
+            const existingMessage = messagesContainer.querySelector(`[data-message-id="${message.maTinNhan}"]`);
+            if (existingMessage) {
+                console.log('Message already exists, skipping:', message.maTinNhan);
+                return;
+            }
+            
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message ' + (isSent ? 'sent' : 'received');
             messageDiv.setAttribute('data-message-id', message.maTinNhan);
@@ -964,8 +962,8 @@ if ($matchedUserId) {
         // Cập nhật ngay khi trang load
         updateOnlineStatus();
 
-        // Cập nhật mỗi 2 phút
-        setInterval(updateOnlineStatus, 120000);
+        // Cập nhật mỗi 10 giây để status luôn realtime
+        setInterval(updateOnlineStatus, 10000);
         
         // ===== TYPING INDICATOR =====
         let typingTimeout;
@@ -1167,6 +1165,10 @@ if ($matchedUserId) {
         function updateSidebarOnlineStatus(userId, isOnline) {
             const messageItems = document.querySelectorAll('.message-item');
             messageItems.forEach(item => {
+                // Kiểm tra xem item này có phải là của user cần cập nhật không
+                const itemUserId = item.getAttribute('data-user-id');
+                if (itemUserId != userId) return; // Bỏ qua nếu không phải user này
+                
                 const avatar = item.querySelector('.message-avatar');
                 if (!avatar) return;
                 
@@ -1187,8 +1189,8 @@ if ($matchedUserId) {
         // Cập nhật ngay
         updatePartnerOnlineStatus();
         
-        // Cập nhật mỗi 30 giây
-        setInterval(updatePartnerOnlineStatus, 30000);
+        // Cập nhật mỗi 5 giây để realtime
+        setInterval(updatePartnerOnlineStatus, 5000);
         <?php endif; ?>
     </script>
 
@@ -1200,7 +1202,7 @@ if ($matchedUserId) {
             .catch(error => console.error('Error:', error));
         }
         updateOnlineStatus();
-        setInterval(updateOnlineStatus, 120000);
+        setInterval(updateOnlineStatus, 10000); // Mỗi 10 giây
         let activityTimeout;
         function resetActivityTimer() {
             clearTimeout(activityTimeout);
@@ -1244,10 +1246,13 @@ if ($matchedUserId) {
                     
                     // Kiểm tra tin nhắn mới (so sánh số tin nhắn chưa đọc)
                     if (data.unreadMessages > lastUnreadCount) {
-                        // Có tin nhắn mới -> reload trang để cập nhật
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 500);
+                        // CHỈ reload nếu CHƯA CHỌN ai để nhắn tin (đang ở danh sách)
+                        // Nếu đang chat với ai đó thì KHÔNG reload
+                        if (!currentMatchId || currentMatchId === null) {
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 500);
+                        }
                     }
                     
                     lastNotificationCount = currentTotal;
@@ -1309,5 +1314,22 @@ if ($matchedUserId) {
             color: #999;
         }
     </style>
+    
+    <!-- Script set offline khi tắt tab/đóng browser -->
+    <script>
+        // Set offline khi user tắt tab hoặc đóng browser
+        window.addEventListener('beforeunload', function() {
+            // Sử dụng sendBeacon để đảm bảo request hoàn thành ngay cả khi tab đóng
+            navigator.sendBeacon('../../controller/cSetOffline.php');
+        });
+        
+        // Set offline khi tab bị ẩn (chuyển tab khác)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // User chuyển sang tab khác - có thể set inactive sau 1 khoảng thời gian
+                // Hiện tại không làm gì, chỉ xử lý khi thực sự đóng tab
+            }
+        });
+    </script>
 </body>
 </html>
