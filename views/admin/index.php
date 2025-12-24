@@ -74,8 +74,8 @@ $pendingSupport = $result->fetch_assoc()['total'];
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
-                    <i class="fas fa-heart"></i>
-                    <h2>DuyenHub Admin</h2>
+                    <img src="/public/img/logo.jpg" alt="Logo" style="height:40px;width:auto;vertical-align:middle;">
+                    <h2>DuyenHub</h2>
                 </div>
                 <p class="admin-info">
                     <i class="fas fa-user-shield"></i> <?php echo htmlspecialchars($adminName); ?>
@@ -105,15 +105,6 @@ $pendingSupport = $result->fetch_assoc()['total'];
                     </a>
                 </li>
                 <li>
-                    <a href="hotro.php">
-                        <i class="fas fa-headset"></i>
-                        <span>Hỗ trợ khách hàng</span>
-                        <?php if ($pendingSupport > 0): ?>
-                            <span class="badge"><?php echo $pendingSupport; ?></span>
-                        <?php endif; ?>
-                    </a>
-                </li>
-                <li>
                     <a href="magiamgia.php">
                         <i class="fas fa-ticket-alt"></i>
                         <span>Mã giảm giá</span>
@@ -132,12 +123,6 @@ $pendingSupport = $result->fetch_assoc()['total'];
                     </a>
                 </li>
                 <li class="menu-separator"></li>
-                <li>
-                    <a href="doimatkhau.php">
-                        <i class="fas fa-key"></i>
-                        <span>Đổi mật khẩu</span>
-                    </a>
-                </li>
                 <li>
                     <a href="../../controller/cAdminLogout.php" class="logout-link">
                         <i class="fas fa-sign-out-alt"></i>
@@ -223,20 +208,6 @@ $pendingSupport = $result->fetch_assoc()['total'];
                         </div>
                     </div>
                     
-                    <div class="stat-card orange">
-                        <div class="stat-icon">
-                            <i class="fas fa-headset"></i>
-                        </div>
-                        <div class="stat-details">
-                            <h3><?php echo number_format($pendingSupport); ?></h3>
-                            <p>Yêu cầu hỗ trợ</p>
-                            <?php if ($pendingSupport > 0): ?>
-                                <span class="stat-change negative">
-                                    <i class="fas fa-clock"></i> Đang chờ
-                                </span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
                 </div>
                 
                 <!-- Quick Actions -->
@@ -255,12 +226,6 @@ $pendingSupport = $result->fetch_assoc()['total'];
                         <i class="fas fa-flag"></i>
                         <h3>Xử lý báo cáo</h3>
                         <p><?php echo $pendingReports; ?> báo cáo đang chờ xử lý</p>
-                    </a>
-                    
-                    <a href="hotro.php" class="action-card">
-                        <i class="fas fa-headset"></i>
-                        <h3>Hỗ trợ khách hàng</h3>
-                        <p><?php echo $pendingSupport; ?> yêu cầu hỗ trợ</p>
                     </a>
                     
                     <a href="magiamgia.php" class="action-card">

@@ -10,6 +10,7 @@ require_once '../../models/mProfile.php';
 require_once '../../models/mLike.php';
 require_once '../../models/mNotification.php';
 require_once '../../models/mUser.php';
+require_once '../../models/mVIP.php';
 
 Session::start();
 
@@ -33,6 +34,7 @@ $profileModel = new Profile();
 $likeModel = new Like();
 $notificationModel = new Notification();
 $userModel = new User();
+$vipModel = new VIP();
 $currentUserProfile = $profileModel->getProfile($currentUserId);
 
 // Đếm số ghép đôi mới (chưa nhắn tin)
@@ -88,6 +90,8 @@ $latestReplies = $supportModel->getLatestReplies($currentUserId, 3);
 $successMessage = Session::getFlash('success_message');
 $errorMessage = Session::getFlash('error_message');
 $infoMessage = Session::getFlash('info_message');
+
+$isVIP = $vipModel->isVIP($currentUserId);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -104,22 +108,8 @@ $infoMessage = Session::getFlash('info_message');
 </head>
 <body>
     <?php if ($successMessage): ?>
-    <div id="flashNotification" style="
-        position: fixed;
-        top: 100px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        color: white;
-        padding: 18px 35px;
-        border-radius: 30px;
-        font-size: 16px;
-        font-weight: 600;
-        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
-        z-index: 10000;
-        animation: slideDown 0.3s ease;
-    ">
-        <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+    <div id="flashNotification" class="flash-success">
+        <i class="fas fa-check-circle"></i>
         <?php echo htmlspecialchars($successMessage); ?>
     </div>
     <script>
@@ -132,37 +122,11 @@ $infoMessage = Session::getFlash('info_message');
             }
         }, 4000);
     </script>
-    <style>
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -20px);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, 0);
-            }
-        }
-    </style>
     <?php endif; ?>
     
     <?php if ($infoMessage): ?>
-    <div id="infoNotification" style="
-        position: fixed;
-        top: 100px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: linear-gradient(135deg, #17a2b8 0%, #5BC0DE 100%);
-        color: white;
-        padding: 18px 35px;
-        border-radius: 30px;
-        font-size: 16px;
-        font-weight: 600;
-        box-shadow: 0 8px 25px rgba(23, 162, 184, 0.4);
-        z-index: 10000;
-        animation: slideDown 0.3s ease;
-    ">
-        <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+    <div id="infoNotification" class="flash-info">
+        <i class="fas fa-info-circle"></i>
         <?php echo htmlspecialchars($infoMessage); ?>
     </div>
     <script>
@@ -178,22 +142,8 @@ $infoMessage = Session::getFlash('info_message');
     <?php endif; ?>
     
     <?php if ($errorMessage): ?>
-    <div id="errorNotification" style="
-        position: fixed;
-        top: 100px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        color: white;
-        padding: 18px 35px;
-        border-radius: 30px;
-        font-size: 16px;
-        font-weight: 600;
-        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
-        z-index: 10000;
-        animation: slideDown 0.3s ease;
-    ">
-        <i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i>
+    <div id="errorNotification" class="flash-error">
+        <i class="fas fa-exclamation-circle"></i>
         <?php echo htmlspecialchars($errorMessage); ?>
     </div>
     <script>
@@ -247,6 +197,9 @@ $infoMessage = Session::getFlash('info_message');
                 </a>
                 <div class="user-menu-wrapper">
                     <img src="../../<?php echo htmlspecialchars($currentUserProfile['avt']); ?>" alt="User" class="user-avatar" id="userAvatar">
+                    <?php if ($isVIP): ?>
+                        <span class="vip-badge-header">VIP</span>
+                    <?php endif; ?>
                     <div class="user-dropdown" id="userDropdown" style="display:none;">
                         <a href="../goivip/index.php" class="user-dropdown-item">
                             <i class="fas fa-crown"></i>
@@ -518,7 +471,7 @@ $infoMessage = Session::getFlash('info_message');
             body: new URLSearchParams({ action: 'random_profiles' })
         })
         .then(res => res.json())
-        .then(data => {
+        .then data => {
             if (data.success && data.profiles) {
                 updateProfilesGrid(data.profiles);
                 showNotification('Đã làm mới danh sách hồ sơ!', 'success');

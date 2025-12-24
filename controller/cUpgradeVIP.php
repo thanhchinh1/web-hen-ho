@@ -33,8 +33,29 @@ if (!in_array($months, [1, 3, 6, 12])) {
     exit;
 }
 
+
 $vipModel = new VIP();
 $discountModel = new Discount();
+
+// Lấy tên user
+require_once '../models/mProfile.php';
+$profileModel = new Profile();
+$profile = $profileModel->getProfile($userId);
+$userName = $profile && !empty($profile['ten']) ? $profile['ten'] : 'Chưa cập nhật';
+
+// Tạo giao dịch chờ xác nhận
+$transaction = $vipModel->createVIPTransaction($userId, $userName, $months, $price);
+if (!$transaction['success']) {
+    Session::setFlash('vip_error', 'Không thể tạo giao dịch: ' . $transaction['error']);
+    header('Location: ../views/goivip/thanhtoan.php?months=' . $months);
+    exit;
+}
+
+// Hiển thị thông báo và hướng dẫn chờ admin xác nhận
+Session::setFlash('vip_success', 'Giao dịch của bạn đã được ghi nhận với mã chuyển khoản: ' . $transaction['ma_chuyen_khoan'] . '. Vui lòng chờ admin xác nhận.');
+Session::delete('applied_discount');
+header('Location: ../views/goivip/thanhtoan.php?months=' . $months);
+exit;
 
 // Verify price (considering discount)
 $expectedPrice = $vipModel->getVIPPrice($months);

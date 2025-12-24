@@ -1,12 +1,38 @@
+
 <?php
 require_once 'mDbconnect.php';
 
 class VIP {
     private $conn;
-    
+
     public function __construct() {
         $db = clsConnect::getInstance();
         $this->conn = $db->connect();
+    }
+
+    /**
+     * Tạo giao dịch nâng cấp VIP (chờ xác nhận)
+     */
+    public function createVIPTransaction($userId, $userName, $months, $amount) {
+        // Tạo mã chuyển khoản riêng: VIP {months}T - ID{userId} - random
+        $rand = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6));
+        $maChuyenKhoan = "VIP {$months}T-ID{$userId}-{$rand}";
+        $now = date('Y-m-d H:i:s');
+        // Truyền NULL cho ngay_giao_dich bằng cách để NULL trực tiếp trong SQL
+        $stmt = $this->conn->prepare("INSERT INTO giaodich (user_id, user_name, ma_chuyen_khoan, ngay_giao_dich, trang_thai, thoi_gian_tao) VALUES (?, ?, ?, NULL, 'cho_xac_nhan', ?)");
+        $stmt->bind_param("isss", $userId, $userName, $maChuyenKhoan, $now);
+        if ($stmt->execute()) {
+            $result = [
+                'success' => true,
+                'ma_chuyen_khoan' => $maChuyenKhoan,
+                'giaodich_id' => $this->conn->insert_id
+            ];
+            $stmt->close();
+            return $result;
+        }
+        $error = $stmt->error;
+        $stmt->close();
+        return ['success' => false, 'error' => $error];
     }
     
     /**

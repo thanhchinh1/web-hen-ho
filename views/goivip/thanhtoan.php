@@ -193,7 +193,21 @@ $errorMessage = Session::getFlash('vip_error');
                         </div>
                         <div class="info-row">
                             <span class="info-label"><i class="fas fa-comment-alt"></i> Nội dung CK:</span>
-                            <span class="info-value">VIP <?php echo $months; ?>T - ID<?php echo $userId; ?></span>
+                            <span class="info-value">
+                                <?php
+                                // Lấy mã chuyển khoản từ session flash nếu có
+                                $maChuyenKhoan = null;
+                                if (isset($successMessage) && preg_match('/mã chuyển khoản: ([A-Z0-9\-]+)/i', $successMessage, $m)) {
+                                    $maChuyenKhoan = $m[1];
+                                }
+                                // Nếu chưa có mã, tạo lại đúng format
+                                if (!$maChuyenKhoan) {
+                                    $rand = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6));
+                                    $maChuyenKhoan = "VIP {$months}T-ID{$userId}-{$rand}";
+                                }
+                                echo htmlspecialchars($maChuyenKhoan);
+                                ?>
+                            </span>
                         </div>
                     </div>
                     
