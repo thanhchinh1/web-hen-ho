@@ -170,10 +170,11 @@ if ($matchedUserId) {
                                 <img src="<?php echo $avatarSrc; ?>" alt="<?php echo htmlspecialchars($match['ten']); ?>">
                                 <?php 
                                 $isOnline = $userModel->isUserOnline($match['maNguoiDung']);
+                                $isInactive = $userModel->isUserInactive($match['maNguoiDung']);
                                 if ($isOnline): 
                                 ?>
                                     <div class="online-dot pulse" title="Đang online"></div>
-                                <?php else: ?>
+                                <?php elseif ($isInactive): ?>
                                     <div class="offline-dot" title="Không hoạt động"></div>
                                 <?php endif; ?>
                             </div>
@@ -1314,22 +1315,5 @@ if ($matchedUserId) {
             color: #999;
         }
     </style>
-    
-    <!-- Script set offline khi tắt tab/đóng browser -->
-    <script>
-        // Set offline khi user tắt tab hoặc đóng browser
-        window.addEventListener('beforeunload', function() {
-            // Sử dụng sendBeacon để đảm bảo request hoàn thành ngay cả khi tab đóng
-            navigator.sendBeacon('../../controller/cSetOffline.php');
-        });
-        
-        // Set offline khi tab bị ẩn (chuyển tab khác)
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                // User chuyển sang tab khác - có thể set inactive sau 1 khoảng thời gian
-                // Hiện tại không làm gì, chỉ xử lý khi thực sự đóng tab
-            }
-        });
-    </script>
 </body>
 </html>

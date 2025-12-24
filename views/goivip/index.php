@@ -450,10 +450,5 @@ $unreadMessagesCount = $messageModel->getTotalUnreadCount($userId);
             }
         }
     </style>
-    <script>
-        window.addEventListener('beforeunload', function() {
-            navigator.sendBeacon('../../controller/cSetOffline.php');
-        });
-    </script>
 </body>
 </html>

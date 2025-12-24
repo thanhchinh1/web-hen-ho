@@ -1980,13 +1980,6 @@ $isVIP = $vipModel->isVIP($currentUserId);
             }
         }
     </style>
-    
-    <!-- Script set offline khi tắt tab/đóng browser -->
-    <script>
-        window.addEventListener('beforeunload', function() {
-            navigator.sendBeacon('../../controller/cSetOffline.php');
-        });
-    </script>
     </div>
 </body>
 </html>

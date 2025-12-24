@@ -761,10 +761,5 @@ $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt
             to { transform: translateX(400px); opacity: 0; }
         }
     </style>
-    <script>
-        window.addEventListener('beforeunload', function() {
-            navigator.sendBeacon('../../controller/cSetOffline.php');
-        });
-    </script>
 </body>
 </html>

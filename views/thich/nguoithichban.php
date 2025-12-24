@@ -428,11 +428,8 @@ function timeAgo($datetime) {
         @keyframes slideInRight { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
     </style>
+</body>
+</html>
     
-    <script>
-        window.addEventListener('beforeunload', function() {
-            navigator.sendBeacon('../../controller/cSetOffline.php');
-        });
-    </script>
 </body>
 </html>
