@@ -4,6 +4,7 @@ require_once '../../models/mMatch.php';
 require_once '../../models/mMessage.php';
 require_once '../../models/mProfile.php';
 require_once '../../models/mUser.php';
+require_once '../../models/mNotification.php';
 
 Session::start();
 
@@ -25,6 +26,11 @@ $matchModel = new MatchModel();
 $messageModel = new Message();
 $profileModel = new Profile();
 $userModel = new User();
+
+// Đếm số ghép đôi mới và tin nhắn chưa đọc
+$notificationModel = new Notification();
+$newMatchesCount = $notificationModel->getNewMatchesCount($currentUserId);
+$unreadMessagesCount = $messageModel->getTotalUnreadCount($currentUserId);
 
 // Lấy danh sách tất cả người đã ghép đôi
 $myMatches = $matchModel->getMyMatches($currentUserId);
@@ -96,141 +102,6 @@ if ($matchedUserId) {
     <link rel="stylesheet" href="/public/css/message.css?v=<?php echo time(); ?>">
 </head>
 <body>
-    <?php if ($successMessage && $matchedUserProfile): ?>
-    <!-- Match Celebration Popup -->
-    <div id="matchCelebration" style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.85);
-        z-index: 10000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        animation: fadeIn 0.3s ease;
-    ">
-        <div style="
-            background: white;
-            padding: 50px;
-            border-radius: 25px;
-            text-align: center;
-            max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-            animation: scaleIn 0.4s ease;
-        ">
-            <div style="font-size: 100px; margin-bottom: 25px; animation: heartBeat 1.5s infinite;">
-                💕
-            </div>
-            <h1 style="
-                color: #e94057; 
-                margin: 0 0 15px 0; 
-                font-size: 36px;
-                font-weight: 700;
-            ">
-                Ghép Đôi Thành Công!
-            </h1>
-            <div style="
-                width: 80px;
-                height: 80px;
-                border-radius: 50%;
-                overflow: hidden;
-                margin: 20px auto;
-                border: 4px solid #e94057;
-            ">
-                <?php 
-                $matchedAvatar = '/public/img/default-avatar.jpg';
-                if (!empty($matchedUserProfile['avt'])) {
-                    if (strpos($matchedUserProfile['avt'], 'public/') === 0) {
-                        $matchedAvatar = '/' . htmlspecialchars($matchedUserProfile['avt']);
-                    } else {
-                        $matchedAvatar = '/public/uploads/avatars/' . htmlspecialchars($matchedUserProfile['avt']);
-                    }
-                }
-                ?>
-                <img src="<?php echo $matchedAvatar; ?>" 
-                     alt="<?php echo htmlspecialchars($matchedUserProfile['ten']); ?>"
-                     style="width: 100%; height: 100%; object-fit: cover;">
-            </div>
-            <p style="
-                color: #333; 
-                margin: 15px 0 25px 0; 
-                font-size: 18px;
-                line-height: 1.6;
-            ">
-                Bạn và <strong><?php echo htmlspecialchars($matchedUserProfile['ten']); ?></strong> đã thích nhau!<br>
-                Hãy bắt đầu trò chuyện ngay! 💬
-            </p>
-            <button onclick="closeMatchCelebration()" style="
-                padding: 15px 50px;
-                background: linear-gradient(135deg, #e94057 0%, #f27121 100%);
-                color: white;
-                border: none;
-                border-radius: 30px;
-                font-size: 18px;
-                font-weight: 600;
-                cursor: pointer;
-                box-shadow: 0 5px 25px rgba(233,64,87,0.4);
-                transition: all 0.3s ease;
-            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 30px rgba(233,64,87,0.5)'"
-               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 25px rgba(233,64,87,0.4)'">
-                Bắt đầu trò chuyện! 🚀
-            </button>
-        </div>
-    </div>
-    
-    <style>
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes scaleIn {
-            from { 
-                opacity: 0;
-                transform: scale(0.7);
-            }
-            to { 
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        
-        @keyframes heartBeat {
-            0%, 100% { transform: scale(1); }
-            10%, 30% { transform: scale(0.85); }
-            20%, 40%, 60%, 80% { transform: scale(1.15); }
-            50%, 70% { transform: scale(1.05); }
-        }
-    </style>
-    
-    <script>
-        function closeMatchCelebration() {
-            const popup = document.getElementById('matchCelebration');
-            popup.style.animation = 'fadeOut 0.3s ease';
-            setTimeout(() => {
-                popup.remove();
-            }, 300);
-        }
-        
-        // Auto close sau 10 giây
-        setTimeout(() => {
-            const popup = document.getElementById('matchCelebration');
-            if (popup) {
-                closeMatchCelebration();
-            }
-        }, 10000);
-    </script>
-    
-    <style>
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-    </style>
-    <?php endif; ?>
-    
     <div class="chat-container">
         <!-- Left sidebar - Messages list -->
         <div class="chat-sidebar">
@@ -246,6 +117,18 @@ if ($matchedUserId) {
                     </a>
                 </div>
                 <h1>Tin nhắn</h1>
+                <!-- Notification Badge -->
+                <div style="position: absolute; top: 15px; right: 15px; display: flex; gap: 10px;">
+                    <?php if ($newMatchesCount > 0): ?>
+                    <a href="../timkiem/ghepdoinhanh.php" style="position: relative; text-decoration: none;">
+                        <i class="fas fa-heart" style="color: #e94057; font-size: 20px;"></i>
+                        <span id="matchesBadge" style="position: absolute; top: -8px; right: -8px; background: #ff6b9d; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;"><?php echo $newMatchesCount; ?></span>
+                    </a>
+                    <?php endif; ?>
+                    <a href="../trangchu/index.php" style="position: relative; text-decoration: none;">
+                        <i class="fas fa-home" style="color: #667eea; font-size: 20px;"></i>
+                    </a>
+                </div>
             </div>
 
             <!-- Toggle button -->
@@ -1024,14 +907,14 @@ if ($matchedUserId) {
 
             // Start polling nếu có match được chọn
             if (currentMatchId) {
-                // Poll tin nhắn mới mỗi 2 giây
-                pollingInterval = setInterval(checkNewMessages, 2000);
+                // Poll tin nhắn mới mỗi 0.3 giây (300ms) - TỨC THÌ REAL-TIME!
+                pollingInterval = setInterval(checkNewMessages, 300);
                 
-                // Poll status updates mỗi 3 giây (để cập nhật trạng thái realtime)
-                setInterval(checkMessageStatusUpdates, 3000);
+                // Poll status updates mỗi 0.5 giây (500ms) - trạng thái siêu nhanh
+                setInterval(checkMessageStatusUpdates, 500);
                 
-                // Poll typing status mỗi 1 giây
-                setInterval(checkTypingStatus, 1000);
+                // Poll typing status mỗi 0.3 giây (300ms) - typing tức thì
+                setInterval(checkTypingStatus, 300);
                 
                 // Đánh dấu tin nhắn đã xem khi mở trang
                 markMessagesAsSeen();
@@ -1040,8 +923,8 @@ if ($matchedUserId) {
                 updateUnreadBadge(currentMatchId, 0);
             }
             
-            // Update unread badges cho tất cả các match mỗi 5 giây
-            setInterval(updateAllUnreadBadges, 5000);
+            // Update unread badges cho tất cả các match mỗi 2 giây
+            setInterval(updateAllUnreadBadges, 2000);
             
             // Xử lý click vào tin nhắn gửi thất bại để retry
             document.addEventListener('click', function(e) {
@@ -1308,8 +1191,96 @@ if ($matchedUserId) {
         setInterval(updatePartnerOnlineStatus, 30000);
         <?php endif; ?>
     </script>
+
+    <!-- Script cập nhật trạng thái online của bản thân -->
+    <script>
+        function updateOnlineStatus() {
+            fetch('../../controller/cUpdateOnlineStatus.php', {method: 'POST'})
+            .then(response => response.json())
+            .catch(error => console.error('Error:', error));
+        }
+        updateOnlineStatus();
+        setInterval(updateOnlineStatus, 120000);
+        let activityTimeout;
+        function resetActivityTimer() {
+            clearTimeout(activityTimeout);
+            activityTimeout = setTimeout(updateOnlineStatus, 5000);
+        }
+        ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(event => {
+            document.addEventListener(event, resetActivityTimer, true);
+        });
+    </script>
+
+    <!-- Script check thông báo real-time -->
+    <script>
+        let lastNotificationCount = <?php echo ($newMatchesCount + $unreadMessagesCount); ?>;
+        let lastUnreadCount = <?php echo $unreadMessagesCount; ?>;
+        
+        function checkNotifications() {
+            fetch('../../controller/cCheckNotifications.php', {method: 'GET', cache: 'no-cache'})
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Cập nhật badge ghép đôi
+                    const matchesBadge = document.getElementById('matchesBadge');
+                    const matchIcon = document.querySelector('a[href="../timkiem/ghepdoinhanh.php"]');
+                    
+                    if (data.newMatches > 0) {
+                        if (matchesBadge) {
+                            matchesBadge.textContent = data.newMatches;
+                        } else if (matchIcon) {
+                            const badge = document.createElement('span');
+                            badge.id = 'matchesBadge';
+                            badge.textContent = data.newMatches;
+                            badge.style.cssText = 'position: absolute; top: -8px; right: -8px; background: #ff6b9d; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;';
+                            matchIcon.appendChild(badge);
+                        }
+                    } else if (matchesBadge) {
+                        matchesBadge.remove();
+                    }
+                    
+                    // Cập nhật số đếm
+                    const currentTotal = data.unreadMessages + data.newMatches;
+                    
+                    // Kiểm tra tin nhắn mới (so sánh số tin nhắn chưa đọc)
+                    if (data.unreadMessages > lastUnreadCount) {
+                        // Có tin nhắn mới -> reload trang để cập nhật
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 500);
+                    }
+                    
+                    lastNotificationCount = currentTotal;
+                    lastUnreadCount = data.unreadMessages;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        
+        // Check ngay khi trang load (sau 0.5 giây - SIÊU NHANH)
+        setTimeout(checkNotifications, 500);
+        
+        // Check mỗi 0.5 giây (500ms) - REAL-TIME TỨC THÌ!
+        setInterval(checkNotifications, 500);
+        
+        // Check khi user quay lại tab
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) checkNotifications();
+        });
+        
+        window.addEventListener('focus', checkNotifications);
+    </script>
     
     <style>
+        @keyframes slideInRight {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+        
         .message-avatar-small {
             width: 30px;
             height: 30px;

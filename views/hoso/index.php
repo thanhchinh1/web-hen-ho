@@ -2,6 +2,8 @@
 require_once '../../models/mSession.php';
 require_once '../../models/mProfile.php';
 require_once '../../models/mVIP.php';
+require_once '../../models/mNotification.php';
+require_once '../../models/mMessage.php';
 
 Session::start();
 
@@ -24,6 +26,12 @@ $profile = $profileModel->getProfile($currentUserId);
 
 // Kiểm tra VIP status
 $isVIP = $vipModel->isVIP($currentUserId);
+
+// Đếm số ghép đôi mới và tin nhắn chưa đọc
+$notificationModel = new Notification();
+$newMatchesCount = $notificationModel->getNewMatchesCount($currentUserId);
+$messageModel = new Message();
+$unreadMessagesCount = $messageModel->getTotalUnreadCount($currentUserId);
 
 if (!$profile) {
     // Nếu chưa có hồ sơ, chuyển về trang thiết lập
@@ -61,13 +69,19 @@ $interests = explode(', ', $profile['soThich']);
                         <i class="fas fa-home"></i>
                         <span>Trang chủ</span>
                     </a>
-                    <a href="../nhantin/message.php" class="menu-item">
+                    <a href="../nhantin/message.php" class="menu-item" style="position: relative;">
                         <i class="fas fa-comments"></i>
                         <span>Tin nhắn</span>
+                        <?php if ($unreadMessagesCount > 0): ?>
+                        <span class="notification-badge" id="messagesBadge" style="position: absolute; top: -5px; right: -5px; background: #ff4757; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;"><?php echo $unreadMessagesCount; ?></span>
+                        <?php endif; ?>
                     </a>
-                    <a href="../timkiem/ghepdoinhanh.php" class="menu-item">
+                    <a href="../timkiem/ghepdoinhanh.php" class="menu-item" style="position: relative;">
                         <i class="fas fa-search"></i>
                         <span>Tìm kiếm</span>
+                        <?php if ($newMatchesCount > 0): ?>
+                        <span class="notification-badge" id="matchesBadge" style="position: absolute; top: -5px; right: -5px; background: #ff6b9d; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;"><?php echo $newMatchesCount; ?></span>
+                        <?php endif; ?>
                     </a>
                     <a href="#" class="menu-item">
                         <i class="fas fa-question-circle"></i>
@@ -188,5 +202,130 @@ $interests = explode(', ', $profile['soThich']);
             window.history.back();
         }
     </script>
+
+    <!-- Script cập nhật trạng thái online -->
+    <script>
+        function updateOnlineStatus() {
+            fetch('../../controller/cUpdateOnlineStatus.php', {
+                method: 'POST'
+            }).then(response => response.json())
+            .catch(error => console.error('Error updating online status:', error));
+        }
+        updateOnlineStatus();
+        setInterval(updateOnlineStatus, 120000);
+        let activityTimeout;
+        function resetActivityTimer() {
+            clearTimeout(activityTimeout);
+            activityTimeout = setTimeout(updateOnlineStatus, 5000);
+        }
+        ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(event => {
+            document.addEventListener(event, resetActivityTimer, true);
+        });
+    </script>
+
+    <!-- Script check thông báo real-time -->
+    <script>
+        let lastNotificationCount = <?php echo ($newMatchesCount + $unreadMessagesCount); ?>;
+        function checkNotifications() {
+            fetch('../../controller/cCheckNotifications.php', {
+                method: 'GET',
+                cache: 'no-cache'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const messagesBadge = document.getElementById('messagesBadge');
+                    if (data.unreadMessages > 0) {
+                        if (messagesBadge) {
+                            messagesBadge.textContent = data.unreadMessages;
+                        } else {
+                            const messagesLink = document.querySelector('a[href="../nhantin/message.php"]');
+                            if (messagesLink && !messagesLink.querySelector('.notification-badge')) {
+                                const badge = document.createElement('span');
+                                badge.id = 'messagesBadge';
+                                badge.className = 'notification-badge';
+                                badge.textContent = data.unreadMessages;
+                                badge.style.cssText = 'position: absolute; top: -5px; right: -5px; background: #ff4757; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;';
+                                messagesLink.appendChild(badge);
+                            }
+                        }
+                    } else if (messagesBadge) {
+                        messagesBadge.remove();
+                    }
+                    const matchesBadge = document.getElementById('matchesBadge');
+                    if (data.newMatches > 0) {
+                        if (matchesBadge) {
+                            matchesBadge.textContent = data.newMatches;
+                        } else {
+                            const searchLink = document.querySelector('a[href="../timkiem/ghepdoinhanh.php"]');
+                            if (searchLink && !searchLink.querySelector('.notification-badge')) {
+                                const badge = document.createElement('span');
+                                badge.id = 'matchesBadge';
+                                badge.className = 'notification-badge';
+                                badge.textContent = data.newMatches;
+                                badge.style.cssText = 'position: absolute; top: -5px; right: -5px; background: #ff6b9d; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;';
+                                searchLink.appendChild(badge);
+                            }
+                        }
+                    } else if (matchesBadge) {
+                        matchesBadge.remove();
+                    }
+                    const currentTotal = data.unreadMessages + data.newMatches;
+                    if (currentTotal > lastNotificationCount) {
+                        showNewNotificationAlert(data);
+                    }
+                    lastNotificationCount = currentTotal;
+                }
+            })
+            .catch(error => console.error('Error checking notifications:', error));
+        }
+        function showNewNotificationAlert(data) {
+            let message = '';
+            if (data.unreadMessages > 0 && data.newMatches > 0) {
+                message = `💬 ${data.unreadMessages} tin nhắn mới và 💕 ${data.newMatches} ghép đôi mới!`;
+            } else if (data.unreadMessages > 0) {
+                message = `💬 Bạn có ${data.unreadMessages} tin nhắn mới!`;
+            } else if (data.newMatches > 0) {
+                message = `💕 Bạn có ${data.newMatches} ghép đôi mới!`;
+            }
+            if (message) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `position: fixed; top: 80px; right: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 18px 25px; border-radius: 15px; font-size: 15px; font-weight: 600; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); z-index: 10000; cursor: pointer; animation: slideInRight 0.5s ease; max-width: 350px;`;
+                notification.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-bell" style="font-size: 24px;"></i>
+                        <div>
+                            <div style="font-size: 16px; margin-bottom: 4px;">${message}</div>
+                            <div style="font-size: 12px; opacity: 0.9;">Click để xem ngay →</div>
+                        </div>
+                    </div>
+                `;
+                notification.onclick = function() {
+                    window.location.href = '../nhantin/message.php';
+                };
+                document.body.appendChild(notification);
+                setTimeout(() => {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 2000);
+            }
+        }
+        setTimeout(checkNotifications, 2000);
+        setInterval(checkNotifications, 500);
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) checkNotifications();
+        });
+        window.addEventListener('focus', checkNotifications);
+    </script>
+    <style>
+        @keyframes slideInRight {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+    </style>
 </body>
 </html>

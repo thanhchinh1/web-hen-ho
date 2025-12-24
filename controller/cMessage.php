@@ -7,7 +7,6 @@ error_reporting(E_ALL);
 require_once '../models/mSession.php';
 require_once '../models/mMatch.php';
 require_once '../models/mMessage.php';
-require_once '../models/mRateLimit.php';
 
 Session::start();
 
@@ -25,19 +24,8 @@ $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 $matchModel = new MatchModel();
 $messageModel = new Message();
-$rateLimit = new RateLimit();
 
 if ($action === 'send') {
-    // Rate limiting: 30 messages per minute
-    if (!$rateLimit->checkRateLimit($currentUserId, 'send_message', 30, 60)) {
-        echo json_encode([
-            'success' => false, 
-            'message' => 'Bạn đang gửi tin nhắn quá nhanh! Vui lòng chờ.',
-            'rateLimit' => true
-        ]);
-        exit;
-    }
-    
     // Gửi tin nhắn
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         echo json_encode(['success' => false, 'message' => 'Invalid request method']);
@@ -62,9 +50,6 @@ if ($action === 'send') {
     $messageId = $messageModel->sendMessage($matchId, $currentUserId, $content);
     
     if ($messageId) {
-        // Log action cho rate limiting
-        $rateLimit->logAction($currentUserId, 'send_message');
-        
         echo json_encode([
             'success' => true,
             'message' => 'Đã gửi tin nhắn!',

@@ -1682,19 +1682,19 @@ $isVIP = $vipModel->isVIP($currentUserId);
                 
                 document.body.appendChild(notification);
                 
-                // Tự động ẩn sau 5 giây
+                // Tự động ẩn sau 2 giây
                 setTimeout(() => {
-                    notification.style.animation = 'slideOutRight 0.5s ease';
-                    setTimeout(() => notification.remove(), 500);
-                }, 5000);
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 2000);
             }
         }
 
-        // Check ngay khi trang load (sau 2 giây để tránh conflict với page load)
-        setTimeout(checkNotifications, 2000);
+        // Check ngay khi trang load (sau 0.5 giây)
+        setTimeout(checkNotifications, 500);
 
-        // Check mỗi 10 giây (10000ms)
-        setInterval(checkNotifications, 10000);
+        // Check mỗi 0.5 giây (500ms) - REAL-TIME TỨC THÌ!
+        setInterval(checkNotifications, 500);
 
         // Check khi user quay lại tab (visibility change)
         document.addEventListener('visibilitychange', function() {

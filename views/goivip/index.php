@@ -2,6 +2,8 @@
 require_once '../../models/mSession.php';
 require_once '../../models/mVIP.php';
 require_once '../../models/mProfile.php';
+require_once '../../models/mNotification.php';
+require_once '../../models/mMessage.php';
 
 Session::start();
 
@@ -21,6 +23,12 @@ $daysRemaining = $vipModel->getDaysRemaining($userId);
 $profileModel = new Profile();
 $profile = $profileModel->getProfile($userId);
 $avatarPath = !empty($profile['avt']) ? $profile['avt'] : 'public/img/default-avatar.jpg';
+
+// Đếm số ghép đôi mới và tin nhắn chưa đọc
+$notificationModel = new Notification();
+$newMatchesCount = $notificationModel->getNewMatchesCount($userId);
+$messageModel = new Message();
+$unreadMessagesCount = $messageModel->getTotalUnreadCount($userId);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -48,13 +56,19 @@ $avatarPath = !empty($profile['avt']) ? $profile['avt'] : 'public/img/default-av
                         <i class="fas fa-home"></i>
                         <span>Trang chủ</span>
                     </a>
-                    <a href="../nhantin/message.php" class="menu-item">
+                    <a href="../nhantin/message.php" class="menu-item" style="position: relative;">
                         <i class="fas fa-comments"></i>
                         <span>Tin nhắn</span>
+                        <?php if ($unreadMessagesCount > 0): ?>
+                        <span class="notification-badge" id="messagesBadge" style="position: absolute; top: -5px; right: -5px; background: #ff4757; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;"><?php echo $unreadMessagesCount; ?></span>
+                        <?php endif; ?>
                     </a>
-                    <a href="../timkiem/ghepdoinhanh.php" class="menu-item">
+                    <a href="../timkiem/ghepdoinhanh.php" class="menu-item" style="position: relative;">
                         <i class="fas fa-search"></i>
                         <span>Tìm kiếm</span>
+                        <?php if ($newMatchesCount > 0): ?>
+                        <span class="notification-badge" id="matchesBadge" style="position: absolute; top: -5px; right: -5px; background: #ff6b9d; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;"><?php echo $newMatchesCount; ?></span>
+                        <?php endif; ?>
                     </a>
                     <a href="#" class="menu-item">
                         <i class="fas fa-question-circle"></i>
@@ -239,5 +253,202 @@ $avatarPath = !empty($profile['avt']) ? $profile['avt'] : 'public/img/default-av
             </div>
         </div>
     </footer>
+
+    <!-- Script cập nhật trạng thái online -->
+    <script>
+        // Cập nhật trạng thái online mỗi 2 phút
+        function updateOnlineStatus() {
+            fetch('../../controller/cUpdateOnlineStatus.php', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Online status updated');
+                }
+            })
+            .catch(error => {
+                console.error('Error updating online status:', error);
+            });
+        }
+
+        // Cập nhật ngay khi trang load
+        updateOnlineStatus();
+
+        // Cập nhật mỗi 2 phút (120000ms)
+        setInterval(updateOnlineStatus, 120000);
+
+        // Cập nhật khi user tương tác
+        let activityTimeout;
+        function resetActivityTimer() {
+            clearTimeout(activityTimeout);
+            activityTimeout = setTimeout(updateOnlineStatus, 5000);
+        }
+
+        // Lắng nghe các sự kiện tương tác
+        ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(event => {
+            document.addEventListener(event, resetActivityTimer, true);
+        });
+    </script>
+
+    <!-- Script check thông báo real-time -->
+    <script>
+        let lastNotificationCount = <?php echo ($newMatchesCount + $unreadMessagesCount); ?>;
+        
+        // Check và cập nhật số thông báo mới
+        function checkNotifications() {
+            fetch('../../controller/cCheckNotifications.php', {
+                method: 'GET',
+                cache: 'no-cache'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Cập nhật badge tin nhắn
+                    const messagesBadge = document.getElementById('messagesBadge');
+                    if (data.unreadMessages > 0) {
+                        if (messagesBadge) {
+                            messagesBadge.textContent = data.unreadMessages;
+                        } else {
+                            // Tạo badge mới nếu chưa có
+                            const messagesLink = document.querySelector('a[href="../nhantin/message.php"]');
+                            if (messagesLink && !messagesLink.querySelector('.notification-badge')) {
+                                const badge = document.createElement('span');
+                                badge.id = 'messagesBadge';
+                                badge.className = 'notification-badge';
+                                badge.textContent = data.unreadMessages;
+                                badge.style.cssText = 'position: absolute; top: -5px; right: -5px; background: #ff4757; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;';
+                                messagesLink.appendChild(badge);
+                            }
+                        }
+                    } else if (messagesBadge) {
+                        messagesBadge.remove();
+                    }
+                    
+                    // Cập nhật badge ghép đôi
+                    const matchesBadge = document.getElementById('matchesBadge');
+                    if (data.newMatches > 0) {
+                        if (matchesBadge) {
+                            matchesBadge.textContent = data.newMatches;
+                        } else {
+                            // Tạo badge mới nếu chưa có
+                            const searchLink = document.querySelector('a[href="../timkiem/ghepdoinhanh.php"]');
+                            if (searchLink && !searchLink.querySelector('.notification-badge')) {
+                                const badge = document.createElement('span');
+                                badge.id = 'matchesBadge';
+                                badge.className = 'notification-badge';
+                                badge.textContent = data.newMatches;
+                                badge.style.cssText = 'position: absolute; top: -5px; right: -5px; background: #ff6b9d; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;';
+                                searchLink.appendChild(badge);
+                            }
+                        }
+                    } else if (matchesBadge) {
+                        matchesBadge.remove();
+                    }
+                    
+                    // Hiển thị thông báo popup nếu có thay đổi
+                    const currentTotal = data.unreadMessages + data.newMatches;
+                    if (currentTotal > lastNotificationCount) {
+                        showNewNotificationAlert(data);
+                    }
+                    lastNotificationCount = currentTotal;
+                }
+            })
+            .catch(error => {
+                console.error('Error checking notifications:', error);
+            });
+        }
+        
+        // Hiển thị thông báo popup khi có tin nhắn/match mới
+        function showNewNotificationAlert(data) {
+            let message = '';
+            if (data.unreadMessages > 0 && data.newMatches > 0) {
+                message = `💬 ${data.unreadMessages} tin nhắn mới và 💕 ${data.newMatches} ghép đôi mới!`;
+            } else if (data.unreadMessages > 0) {
+                message = `💬 Bạn có ${data.unreadMessages} tin nhắn mới!`;
+            } else if (data.newMatches > 0) {
+                message = `💕 Bạn có ${data.newMatches} ghép đôi mới!`;
+            }
+            
+            if (message) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 18px 25px;
+                    border-radius: 15px;
+                    font-size: 15px;
+                    font-weight: 600;
+                    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                    z-index: 10000;
+                    cursor: pointer;
+                    animation: slideInRight 0.5s ease;
+                    max-width: 350px;
+                `;
+                notification.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-bell" style="font-size: 24px;"></i>
+                        <div>
+                            <div style="font-size: 16px; margin-bottom: 4px;">${message}</div>
+                            <div style="font-size: 12px; opacity: 0.9;">Click để xem ngay →</div>
+                        </div>
+                    </div>
+                `;
+                notification.onclick = function() {
+                    window.location.href = '../nhantin/message.php';
+                };
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 2000);
+            }
+        }
+
+        // Check ngay khi trang load (sau 2 giây)
+        setTimeout(checkNotifications, 2000);
+
+        // Check mỗi 0.5 giây (500ms) - REAL-TIME TỨC THÌ!
+        setInterval(checkNotifications, 500);
+
+        // Check khi user quay lại tab
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                checkNotifications();
+            }
+        });
+
+        // Check khi user focus vào window
+        window.addEventListener('focus', checkNotifications);
+    </script>
+
+    <style>
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    </style>
 </body>
 </html>
