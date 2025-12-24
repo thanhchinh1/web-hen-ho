@@ -72,11 +72,8 @@ $excludeIds = array_unique(array_merge(
     $matchedUserIds
 ));
 
-// Lấy giới tính của người dùng hiện tại
-$currentUserGender = $currentUserProfile['gioiTinh'] ?? null;
-
-// Lấy danh sách hồ sơ để hiển thị (chỉ lấy giới tính đối lập)
-$allProfiles = $profileModel->getAllProfiles(12, 0, $excludeIds, $currentUserGender);
+// Lấy danh sách hồ sơ để hiển thị 
+$allProfiles = $profileModel->getAllProfiles(12, 0, $excludeIds);
 
 // Lấy thông báo hệ thống từ admin
 $systemNotifications = $notificationModel->getSystemNotifications(3);

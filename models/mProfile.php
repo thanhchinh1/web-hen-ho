@@ -149,25 +149,14 @@ class Profile {
      * Loại trừ: chính mình, người đã thích, người đã thích mình
      * Sử dụng random offset thay vì ORDER BY RAND() để tăng hiệu năng
      */
-    public function getAllProfiles($limit = 12, $offset = 0, $excludeUserIds = [], $currentUserGender = null) {
+    public function getAllProfiles($limit = 12, $offset = 0, $excludeUserIds = []) {
         // Tạo placeholder cho excludeUserIds
         $excludeCondition = '';
         if (!empty($excludeUserIds)) {
             $placeholders = str_repeat('?,', count($excludeUserIds) - 1) . '?';
             $excludeCondition = " AND n.maNguoiDung NOT IN ($placeholders)";
         }
-        
-        // Thêm điều kiện lọc giới tính đối lập
-        $genderCondition = '';
-        $targetGender = null;
-        if ($currentUserGender === 'Nam') {
-            $targetGender = 'Nữ';
-            $genderCondition = " AND h.gioiTinh = 'Nữ'";
-        } elseif ($currentUserGender === 'Nữ') {
-            $targetGender = 'Nam';
-            $genderCondition = " AND h.gioiTinh = 'Nam'";
-        }
-        
+
         // Đếm tổng số records để tính random offset
         $countQuery = "
             SELECT COUNT(*) as total
@@ -175,7 +164,7 @@ class Profile {
             INNER JOIN nguoidung n ON h.maNguoiDung = n.maNguoiDung
             WHERE n.trangThaiNguoiDung = 'active'
             $excludeCondition
-            $genderCondition
+            
         ";
         
         $countStmt = $this->conn->prepare($countQuery);
@@ -206,7 +195,6 @@ class Profile {
             INNER JOIN nguoidung n ON h.maNguoiDung = n.maNguoiDung
             WHERE n.trangThaiNguoiDung = 'active'
             $excludeCondition
-            $genderCondition
             ORDER BY h.maHoSo
             LIMIT ? OFFSET ?
         ";

@@ -68,7 +68,7 @@ $errorMessage = Session::getFlash('vip_error');
                         Trang chủ
                     </a>
                     <a href="../nhantin/message.php" class="nav-link">
-                        <i class="fas fa-comment"></i>
+                        <i class="fas fa-comments"></i>
                         Tin nhắn
                     </a>
                     <a href="#" class="nav-link" onclick="openSearchModal(); return false;">
