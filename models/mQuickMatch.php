@@ -225,18 +225,36 @@ class QuickMatch {
             error_log("🎯 Số ứng viên sau khi lọc: $candidateCount");
             error_log("Danh sách ứng viên: " . print_r($candidateUsers, true));
             
-            // Tính độ phù hợp với từng người
-            $bestMatch = null;
-            $highestScore = 30; // Ngưỡng tối thiểu để ghép đôi (30%)
+            // Tính độ phù hợp với TẤT CẢ ứng viên và sắp xếp theo độ phù hợp
+            $candidatesWithScores = [];
             
             foreach ($candidateUsers as $candidateId) {
                 $score = $this->matching->calculateCompatibility($userId, $candidateId);
                 error_log("Độ phù hợp với user $candidateId: $score%");
                 
-                if ($score > $highestScore) {
-                    $highestScore = $score;
-                    $bestMatch = $candidateId;
+                // Chỉ thêm vào danh sách nếu đạt ngưỡng tối thiểu 30%
+                if ($score >= 30) {
+                    $candidatesWithScores[] = [
+                        'userId' => $candidateId,
+                        'score' => $score
+                    ];
                 }
+            }
+            
+            // Sắp xếp theo điểm số GIẢM DẦN - ưu tiên người có điểm cao nhất
+            usort($candidatesWithScores, function($a, $b) {
+                return $b['score'] - $a['score'];
+            });
+            
+            error_log("📊 Danh sách sau khi sắp xếp: " . print_r($candidatesWithScores, true));
+            
+            // Chọn người có điểm cao nhất
+            $bestMatch = null;
+            $highestScore = 0;
+            
+            if (!empty($candidatesWithScores)) {
+                $bestMatch = $candidatesWithScores[0]['userId'];
+                $highestScore = $candidatesWithScores[0]['score'];
             }
             
             // Nếu tìm thấy người phù hợp, KHÓA partner và tạo match

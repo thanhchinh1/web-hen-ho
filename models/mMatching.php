@@ -92,27 +92,29 @@ class Matching {
         }
         
         // Xác định giới tính tìm kiếm (ngược lại với giới tính của user)
+        // CHỈ ghép Nam với Nữ và ngược lại
         $targetGender = '';
         if ($currentUser['gioiTinh'] == 'Nam') {
-            $targetGender = 'Nu';
-        } elseif ($currentUser['gioiTinh'] == 'Nu') {
+            $targetGender = 'Nữ';
+        } elseif ($currentUser['gioiTinh'] == 'Nữ') {
             $targetGender = 'Nam';
+        } else {
+            // Nếu là giới tính khác hoặc không xác định, không tìm kiếm
+            return [];
         }
         
         // Query lấy danh sách người dùng phù hợp
+        // LUÔN LUÔN lọc theo giới tính đối lập
         $sql = "
             SELECT h.*, n.maNguoiDung, n.tenDangNhap
             FROM hoso h
             INNER JOIN nguoidung n ON h.maNguoiDung = n.maNguoiDung
             WHERE n.trangThaiNguoiDung = 'active'
             AND n.maNguoiDung NOT IN ($placeholders)
+            AND h.gioiTinh = '$targetGender'
+            ORDER BY h.maHoSo DESC 
+            LIMIT 50
         ";
-        
-        if ($targetGender) {
-            $sql .= " AND h.gioiTinh = '$targetGender'";
-        }
-        
-        $sql .= " ORDER BY h.maHoSo DESC LIMIT 50"; // Lấy 50 người để tính toán
         
         $stmt = $this->conn->prepare($sql);
         $types = str_repeat('i', count($excludedUsers));
