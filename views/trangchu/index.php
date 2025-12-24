@@ -288,7 +288,7 @@ $infoMessage = Session::getFlash('info_message');
 
     <!-- Hero Section -->
     <section class="hero-section">
-        <img src="../../public/img/header1.jpg" alt="1Love - Chỉ một tình yêu" class="hero-bg-image">
+        <img id="heroSlideshow" src="../../public/img/header1.jpg" alt="1Love - Chỉ một tình yêu" class="hero-bg-image">
         <div class="hero-content">
             <div class="hero-text">
                 <h1 style="color:#fff;">Tìm kiếm một nửa yêu thương của bạn</h1>
@@ -298,6 +298,31 @@ $infoMessage = Session::getFlash('info_message');
     </section>
 
     <!-- System Notifications Section -->
+    <script>
+    // Danh sách các ảnh header
+    //const headerImages = [
+        //'../../public/img/header1.jpg',
+        //'../../public/img/header3.jpg'
+
+    //];
+    let currentHeader = 0;
+    setInterval(() => {
+        currentHeader = (currentHeader + 1) % headerImages.length;
+        const img = document.getElementById('heroSlideshow');
+        if (img) {
+            img.style.opacity = 0;
+            setTimeout(() => {
+                img.src = headerImages[currentHeader];
+                img.style.opacity = 1;
+            }, 400);
+        }
+    }, 5000);
+    </script>
+    <style>
+    .hero-bg-image {
+        transition: opacity 0.4s;
+    }
+    </style>
     <?php if (!empty($systemNotifications)): ?>
     <section class="notifications-section">
         <div class="section-header">
@@ -456,9 +481,35 @@ $infoMessage = Session::getFlash('info_message');
 
     </section>
     <div class="reload-btn-wrapper">
-        <button onclick="window.location.reload();" class="btn-reload">
-            Làm mới danh sách hồ sơ
+        <button onclick="reloadProfilesAjax();" class="btn-reload">
+            Làm mới danh sách
         </button>
+    <script>
+    // Làm mới danh sách hồ sơ nổi bật bằng AJAX, không reload trang
+    function reloadProfilesAjax() {
+        const btn = document.querySelector('.btn-reload');
+        btn.disabled = true;
+        btn.textContent = 'Đang làm mới...';
+        fetch('../../controller/cSearch.php', {
+            method: 'POST',
+            body: new URLSearchParams({ action: 'random_profiles' })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.profiles) {
+                updateProfilesGrid(data.profiles);
+                showNotification('Đã làm mới danh sách hồ sơ!', 'success');
+            } else {
+                showNotification('Không thể làm mới danh sách!', 'error');
+            }
+        })
+        .catch(() => showNotification('Có lỗi xảy ra!', 'error'))
+        .finally(() => {
+            btn.disabled = false;
+            btn.textContent = 'Làm mới danh sách hồ sơ';
+        });
+    }
+    </script>
     </div>
 
     <!-- VIP Upgrade Section -->
@@ -518,10 +569,11 @@ $infoMessage = Session::getFlash('info_message');
                             <span class="price">99.000đ</span>
                             <span class="period">/tháng</span>
                         </div>
-                        <a href="../goivip/thanhtoan.php?package=1" class="btn-select-package">
+                        <a href="../goivip/thanhtoan.php?package=1" class="btn-select-package btn-select-package-one">
                             <i class="fas fa-crown"></i>
                             Nâng cấp ngay
                         </a>
+
                     </div>
 
                     <!-- Gói 3 Tháng - Phổ biến -->

@@ -1,3 +1,9 @@
+/* Bo tròn nút Làm mới danh sách hồ sơ */
+.btn-reload {
+    border-radius: 32px !important;
+    padding-left: 36px;
+    padding-right: 36px;
+}
 /* Hero Section Background Image Full */
 .hero-section {
     position: relative;
@@ -1383,6 +1389,10 @@ body {
     text-align: center;
     color: #636e72;
     font-size: 0.9rem;
+}
+.btn-select-package-one{
+     margin-top: 59px;
+
 }
 
 /* Responsive Design */

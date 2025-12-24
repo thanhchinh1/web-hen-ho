@@ -57,11 +57,30 @@ $errorMessage = Session::getFlash('vip_error');
     <!-- Header -->
     <header class="main-header">
         <div class="header-container">
-            <a href="../trangchu/index.php" class="logo">
-                <img src="../../public/img/logo.jpg" alt="DuyenHub Logo">
-                <span class="logo-text">DuyenHub</span>
-            </a>
-            
+            <div class="header-left">
+                <a href="../trangchu/index.php" class="logo">
+                    <img src="../../public/img/logo.jpg" alt="Kết Nối Yêu Thương">
+                    <span class="logo-text">DuyenHub</span>
+                </a>
+                <nav class="main-nav">
+                    <a href="../trangchu/index.php" class="nav-link active">
+                        <i class="fas fa-home"></i>
+                        Trang chủ
+                    </a>
+                    <a href="../nhantin/message.php" class="nav-link">
+                        <i class="fas fa-comment"></i>
+                        Tin nhắn
+                    </a>
+                    <a href="#" class="nav-link" onclick="openSearchModal(); return false;">
+                        <i class="fas fa-search"></i>
+                        Tìm kiếm
+                    </a>
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Trợ giúp</span>
+                    </a>
+                </nav>
+            </div>
         </div>
     </header>
 

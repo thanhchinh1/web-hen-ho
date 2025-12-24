@@ -22,7 +22,71 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $currentUserId = Session::getUserId();
+
 $action = $_POST['action'] ?? '';
+
+if ($action === 'random_profiles') {
+    try {
+        $profileModel = new Profile();
+        $likeModel = new Like();
+        $blockModel = new Block();
+        $userModel = new User();
+
+        // Lấy danh sách người cần loại trừ
+        $likedUserIds = $likeModel->getLikedUserIds($currentUserId);
+        $whoLikedMeIds = $likeModel->getUserIdsWhoLikedMe($currentUserId);
+        $blockedUserIds = $blockModel->getBlockedUserIds($currentUserId);
+        $excludeIds = array_unique(array_merge([$currentUserId], $likedUserIds, $whoLikedMeIds, $blockedUserIds));
+
+        // Lấy random 12 hồ sơ
+        $results = $profileModel->getAllProfiles(12, 0, $excludeIds);
+
+        $profiles = [];
+        foreach ($results as $profile) {
+            $age = $profileModel->calculateAge($profile['ngaySinh']);
+            $avatarSrc = !empty($profile['avt']) ? $profile['avt'] : 'public/img/default-avatar.jpg';
+            $isOnline = $userModel->isUserOnline($profile['maNguoiDung']);
+            $lastActivity = $userModel->getLastActivity($profile['maNguoiDung']);
+            $lastSeenText = '';
+            if ($isOnline) {
+                $lastSeenText = 'online';
+            } elseif ($lastActivity && $lastActivity['minutesAgo'] !== null) {
+                $minutes = $lastActivity['minutesAgo'];
+                if ($minutes < 60) {
+                    $lastSeenText = $minutes . ' phút trước';
+                } elseif ($minutes < 1440) {
+                    $lastSeenText = floor($minutes / 60) . ' giờ trước';
+                } else {
+                    $lastSeenText = floor($minutes / 1440) . ' ngày trước';
+                }
+            }
+            $profiles[] = [
+                'id' => $profile['maNguoiDung'],
+                'name' => $profile['ten'],
+                'age' => $age,
+                'gender' => $profile['gioiTinh'],
+                'location' => $profile['noiSong'],
+                'goal' => $profile['mucTieuPhatTrien'],
+                'avatar' => $avatarSrc,
+                'education' => $profile['hocVan'] ?? '',
+                'status' => $profile['tinhTrangHonNhan'] ?? '',
+                'isOnline' => $isOnline,
+                'lastSeen' => $lastSeenText
+            ];
+        }
+        echo json_encode([
+            'success' => true,
+            'profiles' => $profiles
+        ]);
+    } catch (Exception $e) {
+        error_log("Random profiles error: " . $e->getMessage());
+        echo json_encode([
+            'success' => false,
+            'message' => 'Có lỗi xảy ra khi làm mới!'
+        ]);
+    }
+    exit;
+}
 
 if ($action !== 'search') {
     echo json_encode(['success' => false, 'message' => 'Invalid action']);

@@ -138,7 +138,7 @@ $avatarPath = !empty($profile['avt']) ? $profile['avt'] : 'public/img/default-av
                                 <span class="amount">99.000đ</span>
                                 <span class="period">/tháng</span>
                             </div>
-                            <a href="thanhtoan.php?months=1" class="btn-upgrade">
+                            <a href="../goivip/thanhtoan.php?package=1" class="btn-select-package btn-select-package-one">
                                 <i class="fas fa-crown"></i> Nâng cấp ngay
                             </a>
                         </div>
