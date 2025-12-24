@@ -116,7 +116,8 @@ if (is_array($loginResult) && $loginResult['status'] === 'success') {
             exit;
         }
         if (isset($_GET['redirect']) && $_GET['redirect'] === 'profile' && isset($_GET['id'])) {
-            header('Location: ../views/hoso/xemnguoikhac.php?id=' . urlencode($_GET['id']));
+            // Thêm flag 'from_login' để xemnguoikhac.php biết user vừa đăng nhập
+            header('Location: ../views/hoso/xemnguoikhac.php?id=' . urlencode($_GET['id']) . '&from_login=1');
             exit;
         } else {
             header('Location: ../views/trangchu/index.php');

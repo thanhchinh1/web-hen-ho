@@ -562,6 +562,8 @@ $isVIP = $vipModel->isVIP($currentUserId);
         <button onclick="reloadProfilesAjax();" class="btn-reload">
             Làm mới danh sách
         </button>
+    </div>
+
     <script>
     // Làm mới danh sách hồ sơ nổi bật bằng AJAX, không reload trang
     function reloadProfilesAjax() {
@@ -577,7 +579,7 @@ $isVIP = $vipModel->isVIP($currentUserId);
             body: new URLSearchParams({ action: 'random_profiles' })
         })
         .then(res => res.json())
-        .then data => {
+        .then(data => {
             if (data.success && data.profiles) {
                 updateProfilesGrid(data.profiles);
                 showNotification('Đã làm mới danh sách hồ sơ!', 'success');
@@ -592,7 +594,6 @@ $isVIP = $vipModel->isVIP($currentUserId);
         });
     }
     </script>
-    </div>
 
     <!-- VIP Upgrade Section -->
     <section class="vip-upgrade-section">

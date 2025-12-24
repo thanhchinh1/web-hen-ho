@@ -362,6 +362,20 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
     </div>
 
     <script>
+        // Xử lý history để tránh quay lại trang đăng nhập khi nhấn back
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromLogin = urlParams.get('from_login') === '1';
+            
+            // Nếu vừa đăng nhập xong
+            if (fromLogin) {
+                // Thay thế history state hiện tại, xóa trang login khỏi lịch sử
+                // Và xóa parameter from_login khỏi URL
+                const cleanUrl = window.location.pathname + '?id=' + urlParams.get('id');
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+        })();
+
         // Toggle like/unlike
         function toggleLike(targetUserId) {
             const likeBtn = document.getElementById('likeBtn');
