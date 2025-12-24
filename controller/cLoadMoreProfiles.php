@@ -34,24 +34,28 @@ $blockModel = new Block();
 $matchModel = new MatchModel();
 $userModel = new User();
 
-// Lấy giới tính của người dùng hiện tại
-$currentUserProfile = $profileModel->getProfile($currentUserId);
-$currentUserGender = $currentUserProfile['gioiTinh'] ?? null;
-
 // Lấy danh sách ID cần loại trừ
 $likedUserIds = $likeModel->getLikedUserIds($currentUserId);
 $whoLikedMeIds = $likeModel->getUserIdsWhoLikedMe($currentUserId);
 $blockedUserIds = $blockModel->getBlockedUserIds($currentUserId);
+$whoBlockedMeIds = $blockModel->getUserIdsWhoBlockedMe($currentUserId);
 $myMatches = $matchModel->getMyMatches($currentUserId);
 $matchedUserIds = array_map(function($match) {
     return $match['maNguoiDung'];
 }, $myMatches);
 
-// Kết hợp và thêm chính mình vào danh sách loại trừ
-$excludeIds = array_unique(array_merge([$currentUserId], $likedUserIds, $whoLikedMeIds, $blockedUserIds, $matchedUserIds));
+// Kết hợp và thêm chính mình vào danh sách loại trừ (bao gồm cả người đã chặn và bị chặn)
+$excludeIds = array_unique(array_merge(
+    [$currentUserId], 
+    $likedUserIds, 
+    $whoLikedMeIds, 
+    $blockedUserIds, 
+    $whoBlockedMeIds, 
+    $matchedUserIds
+));
 
-// Lấy thêm hồ sơ mới (chỉ lấy giới tính đối lập)
-$newProfiles = $profileModel->getAllProfiles($count, 0, $excludeIds, $currentUserGender);
+// Lấy thêm hồ sơ mới
+$newProfiles = $profileModel->getAllProfiles($count, 0, $excludeIds);
 
 if (empty($newProfiles)) {
     echo json_encode(['success' => true, 'profiles' => [], 'message' => 'Không còn hồ sơ mới']);

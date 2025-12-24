@@ -691,55 +691,58 @@ body {
 
 .matches-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
 }
 
 .match-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    border: 1px solid #e8e8e8;
+    border-radius: 16px;
     background: white;
-    border-radius: 15px;
-    overflow: hidden;
     transition: all 0.3s ease;
+    position: relative;
+    text-align: center;
     cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    border: 2px solid transparent;
 }
 
 .match-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(255, 107, 157, 0.25);
-    border-color: #ff6b9d;
+    box-shadow: 0 4px 20px rgba(255, 107, 157, 0.2);
+    transform: translateY(-3px);
 }
 
 .match-avatar {
     position: relative;
-    width: 100%;
-    padding-top: 100%;
-    overflow: hidden;
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 15px;
+    flex-shrink: 0;
 }
 
 .match-avatar img {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
+    border-radius: 50%;
     object-fit: cover;
+    display: block;
 }
 
 .match-badge {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: -5px;
+    right: -5px;
     background: linear-gradient(135deg, #ff6b9d 0%, #ff4d6d 100%);
     color: white;
-    width: 45px;
-    height: 45px;
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: 0.9rem;
     box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4);
     animation: pulse 2s ease-in-out infinite;
 }
@@ -750,48 +753,60 @@ body {
 }
 
 .match-info {
-    padding: 1.25rem;
+    width: 100%;
 }
 
 .match-name {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 0.5rem;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 8px 0;
 }
 
 .match-location {
-    font-size: 0.9rem;
+    font-size: 14px;
     color: #666;
-    margin-bottom: 0.4rem;
+    margin: 0 0 8px 0;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    justify-content: center;
+    gap: 5px;
 }
 
 .match-location i {
     color: #ff6b9d;
+    font-size: 12px;
 }
 
 .match-date {
-    font-size: 0.85rem;
-    color: #999;
-    font-style: italic;
+    font-size: 13px;
+    color: #ff6b9d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0;
+    font-weight: 500;
 }
 
 .match-actions {
-    padding: 0 1.25rem 1.25rem;
+    width: 100%;
+    margin-top: 12px;
 }
 
 .btn-chat {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     width: 100%;
-    padding: 0.75rem;
+    padding: 12px 20px;
     background: linear-gradient(135deg, #ff6b9d 0%, #ff4d6d 100%);
     color: white;
     text-align: center;
     text-decoration: none;
-    border-radius: 10px;
+    border-radius: 8px;
+    font-size: 14px;
     font-weight: 600;
     transition: all 0.3s ease;
     border: none;

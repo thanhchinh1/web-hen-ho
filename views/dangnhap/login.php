@@ -109,14 +109,14 @@ $targetUser = $_GET['targetUser'] ?? '';
 
             <form action="<?php echo $formAction; ?>" method="POST" id="loginForm">
                 <div class="form-group">
-                    <label for="email">Email/SĐT</label>
+                    <label for="email">Email</label>
                     <div class="input-wrapper">
                         <input 
                             type="text" 
                             id="email" 
                             name="email" 
                             class="form-control" 
-                            placeholder="Nhập email hoặc số điện thoại"
+                            placeholder="Nhập email"
                             value="<?php echo isset($formData['email']) ? htmlspecialchars($formData['email']) : ''; ?>"
                             required
                         >

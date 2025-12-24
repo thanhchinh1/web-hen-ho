@@ -77,7 +77,22 @@ if ($likeModel->hasLiked($userId, $targetUserId)) {
         echo json_encode(['success' => false, 'message' => 'Có lỗi xảy ra khi bỏ thích!']);
     }
 } else {
-    // Chưa like, thực hiện like
+    // Chưa like, kiểm tra giới hạn trước khi thực hiện like
+    $likeLimit = $likeModel->canLikeMore($userId);
+    
+    if (!$likeLimit['canLike']) {
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Bạn đã hết lượt thích! Nâng cấp VIP để thích không giới hạn.',
+            'limitReached' => true,
+            'currentCount' => $likeLimit['currentCount'],
+            'limit' => $likeLimit['limit'],
+            'requireVIP' => true
+        ]);
+        exit;
+    }
+    
+    // Thực hiện like
     if ($likeModel->likeUser($userId, $targetUserId)) {
         // Kiểm tra xem có tạo match không (người kia đã like mình chưa)
         $matchModel = new MatchModel();
@@ -100,11 +115,13 @@ if ($likeModel->hasLiked($userId, $targetUserId)) {
         }
         
         // Like thành công nhưng chưa match
+        $updatedLimit = $likeModel->canLikeMore($userId);
         echo json_encode([
             'success' => true, 
             'message' => 'Đã thích!',
             'action' => 'liked',
-            'matched' => false
+            'matched' => false,
+            'remaining' => $updatedLimit['remaining'] ?? null
         ]);
     } else {
         echo json_encode(['success' => false, 'message' => 'Có lỗi xảy ra khi thích!']);

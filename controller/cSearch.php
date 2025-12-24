@@ -117,18 +117,14 @@ try {
     $blockModel = new Block();
     $userModel = new User();
     
-    // Lấy giới tính của người dùng hiện tại
-    $currentUserProfile = $profileModel->getProfile($currentUserId);
-    $currentUserGender = $currentUserProfile['gioiTinh'] ?? null;
-    
     // Lấy danh sách người cần loại trừ
     $likedUserIds = $likeModel->getLikedUserIds($currentUserId);
     $whoLikedMeIds = $likeModel->getUserIdsWhoLikedMe($currentUserId);
     $blockedUserIds = $blockModel->getBlockedUserIds($currentUserId);
     $excludeIds = array_unique(array_merge([$currentUserId], $likedUserIds, $whoLikedMeIds, $blockedUserIds));
     
-    // Tìm kiếm với filters (chỉ lấy giới tính đối lập nếu không chỉ định)
-    $results = $profileModel->searchProfiles($filters, $excludeIds, 20, $currentUserGender);
+    // Tìm kiếm với filters
+    $results = $profileModel->searchProfiles($filters, $excludeIds, 20);
     
     // Format kết quả
     $profiles = [];

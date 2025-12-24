@@ -40,6 +40,11 @@ $currentUserProfile = $profileModel->getProfile($currentUserId);
 // Đếm số ghép đôi mới (chưa nhắn tin)
 $newMatchesCount = $notificationModel->getNewMatchesCount($currentUserId);
 
+// Đếm số tin nhắn chưa đọc
+require_once '../../models/mMessage.php';
+$messageModel = new Message();
+$unreadMessagesCount = $messageModel->getTotalUnreadCount($currentUserId);
+
 // Nếu chưa thiết lập hồ sơ, chuyển đến trang thiết lập
 if (!$currentUserProfile) {
     header('Location: ../hoso/thietlaphoso.php');
@@ -77,6 +82,9 @@ $excludeIds = array_unique(array_merge(
 // Lấy danh sách hồ sơ để hiển thị 
 $allProfiles = $profileModel->getAllProfiles(12, 0, $excludeIds);
 
+// Lấy thông tin giới hạn lượt thích
+$likeLimitInfo = $likeModel->canLikeMore($currentUserId);
+
 // Lấy thông báo hệ thống từ admin
 $systemNotifications = $notificationModel->getSystemNotifications(3);
 
@@ -105,6 +113,28 @@ $isVIP = $vipModel->isVIP($currentUserId);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../../public/css/trangchu.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../../public/css/search-modal.css">
+    <style>
+        /* Ngăn browser tự động scroll về đầu trang khi back */
+        html {
+            scroll-behavior: auto !important;
+        }
+    </style>
+    <script>
+        // Khôi phục scroll position NGAY LẬP TỨC trước khi trang render
+        (function() {
+            const entries = performance.getEntriesByType('navigation');
+            const isBackNavigation = entries.length > 0 && entries[0].type === 'back_forward';
+            
+            if (isBackNavigation) {
+                const savedScrollPosition = sessionStorage.getItem('trangchu_scrollPosition');
+                if (savedScrollPosition) {
+                    // Áp dụng scroll ngay lập tức
+                    history.scrollRestoration = 'manual'; // Tắt auto scroll restoration của browser
+                    window.scrollTo(0, parseInt(savedScrollPosition));
+                }
+            }
+        })();
+    </script>
 </head>
 <body>
     <?php if ($successMessage): ?>
@@ -175,8 +205,11 @@ $isVIP = $vipModel->isVIP($currentUserId);
                     <a href="../nhantin/message.php" class="nav-link">
                         <i class="fas fa-comments"></i>
                         Tin nhắn
-                        <?php if ($newMatchesCount > 0): ?>
-                            <span class="notification-badge"><?php echo $newMatchesCount; ?></span>
+                        <?php 
+                        $totalNotifications = $newMatchesCount + $unreadMessagesCount;
+                        if ($totalNotifications > 0): 
+                        ?>
+                            <span class="notification-badge"><?php echo $totalNotifications; ?></span>
                         <?php endif; ?>
                     </a>
                     <a href="#" class="nav-link" onclick="openSearchModal(); return false;">
@@ -407,52 +440,121 @@ $isVIP = $vipModel->isVIP($currentUserId);
 
     <!-- Profiles Section -->
     <section class="profiles-section">
+        <?php if (!$likeLimitInfo['isVIP']): ?>
+        <!-- Like Limit Info cho Non-VIP -->
+        <div style="
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        ">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="
+                    font-size: 48px;
+                    background: rgba(255, 255, 255, 0.2);
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    backdrop-filter: blur(10px);
+                ">
+                    💝
+                </div>
+                <div>
+                    <h3 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 700;">
+                        Lượt thích của bạn
+                    </h3>
+                    <p style="margin: 0; font-size: 16px; opacity: 0.95;">
+                        Bạn còn <strong style="font-size: 20px;"><?php echo $likeLimitInfo['remaining']; ?></strong> / <?php echo $likeLimitInfo['limit']; ?> lượt thích
+                    </p>
+                </div>
+            </div>
+            <div>
+                <a href="../goivip/index.php" style="
+                    display: inline-block;
+                    padding: 14px 32px;
+                    background: white;
+                    color: #667eea;
+                    text-decoration: none;
+                    border-radius: 50px;
+                    font-weight: 700;
+                    font-size: 16px;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                    transition: all 0.3s ease;
+                " onmouseover="this.style.transform='translateY(-3px) scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.2)'">
+                    <i class="fas fa-crown"></i> Nâng cấp VIP - Thích không giới hạn
+                </a>
+            </div>
+        </div>
+        <?php else: ?>
+        <!-- VIP Badge -->
+        <div style="
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        ">
+            <div style="font-size: 36px;">⭐</div>
+            <div>
+                <h3 style="margin: 0; font-size: 20px; font-weight: 700;">
+                    Tài khoản VIP
+                </h3>
+                <p style="margin: 0; font-size: 14px; opacity: 0.95;">
+                    Bạn có thể thích không giới hạn! 💕
+                </p>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <div class="section-header">
             <h2>Danh sách hồ sơ nổi bật</h2>
-            <a href="../timkiem/ghepdoinhanh.php" class="btn-register-cta">Ghép Đôi Nhanh</a>
+            <a href="../timkiem/ghepdoinhanh.php" class="btn-register-cta">
+                <i class="fas fa-bolt"></i> Ghép Đôi Nhanh <i class="fas fa-heart"></i>
+            </a>
         </div>
 
         <div class="profiles-grid">
-            <?php foreach ($allProfiles as $profile): ?>
-                <?php 
-                    $age = $profileModel->calculateAge($profile['ngaySinh']);
-                    $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt']) : 'https://i.pravatar.cc/200';
-                    $isOnline = $userModel->isUserOnline($profile['maNguoiDung']);
-                    $isInactive = $userModel->isUserInactive($profile['maNguoiDung']);
-                    $lastActivity = $userModel->getLastActivity($profile['maNguoiDung']);
-                ?>
-                <div class="profile-card" data-user-id="<?php echo $profile['maNguoiDung']; ?>" onclick="viewProfile(<?php echo $profile['maNguoiDung']; ?>)">
-                    <div class="profile-avatar-wrapper">
-                        <img src="<?php echo $avatarSrc; ?>" alt="<?php echo htmlspecialchars($profile['ten']); ?>">
-                        <?php if ($isOnline): ?>
-                            <div class="online-indicator pulse" title="Đang online"></div>
-                        <?php endif; ?>
+            <?php if (empty($allProfiles)): ?>
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                    <div style="font-size: 80px; color: #ddd; margin-bottom: 20px;">
+                        <i class="fas fa-heart-broken"></i>
                     </div>
-                    <div class="profile-info">
-                        <h3><?php echo htmlspecialchars($profile['ten']); ?>, <?php echo $age; ?></h3>
-                        <p class="profile-location"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($profile['noiSong']); ?></p>
-                        <p class="profile-status"><?php echo htmlspecialchars($profile['mucTieuPhatTrien']); ?></p>
-                        <?php if ($isOnline): ?>
-                            <p class="last-seen online"><i class="fas fa-circle"></i> Đang hoạt động</p>
-                        <?php elseif ($isInactive): ?>
-                            <p class="last-seen inactive"><i class="fas fa-circle"></i> Không hoạt động</p>
-                        <?php elseif ($lastActivity && $lastActivity['minutesAgo'] !== null): ?>
-                            <?php
-                                $minutes = $lastActivity['minutesAgo'];
-                                if ($minutes < 60) {
-                                    $timeText = $minutes . ' phút trước';
-                                } elseif ($minutes < 1440) {
-                                    $timeText = floor($minutes / 60) . ' giờ trước';
-                                } else {
-                                    $timeText = floor($minutes / 1440) . ' ngày trước';
-                                }
-                            ?>
-                            <p class="last-seen"><i class="far fa-clock"></i> <?php echo $timeText; ?></p>
-                        <?php endif; ?>
-                    </div>
-                    <button class="btn-like" onclick="event.stopPropagation(); likeProfile(<?php echo $profile['maNguoiDung']; ?>)"><i class="fas fa-heart"></i></button>
+                    <h3 style="color: #7f8c8d; font-size: 24px; margin-bottom: 10px;">Không còn hồ sơ mới</h3>
+                    <p style="color: #95a5a6; font-size: 16px;">Bạn đã xem hết tất cả các hồ sơ hiện có. Hãy quay lại sau để khám phá thêm!</p>
                 </div>
-            <?php endforeach; ?>
+            <?php else: ?>
+                <?php foreach ($allProfiles as $profile): ?>
+                    <?php 
+                        $age = $profileModel->calculateAge($profile['ngaySinh']);
+                        $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt']) : 'https://i.pravatar.cc/200';
+                    ?>
+                    <div class="profile-card" data-user-id="<?php echo $profile['maNguoiDung']; ?>" onclick="viewProfile(<?php echo $profile['maNguoiDung']; ?>)">
+                        <div class="profile-avatar-wrapper">
+                            <img src="<?php echo $avatarSrc; ?>" alt="<?php echo htmlspecialchars($profile['ten']); ?>">
+                        </div>
+                        <div class="profile-info">
+                            <h3><?php echo htmlspecialchars($profile['ten']); ?>, <?php echo $age; ?></h3>
+                            <p class="profile-location"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($profile['noiSong']); ?></p>
+                            <p class="profile-status"><?php echo htmlspecialchars($profile['mucTieuPhatTrien']); ?></p>
+                        </div>
+                        <button class="btn-like" onclick="event.stopPropagation(); likeProfile(<?php echo $profile['maNguoiDung']; ?>)"><i class="fas fa-heart"></i></button>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
 
     </section>
@@ -466,6 +568,10 @@ $isVIP = $vipModel->isVIP($currentUserId);
         const btn = document.querySelector('.btn-reload');
         btn.disabled = true;
         btn.textContent = 'Đang làm mới...';
+        
+        // Reset về trạng thái trang chủ
+        isSearchResult = false;
+        
         fetch('../../controller/cSearch.php', {
             method: 'POST',
             body: new URLSearchParams({ action: 'random_profiles' })
@@ -872,6 +978,9 @@ $isVIP = $vipModel->isVIP($currentUserId);
     </div>
 
     <script>
+        // Biến theo dõi trạng thái hiển thị
+        let isSearchResult = false; // false = trang chủ, true = kết quả tìm kiếm
+
         // Open search modal
         function openSearchModal() {
             document.getElementById('searchModal').classList.add('active');
@@ -959,6 +1068,9 @@ $isVIP = $vipModel->isVIP($currentUserId);
                     // Đóng modal
                     closeSearchModal();
                     
+                    // Đánh dấu đang xem kết quả tìm kiếm
+                    isSearchResult = true;
+                    
                     // Cập nhật grid với kết quả tìm kiếm
                     updateProfilesGrid(data.profiles);
                     
@@ -981,6 +1093,34 @@ $isVIP = $vipModel->isVIP($currentUserId);
             const grid = document.querySelector('.profiles-grid');
             grid.innerHTML = '';
             
+            // Cập nhật text nút "Làm mới" nếu cần
+            const reloadBtn = document.querySelector('.btn-reload');
+            if (reloadBtn) {
+                if (isSearchResult) {
+                    reloadBtn.textContent = 'Quay về trang chủ';
+                } else {
+                    reloadBtn.textContent = 'Làm mới danh sách';
+                }
+            }
+            
+            // Kiểm tra nếu không có hồ sơ nào
+            if (profiles.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 80px; color: #ddd; margin-bottom: 20px;">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3 style="color: #7f8c8d; font-size: 24px; margin-bottom: 10px;">
+                            ${isSearchResult ? 'Đã xem hết kết quả tìm kiếm' : 'Không còn hồ sơ mới'}
+                        </h3>
+                        <p style="color: #95a5a6; font-size: 16px;">
+                            ${isSearchResult ? 'Bạn đã xem hết tất cả kết quả. Thử tìm kiếm với tiêu chí khác hoặc quay về trang chủ!' : 'Bạn đã xem hết tất cả các hồ sơ hiện có. Hãy quay lại sau để khám phá thêm!'}
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+            
             profiles.forEach(profile => {
                 const card = document.createElement('div');
                 card.className = 'profile-card';
@@ -991,30 +1131,14 @@ $isVIP = $vipModel->isVIP($currentUserId);
                     '../../' + profile.avatar : 
                     profile.avatar;
                 
-                // HTML cho online indicator
-                let onlineIndicator = '';
-                if (profile.isOnline) {
-                    onlineIndicator = '<div class="online-indicator pulse" title="Đang online"></div>';
-                }
-                
-                // HTML cho last seen
-                let lastSeenHTML = '';
-                if (profile.lastSeen === 'online') {
-                    lastSeenHTML = '<p class="last-seen online"><i class="fas fa-circle"></i> Đang hoạt động</p>';
-                } else if (profile.lastSeen) {
-                    lastSeenHTML = `<p class="last-seen"><i class="far fa-clock"></i> ${profile.lastSeen}</p>`;
-                }
-                
                 card.innerHTML = `
                     <div class="profile-avatar-wrapper">
                         <img src="${avatarSrc}" alt="${profile.name}">
-                        ${onlineIndicator}
                     </div>
                     <div class="profile-info">
                         <h3>${profile.name}, ${profile.age}</h3>
                         <p class="profile-location"><i class="fas fa-map-marker-alt"></i> ${profile.location}</p>
                         <p class="profile-status">${profile.goal}</p>
-                        ${lastSeenHTML}
                     </div>
                     <button class="btn-like" onclick="event.stopPropagation(); likeProfile(${profile.id})">
                         <i class="fas fa-heart"></i>
@@ -1072,6 +1196,15 @@ $isVIP = $vipModel->isVIP($currentUserId);
 
         // View profile
         function viewProfile(userId) {
+            // Lưu vị trí cuộn hiện tại vào sessionStorage
+            sessionStorage.setItem('trangchu_scrollPosition', window.pageYOffset || document.documentElement.scrollTop);
+            
+            // Lưu danh sách hồ sơ hiện tại
+            const profilesGrid = document.querySelector('.profiles-grid');
+            if (profilesGrid) {
+                sessionStorage.setItem('trangchu_profilesHTML', profilesGrid.innerHTML);
+            }
+            
             window.location.href = '../hoso/xemnguoikhac.php?id=' + userId;
         }
 
@@ -1096,22 +1229,14 @@ $isVIP = $vipModel->isVIP($currentUserId);
                         card.setAttribute('data-user-id', profile.maNguoiDung);
                         card.onclick = function() { viewProfile(profile.maNguoiDung); };
                         
-                        // Xác định loại indicator
-                        let statusIndicator = '';
-                        if (profile.isOnline) {
-                            statusIndicator = '<div class="online-indicator pulse" title="Đang online"></div>';
-                        }
-                        
                         card.innerHTML = `
                             <div class="profile-avatar-wrapper">
                                 <img src="../../${profile.avt}" alt="${profile.ten}">
-                                ${statusIndicator}
                             </div>
                             <div class="profile-info">
                                 <h3>${profile.ten}, ${profile.tuoi}</h3>
                                 <p class="profile-location"><i class="fas fa-map-marker-alt"></i> ${profile.noiSong}</p>
                                 <p class="profile-status">${profile.mucTieuPhatTrien}</p>
-                                ${profile.lastSeenText}
                             </div>
                             <button class="btn-like" onclick="event.stopPropagation(); likeProfile(${profile.maNguoiDung})"><i class="fas fa-heart"></i></button>
                         `;
@@ -1128,6 +1253,9 @@ $isVIP = $vipModel->isVIP($currentUserId);
                             card.style.transform = 'translateY(0) scale(1)';
                         }, 150 + (index * 100));
                     });
+                } else if (data.success && data.profiles.length === 0) {
+                    // Không còn hồ sơ để hiển thị - không làm gì cả
+                    console.log('Không còn hồ sơ mới để hiển thị');
                 }
             })
             .catch(error => {
@@ -1259,6 +1387,11 @@ $isVIP = $vipModel->isVIP($currentUserId);
                         `;
                         document.body.appendChild(successNotif);
                         
+                        // Cập nhật số lượt thích còn lại nếu có
+                        if (data.remaining !== undefined && data.remaining !== null) {
+                            updateLikeCounter(data.remaining);
+                        }
+                        
                         // Thêm fade out animation cho notification
                         setTimeout(() => {
                             successNotif.style.transition = 'opacity 0.3s ease';
@@ -1279,14 +1412,90 @@ $isVIP = $vipModel->isVIP($currentUserId);
                                 // Xóa card sau khi animation hoàn tất
                                 setTimeout(() => {
                                     profileCard.remove();
-                                    // Tải thêm hồ sơ mới để thay thế với delay nhỏ
-                                    setTimeout(() => loadMoreProfiles(1), 100);
+                                    
+                                    // CHỈ tải thêm hồ sơ mới khi KHÔNG phải kết quả tìm kiếm
+                                    if (!isSearchResult) {
+                                        setTimeout(() => loadMoreProfiles(1), 100);
+                                    }
                                 }, 300);
                             }
                         }, 850);
                     }
                 } else {
-                    alert(data.message);
+                    // Xử lý lỗi
+                    if (data.limitReached && data.requireVIP) {
+                        // Hết lượt thích - hiển thị thông báo nâng cấp VIP
+                        const vipNotif = document.createElement('div');
+                        vipNotif.innerHTML = `
+                            <div style="
+                                position: fixed;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%);
+                                background: white;
+                                padding: 40px 50px;
+                                border-radius: 20px;
+                                box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+                                z-index: 10000;
+                                text-align: center;
+                                max-width: 450px;
+                            ">
+                                <div style="font-size: 60px; margin-bottom: 20px;">
+                                    ⭐💎
+                                </div>
+                                <h2 style="margin: 0 0 15px 0; color: #FF6B9D; font-size: 24px;">
+                                    Bạn đã hết lượt thích!
+                                </h2>
+                                <p style="margin: 0 0 25px 0; color: #7F8C8D; font-size: 16px; line-height: 1.6;">
+                                    Bạn đã sử dụng hết <strong>${data.limit} lượt thích</strong> miễn phí.<br>
+                                    Nâng cấp VIP để thích <strong>không giới hạn</strong>!
+                                </p>
+                                <div style="display: flex; gap: 15px; justify-content: center;">
+                                    <button onclick="closeVIPNotification()" style="
+                                        padding: 12px 30px;
+                                        border: 2px solid #95A5A6;
+                                        background: white;
+                                        color: #7F8C8D;
+                                        border-radius: 25px;
+                                        font-size: 16px;
+                                        font-weight: 600;
+                                        cursor: pointer;
+                                        transition: all 0.3s ease;
+                                    " onmouseover="this.style.background='#ECF0F1'" onmouseout="this.style.background='white'">
+                                        Để sau
+                                    </button>
+                                    <button onclick="window.location.href='../goivip/index.php'" style="
+                                        padding: 12px 30px;
+                                        border: none;
+                                        background: linear-gradient(135deg, #FF6B9D, #FF4D6D);
+                                        color: white;
+                                        border-radius: 25px;
+                                        font-size: 16px;
+                                        font-weight: 600;
+                                        cursor: pointer;
+                                        transition: all 0.3s ease;
+                                        box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3);
+                                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 157, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 15px rgba(255, 107, 157, 0.3)'">
+                                        Nâng cấp VIP ⭐
+                                    </button>
+                                </div>
+                            </div>
+                            <div onclick="closeVIPNotification()" style="
+                                position: fixed;
+                                top: 0;
+                                left: 0;
+                                right: 0;
+                                bottom: 0;
+                                background: rgba(0,0,0,0.6);
+                                z-index: 9999;
+                                cursor: pointer;
+                            "></div>
+                        `;
+                        vipNotif.id = 'vipNotification';
+                        document.body.appendChild(vipNotif);
+                    } else {
+                        alert(data.message);
+                    }
                 }
             })
             .catch(error => {
@@ -1294,6 +1503,42 @@ $isVIP = $vipModel->isVIP($currentUserId);
                 console.error('Error:', error);
                 alert('Có lỗi xảy ra, vui lòng thử lại!');
             });
+        }
+        
+        // Function đóng VIP notification
+        function closeVIPNotification() {
+            const vipNotif = document.getElementById('vipNotification');
+            if (vipNotif) {
+                vipNotif.style.transition = 'opacity 0.3s ease';
+                vipNotif.style.opacity = '0';
+                setTimeout(() => vipNotif.remove(), 300);
+            }
+        }
+        
+        // Function cập nhật số lượt thích còn lại
+        function updateLikeCounter(remaining) {
+            // Tìm phần tử hiển thị số lượt thích còn lại
+            const counterElement = document.querySelector('p > strong[style*="font-size: 20px"]');
+            if (counterElement) {
+                counterElement.textContent = remaining;
+                
+                // Hiệu ứng pulse khi cập nhật
+                counterElement.style.transition = 'all 0.3s ease';
+                counterElement.style.transform = 'scale(1.3)';
+                counterElement.style.color = '#FFD700';
+                
+                setTimeout(() => {
+                    counterElement.style.transform = 'scale(1)';
+                    counterElement.style.color = '';
+                }, 300);
+                
+                // Nếu hết lượt thích, reload trang để hiển thị thông báo
+                if (remaining <= 0) {
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                }
+            }
         }
     </script>
 
@@ -1333,6 +1578,168 @@ $isVIP = $vipModel->isVIP($currentUserId);
             document.addEventListener(event, resetActivityTimer, true);
         });
     </script>
+
+    <!-- Script check thông báo real-time -->
+    <script>
+        let lastNotificationCount = <?php echo ($newMatchesCount + $unreadMessagesCount); ?>;
+        
+        // Check và cập nhật số thông báo mới
+        function checkNotifications() {
+            fetch('../../controller/cCheckNotifications.php', {
+                method: 'GET',
+                cache: 'no-cache'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const badge = document.querySelector('.nav-link[href="../nhantin/message.php"] .notification-badge');
+                    const navLink = document.querySelector('.nav-link[href="../nhantin/message.php"]');
+                    
+                    // Kiểm tra nếu có thông báo mới (số tăng lên)
+                    if (data.total > lastNotificationCount && lastNotificationCount >= 0) {
+                        showNewNotificationAlert(data);
+                    }
+                    
+                    lastNotificationCount = data.total;
+                    
+                    if (data.total > 0) {
+                        // Có thông báo mới
+                        if (badge) {
+                            // Cập nhật số
+                            if (badge.textContent !== data.total.toString()) {
+                                badge.textContent = data.total;
+                                // Animation nhấp nháy khi có thông báo mới
+                                badge.style.animation = 'none';
+                                setTimeout(() => {
+                                    badge.style.animation = 'pulse 1s ease-in-out 3';
+                                }, 10);
+                            }
+                        } else {
+                            // Tạo badge mới nếu chưa có
+                            const newBadge = document.createElement('span');
+                            newBadge.className = 'notification-badge';
+                            newBadge.textContent = data.total;
+                            newBadge.style.animation = 'pulse 1s ease-in-out 3';
+                            navLink.appendChild(newBadge);
+                        }
+                    } else {
+                        // Không có thông báo, xóa badge
+                        if (badge) {
+                            badge.remove();
+                        }
+                    }
+                    
+                    console.log('Notifications checked:', data);
+                }
+            })
+            .catch(error => {
+                console.error('Error checking notifications:', error);
+            });
+        }
+        
+        // Hiển thị thông báo popup khi có tin nhắn/match mới
+        function showNewNotificationAlert(data) {
+            let message = '';
+            if (data.unreadMessages > 0 && data.newMatches > 0) {
+                message = `💬 ${data.unreadMessages} tin nhắn mới và 💕 ${data.newMatches} ghép đôi mới!`;
+            } else if (data.unreadMessages > 0) {
+                message = `💬 Bạn có ${data.unreadMessages} tin nhắn mới!`;
+            } else if (data.newMatches > 0) {
+                message = `💕 Bạn có ${data.newMatches} ghép đôi mới!`;
+            }
+            
+            if (message) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 18px 25px;
+                    border-radius: 15px;
+                    font-size: 15px;
+                    font-weight: 600;
+                    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                    z-index: 10000;
+                    cursor: pointer;
+                    animation: slideInRight 0.5s ease;
+                    max-width: 350px;
+                `;
+                notification.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-bell" style="font-size: 24px;"></i>
+                        <div>
+                            <div style="font-size: 16px; margin-bottom: 4px;">${message}</div>
+                            <div style="font-size: 12px; opacity: 0.9;">Click để xem ngay →</div>
+                        </div>
+                    </div>
+                `;
+                notification.onclick = function() {
+                    window.location.href = '../nhantin/message.php';
+                };
+                
+                document.body.appendChild(notification);
+                
+                // Tự động ẩn sau 5 giây
+                setTimeout(() => {
+                    notification.style.animation = 'slideOutRight 0.5s ease';
+                    setTimeout(() => notification.remove(), 500);
+                }, 5000);
+            }
+        }
+
+        // Check ngay khi trang load (sau 2 giây để tránh conflict với page load)
+        setTimeout(checkNotifications, 2000);
+
+        // Check mỗi 10 giây (10000ms)
+        setInterval(checkNotifications, 10000);
+
+        // Check khi user quay lại tab (visibility change)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                checkNotifications();
+            }
+        });
+
+        // Check khi user focus vào window
+        window.addEventListener('focus', checkNotifications);
+    </script>
+
+    <style>
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    </style>
 
     <!-- Contact Admin Modal -->
     <div id="contactAdminModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:10000; align-items:center; justify-content:center; overflow-y:auto;">
@@ -1484,6 +1891,79 @@ $isVIP = $vipModel->isVIP($currentUserId);
                 this.style.borderColor = '#e0e0e0';
                 this.style.boxShadow = 'none';
             });
+        });
+    </script>
+    
+    <script>
+        // Khôi phục vị trí cuộn và danh sách hồ sơ khi back về trang
+        (function() {
+            // Kiểm tra xem có phải đang back về không
+            const entries = performance.getEntriesByType('navigation');
+            const isBackNavigation = entries.length > 0 && entries[0].type === 'back_forward';
+            
+            if (!isBackNavigation) return;
+            
+            // Khôi phục vị trí cuộn NGAY LẬP TỨC (trước cả khi DOM ready)
+            const savedScrollPosition = sessionStorage.getItem('trangchu_scrollPosition');
+            if (savedScrollPosition) {
+                // Áp dụng ngay lập tức
+                window.scrollTo(0, parseInt(savedScrollPosition));
+                document.documentElement.scrollTop = parseInt(savedScrollPosition);
+                document.body.scrollTop = parseInt(savedScrollPosition);
+            }
+            
+            // Khôi phục danh sách hồ sơ sau khi DOM ready
+            document.addEventListener('DOMContentLoaded', function() {
+                const savedProfilesHTML = sessionStorage.getItem('trangchu_profilesHTML');
+                const profilesGrid = document.querySelector('.profiles-grid');
+                
+                if (savedProfilesHTML && profilesGrid) {
+                    profilesGrid.innerHTML = savedProfilesHTML;
+                    
+                    // Gắn lại sự kiện onclick cho các card
+                    const profileCards = profilesGrid.querySelectorAll('.profile-card');
+                    profileCards.forEach(card => {
+                        const userId = card.getAttribute('data-user-id');
+                        card.onclick = function() { viewProfile(userId); };
+                        
+                        // Gắn lại sự kiện cho nút like
+                        const likeBtn = card.querySelector('.btn-like');
+                        if (likeBtn) {
+                            likeBtn.onclick = function(e) { 
+                                e.stopPropagation(); 
+                                likeProfile(userId); 
+                            };
+                        }
+                    });
+                }
+                
+                // Khôi phục lại vị trí cuộn sau khi DOM render xong
+                if (savedScrollPosition) {
+                    window.scrollTo(0, parseInt(savedScrollPosition));
+                }
+            });
+            
+            // Đảm bảo vị trí cuộn được giữ nguyên sau khi tất cả resources load xong
+            window.addEventListener('load', function() {
+                if (savedScrollPosition) {
+                    setTimeout(() => {
+                        window.scrollTo(0, parseInt(savedScrollPosition));
+                        // Xóa sau khi đã restore hoàn toàn
+                        sessionStorage.removeItem('trangchu_scrollPosition');
+                    }, 100);
+                }
+            });
+        })();
+        
+        // Xóa cache khi reload trang (F5 hoặc Ctrl+R)
+        window.addEventListener('pageshow', function(event) {
+            const entries = performance.getEntriesByType('navigation');
+            const isReload = entries.length > 0 && entries[0].type === 'reload';
+            
+            if (isReload) {
+                sessionStorage.removeItem('trangchu_profilesHTML');
+                sessionStorage.removeItem('trangchu_scrollPosition');
+            }
         });
     </script>
     

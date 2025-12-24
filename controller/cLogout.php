@@ -19,7 +19,7 @@ Session::setFlash('success', 'Đã đăng xuất thành công!');
 // Hủy session và đăng xuất
 Session::destroy();
 
-// Chuyển về trang đăng nhập
-header('Location: ../views/dangnhap/login.php');
+// Chuyển về trang chủ
+header('Location: ../index.php');
 exit;
 ?>

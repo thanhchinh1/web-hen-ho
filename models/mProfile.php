@@ -237,7 +237,7 @@ class Profile {
     /**
      * Tìm kiếm hồ sơ với bộ lọc nâng cao
      */
-    public function searchProfiles($filters, $excludeUserIds = [], $limit = 20, $currentUserGender = null) {
+    public function searchProfiles($filters, $excludeUserIds = [], $limit = 20) {
         // Base query
         $sql = "
             SELECT h.*, n.maNguoiDung, n.tenDangNhap
@@ -257,20 +257,14 @@ class Profile {
             $params = array_merge($params, $excludeUserIds);
         }
         
-        // Filter theo giới tính (dùng giá trị database trực tiếp)
-        // Nếu không chỉ định filter giới tính, sử dụng giới tính đối lập mặc định
-        if (!empty($filters['gender']) && $filters['gender'] !== 'all') {
+        // Filter theo giới tính
+        // Chỉ lọc khi user chọn một giới tính cụ thể (Nam hoặc Nữ)
+        if (!empty($filters['gender'])) {
             $sql .= " AND h.gioiTinh = ?";
             $types .= 's';
             $params[] = $filters['gender'];
-        } elseif ($currentUserGender) {
-            // Nếu không chỉ định, dùng giới tính đối lập mặc định
-            if ($currentUserGender === 'Nam') {
-                $sql .= " AND h.gioiTinh = 'Nữ'";
-            } elseif ($currentUserGender === 'Nữ') {
-                $sql .= " AND h.gioiTinh = 'Nam'";
-            }
         }
+        // Nếu không chọn gì (chuỗi rỗng hoặc "Tất cả") thì hiển thị tất cả giới tính
         
         // Filter theo tình trạng hôn nhân (dùng giá trị database trực tiếp)
         if (!empty($filters['status']) && $filters['status'] !== 'all') {

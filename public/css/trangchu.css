@@ -585,22 +585,102 @@ body {
 }
 
 .btn-register-cta {
-    display: inline-block;
-    padding: 0.6rem 2rem;
-    background: #28a745;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 1rem 2.8rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #ffffff;
     text-decoration: none;
-    border-radius: 25px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5), 0 0 0 0 rgba(102, 126, 234, 0.4);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    border: 2px solid transparent;
+    animation: pulse-ring 2s ease-in-out infinite;
+}
+
+.btn-register-cta i {
+    font-size: 1.2rem;
+    animation: icon-bounce 1s ease-in-out infinite;
+}
+
+.btn-register-cta i:first-child {
+    animation-delay: 0s;
+}
+
+.btn-register-cta i:last-child {
+    animation-delay: 0.5s;
+    color: #FFD700;
+}
+
+.btn-register-cta::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
 }
 
 .btn-register-cta:hover {
-    background: #218838;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-5px) scale(1.08);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.7), 0 0 30px rgba(118, 75, 162, 0.5);
+    border-color: rgba(255, 255, 255, 0.6);
+    animation: none;
+}
+
+.btn-register-cta:hover::after {
+    width: 400px;
+    height: 400px;
+}
+
+.btn-register-cta:hover i {
+    animation: icon-spin 0.6s ease;
+}
+
+.btn-register-cta:active {
+    transform: translateY(-2px) scale(1.03);
+}
+
+@keyframes pulse-ring {
+    0% {
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5), 0 0 0 0 rgba(102, 126, 234, 0.7);
+    }
+    50% {
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5), 0 0 0 15px rgba(102, 126, 234, 0);
+    }
+    100% {
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5), 0 0 0 0 rgba(102, 126, 234, 0);
+    }
+}
+
+@keyframes icon-bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+@keyframes icon-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* System Notifications Section */

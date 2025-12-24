@@ -129,6 +129,14 @@ if ($action === 'send') {
     // Đánh dấu tin nhắn là đã nhận (delivered)
     if (!empty($newMessages)) {
         $messageModel->markAsDelivered($matchId, $currentUserId);
+        
+        // Tắt typing status của tất cả người dùng trong match này khi có tin nhắn mới
+        // (vì người gửi đã gửi tin rồi, không còn typing nữa)
+        foreach ($newMessages as $msg) {
+            if ($msg['maNguoiGui'] != $currentUserId) {
+                $messageModel->setTypingStatus($matchId, $msg['maNguoiGui'], 0);
+            }
+        }
     }
     
     echo json_encode([
@@ -192,6 +200,24 @@ if ($action === 'send') {
     echo json_encode([
         'success' => true,
         'statuses' => $statuses
+    ]);
+    
+} elseif ($action === 'get_all_unread_counts') {
+    // Lấy số tin nhắn chưa đọc cho tất cả các match của user
+    $myMatches = $matchModel->getMyMatches($currentUserId);
+    $counts = [];
+    
+    foreach ($myMatches as $match) {
+        $matchId = $match['maGhepDoi'];
+        $unreadCount = $messageModel->getUnreadCount($matchId, $currentUserId);
+        if ($unreadCount > 0) {
+            $counts[$matchId] = $unreadCount;
+        }
+    }
+    
+    echo json_encode([
+        'success' => true,
+        'counts' => $counts
     ]);
     
 } else {

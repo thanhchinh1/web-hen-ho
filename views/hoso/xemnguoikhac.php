@@ -699,15 +699,5 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
         }
     </script>
 
-    <script>
-    // Khi quay lại trang này, luôn reload để cập nhật trạng thái ghép đôi
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            // Trang được load từ cache (người dùng nhấn nút back)
-            window.location.reload();
-        }
-    });
-    </script>
-
 </body>
 </html>

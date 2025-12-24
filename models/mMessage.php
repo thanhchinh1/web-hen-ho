@@ -10,19 +10,110 @@ class Message {
     }
     
     /**
-     * Gửi tin nhắn
+     * Gửi tin nhắn với trạng thái 'sending' ban đầu
      */
     public function sendMessage($matchId, $senderId, $content) {
         $stmt = $this->conn->prepare("
             INSERT INTO tinnhan (maGhepDoi, maNguoiGui, noiDung, trangThai) 
-            VALUES (?, ?, ?, 'sent')
+            VALUES (?, ?, ?, 'sending')
         ");
         $stmt->bind_param("iis", $matchId, $senderId, $content);
         
         if ($stmt->execute()) {
-            return $this->conn->insert_id;
+            $messageId = $this->conn->insert_id;
+            // Cập nhật ngay sang 'sent' nếu gửi thành công
+            $this->updateMessageStatus($messageId, 'sent');
+            
+            // Tắt typing status của người gửi ngay khi gửi tin
+            $this->setTypingStatus($matchId, $senderId, 0);
+            
+            return $messageId;
         }
         return false;
+    }
+    
+    /**
+     * Cập nhật trạng thái của một tin nhắn cụ thể
+     */
+    public function updateMessageStatus($messageId, $status) {
+        $validStatuses = ['sending', 'sent', 'delivered', 'seen', 'failed', 'recalled'];
+        if (!in_array($status, $validStatuses)) {
+            return false;
+        }
+        
+        $timeColumn = '';
+        switch($status) {
+            case 'delivered':
+                $timeColumn = ', thoiDiemNhan = NOW()';
+                break;
+            case 'seen':
+                $timeColumn = ', thoiDiemXem = NOW()';
+                break;
+            case 'recalled':
+                $timeColumn = ', thuHoiLuc = NOW()';
+                break;
+        }
+        
+        $stmt = $this->conn->prepare("
+            UPDATE tinnhan 
+            SET trangThai = ? $timeColumn
+            WHERE maTinNhan = ?
+        ");
+        $stmt->bind_param("si", $status, $messageId);
+        return $stmt->execute();
+    }
+    
+    /**
+     * Đánh dấu tin nhắn gửi thất bại
+     */
+    public function markAsFailed($messageId, $errorMessage = '') {
+        $stmt = $this->conn->prepare("
+            UPDATE tinnhan 
+            SET trangThai = 'failed', loiGanNhat = ?
+            WHERE maTinNhan = ?
+        ");
+        $stmt->bind_param("si", $errorMessage, $messageId);
+        return $stmt->execute();
+    }
+    
+    /**
+     * Gửi lại tin nhắn thất bại
+     */
+    public function retryFailedMessage($messageId) {
+        $stmt = $this->conn->prepare("
+            UPDATE tinnhan 
+            SET trangThai = 'sending', loiGanNhat = NULL
+            WHERE maTinNhan = ? AND trangThai = 'failed'
+        ");
+        $stmt->bind_param("i", $messageId);
+        
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            // Cập nhật sang 'sent'
+            $this->updateMessageStatus($messageId, 'sent');
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Thu hồi tin nhắn
+     */
+    public function recallMessage($messageId, $senderId) {
+        // Kiểm tra tin nhắn có thuộc về người gửi không
+        $stmt = $this->conn->prepare("
+            SELECT maNguoiGui FROM tinnhan WHERE maTinNhan = ?
+        ");
+        $stmt->bind_param("i", $messageId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $message = $result->fetch_assoc();
+        
+        if (!$message || $message['maNguoiGui'] != $senderId) {
+            return false;
+        }
+        
+        // Cập nhật trạng thái sang 'recalled'
+        return $this->updateMessageStatus($messageId, 'recalled');
     }
     
     /**
@@ -110,14 +201,15 @@ class Message {
      * Đếm số tin nhắn chưa đọc
      */
     public function getUnreadCount($matchId, $userId, $lastSeenMessageId = 0) {
+        // Đếm tin nhắn chưa xem (status != 'seen')
         $stmt = $this->conn->prepare("
             SELECT COUNT(*) as unread_count
             FROM tinnhan
             WHERE maGhepDoi = ? 
             AND maNguoiGui != ? 
-            AND maTinNhan > ?
+            AND trangThai IN ('sending', 'sent', 'delivered')
         ");
-        $stmt->bind_param("iii", $matchId, $userId, $lastSeenMessageId);
+        $stmt->bind_param("ii", $matchId, $userId);
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
@@ -171,10 +263,42 @@ class Message {
             SET trangThai = 'seen', thoiDiemXem = NOW() 
             WHERE maGhepDoi = ? 
             AND maNguoiGui != ? 
-            AND (trangThai = 'sent' OR trangThai = 'delivered')
+            AND trangThai IN ('sent', 'delivered')
         ");
         $stmt->bind_param("ii", $matchId, $userId);
         return $stmt->execute();
+    }
+    
+    /**
+     * Cập nhật trạng thái typing (đang soạn)
+     */
+    public function setTypingStatus($matchId, $userId, $isTyping) {
+        $stmt = $this->conn->prepare("
+            INSERT INTO typing_status (maGhepDoi, maNguoiDung, isTyping) 
+            VALUES (?, ?, ?)
+            ON DUPLICATE KEY UPDATE isTyping = ?, lastUpdate = NOW()
+        ");
+        $stmt->bind_param("iiii", $matchId, $userId, $isTyping, $isTyping);
+        return $stmt->execute();
+    }
+    
+    /**
+     * Lấy trạng thái typing của người dùng khác trong cuộc trò chuyện
+     */
+    public function getTypingStatus($matchId, $excludeUserId) {
+        $stmt = $this->conn->prepare("
+            SELECT ts.maNguoiDung, ts.isTyping, h.ten
+            FROM typing_status ts
+            JOIN hoso h ON ts.maNguoiDung = h.maNguoiDung
+            WHERE ts.maGhepDoi = ? 
+            AND ts.maNguoiDung != ?
+            AND ts.isTyping = 1
+            AND ts.lastUpdate >= DATE_SUB(NOW(), INTERVAL 3 SECOND)
+        ");
+        $stmt->bind_param("ii", $matchId, $excludeUserId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
     }
     
     /**
@@ -227,6 +351,25 @@ class Message {
         }
         
         return $statuses;
+    }
+    
+    /**
+     * Đếm tổng số tin nhắn chưa đọc từ tất cả các cuộc trò chuyện của user
+     */
+    public function getTotalUnreadCount($userId) {
+        $stmt = $this->conn->prepare("
+            SELECT COUNT(DISTINCT t.maTinNhan) as total_unread
+            FROM tinnhan t
+            INNER JOIN ghepdoi g ON t.maGhepDoi = g.maGhepDoi
+            WHERE (g.maNguoiA = ? OR g.maNguoiB = ?)
+            AND t.maNguoiGui != ?
+            AND t.trangThai != 'seen'
+        ");
+        $stmt->bind_param("iii", $userId, $userId, $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        return $row['total_unread'] ?? 0;
     }
 }
 ?>

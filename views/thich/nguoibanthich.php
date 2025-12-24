@@ -42,8 +42,8 @@ foreach ($likedUsers as $person) {
 
 $likedUsers = $filteredUsers;
 
-// Lấy danh sách người đã ghép đôi
-$matchedUsers = $matchModel->getMyMatches($currentUserId);
+// Lấy danh sách người đã ghép đôi mà MÌNH THÍCH TRƯỚC
+$matchedUsers = $matchModel->getMatchesILikedFirst($currentUserId);
 
 // Helper function để hiển thị thời gian
 function timeAgo($datetime) {

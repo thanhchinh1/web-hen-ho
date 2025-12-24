@@ -43,11 +43,11 @@ if ($selectedMatchId) {
     }
 }
 
-// Nếu không có match nào được chọn, chọn match đầu tiên
-if (!$selectedMatch && !empty($myMatches)) {
-    $selectedMatch = $myMatches[0];
-    $selectedMatchId = $selectedMatch['maGhepDoi'];
-}
+// Không tự động chọn match đầu tiên - để người dùng tự chọn
+// if (!$selectedMatch && !empty($myMatches)) {
+//     $selectedMatch = $myMatches[0];
+//     $selectedMatchId = $selectedMatch['maGhepDoi'];
+// }
 
 // Lấy danh sách tin nhắn nếu có match
 $messages = [];
@@ -266,6 +266,10 @@ if ($matchedUserId) {
                         $isActive = ($selectedMatchId == $match['maGhepDoi']) ? 'active' : '';
                         $lastMessage = $messageModel->getLastMessage($match['maGhepDoi']);
                         
+                        // Đếm số tin nhắn chưa đọc
+                        $unreadCount = $messageModel->getUnreadCount($match['maGhepDoi'], $currentUserId);
+                        $hasUnread = $unreadCount > 0;
+                        
                         // Xử lý avatar
                         $avatarSrc = '/public/img/default-avatar.jpg';
                         if (!empty($match['avt'])) {
@@ -276,7 +280,7 @@ if ($matchedUserId) {
                             }
                         }
                     ?>
-                        <div class="message-item <?php echo $isActive; ?>" 
+                        <div class="message-item <?php echo $isActive; ?> <?php echo $hasUnread ? 'has-unread' : ''; ?>" 
                              onclick="window.location.href='?match=<?php echo $match['maGhepDoi']; ?>'">
                             <div class="message-avatar">
                                 <img src="<?php echo $avatarSrc; ?>" alt="<?php echo htmlspecialchars($match['ten']); ?>">
@@ -291,8 +295,13 @@ if ($matchedUserId) {
                                 <?php endif; ?>
                             </div>
                             <div class="message-content">
-                                <h3 class="message-name"><?php echo htmlspecialchars($match['ten']); ?></h3>
-                                <p class="message-text">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                    <h3 class="message-name"><?php echo htmlspecialchars($match['ten']); ?></h3>
+                                    <?php if ($hasUnread): ?>
+                                        <span class="unread-badge"><?php echo $unreadCount; ?></span>
+                                    <?php endif; ?>
+                                </div>
+                                <p class="message-text <?php echo $hasUnread ? 'unread-text' : ''; ?>">
                                     <?php 
                                     if ($lastMessage) {
                                         echo htmlspecialchars(mb_substr($lastMessage['noiDung'], 0, 50));
@@ -303,11 +312,6 @@ if ($matchedUserId) {
                                     ?>
                                 </p>
                             </div>
-                            <?php if ($lastMessage): ?>
-                                <div class="message-time-badge" style="font-size: 11px; color: #999;">
-                                    <?php echo formatTime($lastMessage['thoiDiemGui']); ?>
-                                </div>
-                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -390,7 +394,7 @@ if ($matchedUserId) {
                                 </a>
                             </div>
                         </div>
-                        <button class="btn-close" onclick="window.location.href='../trangchu/index.php'">
+                        <button class="btn-close" onclick="closeConversation()">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -411,25 +415,46 @@ if ($matchedUserId) {
                                 <?php if (!$isSent): ?>
                                     <img src="<?php echo $chatAvatarSrc; ?>" alt="" class="message-avatar-small">
                                 <?php endif; ?>
-                                <div class="message-bubble">
-                                    <p><?php echo nl2br(htmlspecialchars($msg['noiDung'])); ?></p>
-                                    <span class="message-time">
-                                        <?php echo date('H:i', strtotime($msg['thoiDiemGui'])); ?>
-                                        <?php if ($isSent): ?>
-                                            <span class="message-status" data-status="<?php echo $msg['trangThai'] ?? 'sent'; ?>">
-                                                <?php 
-                                                $status = $msg['trangThai'] ?? 'sent';
-                                                if ($status === 'seen'): ?>
-                                                    <i class="fas fa-eye" style="color: #2E7D32;" title="Đã xem"></i>
-                                                <?php elseif ($status === 'delivered'): ?>
-                                                    <i class="fas fa-check-double" style="color: #95a5a6;" title="Đã nhận"></i>
-                                                <?php else: ?>
-                                                    <i class="fas fa-check" style="color: #95a5a6;" title="Đã gửi"></i>
-                                                <?php endif; ?>
-                                            </span>
+                                
+                                <?php 
+                                $msgStatus = $msg['trangThai'] ?? 'sent';
+                                if ($msgStatus === 'recalled'): 
+                                ?>
+                                    <div class="message-bubble message-recalled">
+                                        <p><i class="fas fa-ban"></i> Tin nhắn đã bị thu hồi</p>
+                                        <span class="message-time">
+                                            <?php echo date('H:i', strtotime($msg['thoiDiemGui'])); ?>
+                                        </span>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="message-bubble">
+                                        <p><?php echo nl2br(htmlspecialchars($msg['noiDung'])); ?></p>
+                                        <span class="message-time">
+                                            <?php echo date('H:i', strtotime($msg['thoiDiemGui'])); ?>
+                                        </span>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if ($isSent): ?>
+                                    <span class="message-status<?php echo ($msgStatus === 'failed') ? ' message-failed' : ''; ?>" 
+                                          data-status="<?php echo $msgStatus; ?>"
+                                          <?php echo ($msgStatus === 'failed') ? 'data-message-id="' . $msg['maTinNhan'] . '"' : ''; ?>>
+                                        <?php 
+                                        if ($msgStatus === 'recalled'): ?>
+                                            <i class="fas fa-ban" style="color: #e74c3c;" title="Đã thu hồi"></i>
+                                        <?php elseif ($msgStatus === 'failed'): ?>
+                                            <i class="fas fa-exclamation-circle" style="color: #e74c3c;" title="Gửi thất bại - Nhấn để thử lại"></i>
+                                        <?php elseif ($msgStatus === 'sending'): ?>
+                                            <i class="fas fa-clock" style="color: #95a5a6;" title="Đang gửi"></i>
+                                        <?php elseif ($msgStatus === 'seen'): ?>
+                                            <i class="fas fa-eye" style="color: #2E7D32;" title="Đã xem"></i>
+                                        <?php elseif ($msgStatus === 'delivered'): ?>
+                                            <i class="fas fa-check-double" style="color: #95a5a6;" title="Đã nhận"></i>
+                                        <?php else: ?>
+                                            <i class="fas fa-check" style="color: #95a5a6;" title="Đã gửi"></i>
                                         <?php endif; ?>
                                     </span>
-                                </div>
+                                <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -437,28 +462,113 @@ if ($matchedUserId) {
 
                 <!-- Chat input -->
                 <div class="chat-input-container">
+                    <button class="btn-input-action" title="Emoji" onclick="toggleEmojiPicker()">
+                        <i class="far fa-smile"></i>
+                    </button>
+                    
                     <input type="text" class="chat-input" placeholder="Nhập tin nhắn..." id="messageInput">
+                    
                     <button class="btn-send" onclick="sendMessage()">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
+                
+                <!-- Emoji Picker (Simple) -->
+                <div id="emojiPicker" class="emoji-picker" style="display: none;">
+                    <div class="emoji-grid">
+                        <span class="emoji-item" onclick="insertEmoji('😀')">😀</span>
+                        <span class="emoji-item" onclick="insertEmoji('😃')">😃</span>
+                        <span class="emoji-item" onclick="insertEmoji('😄')">😄</span>
+                        <span class="emoji-item" onclick="insertEmoji('😁')">😁</span>
+                        <span class="emoji-item" onclick="insertEmoji('😊')">😊</span>
+                        <span class="emoji-item" onclick="insertEmoji('😍')">😍</span>
+                        <span class="emoji-item" onclick="insertEmoji('🥰')">🥰</span>
+                        <span class="emoji-item" onclick="insertEmoji('😘')">😘</span>
+                        <span class="emoji-item" onclick="insertEmoji('😗')">😗</span>
+                        <span class="emoji-item" onclick="insertEmoji('😙')">😙</span>
+                        <span class="emoji-item" onclick="insertEmoji('😚')">😚</span>
+                        <span class="emoji-item" onclick="insertEmoji('🤗')">🤗</span>
+                        <span class="emoji-item" onclick="insertEmoji('🤩')">🤩</span>
+                        <span class="emoji-item" onclick="insertEmoji('🤔')">🤔</span>
+                        <span class="emoji-item" onclick="insertEmoji('🤨')">🤨</span>
+                        <span class="emoji-item" onclick="insertEmoji('😐')">😐</span>
+                        <span class="emoji-item" onclick="insertEmoji('😑')">😑</span>
+                        <span class="emoji-item" onclick="insertEmoji('😶')">😶</span>
+                        <span class="emoji-item" onclick="insertEmoji('🙄')">🙄</span>
+                        <span class="emoji-item" onclick="insertEmoji('😏')">😏</span>
+                        <span class="emoji-item" onclick="insertEmoji('😣')">😣</span>
+                        <span class="emoji-item" onclick="insertEmoji('😥')">😥</span>
+                        <span class="emoji-item" onclick="insertEmoji('😮')">😮</span>
+                        <span class="emoji-item" onclick="insertEmoji('🤐')">🤐</span>
+                        <span class="emoji-item" onclick="insertEmoji('😯')">😯</span>
+                        <span class="emoji-item" onclick="insertEmoji('😪')">😪</span>
+                        <span class="emoji-item" onclick="insertEmoji('😫')">😫</span>
+                        <span class="emoji-item" onclick="insertEmoji('😴')">😴</span>
+                        <span class="emoji-item" onclick="insertEmoji('😌')">😌</span>
+                        <span class="emoji-item" onclick="insertEmoji('😛')">😛</span>
+                        <span class="emoji-item" onclick="insertEmoji('😜')">😜</span>
+                        <span class="emoji-item" onclick="insertEmoji('😝')">😝</span>
+                        <span class="emoji-item" onclick="insertEmoji('🤤')">🤤</span>
+                        <span class="emoji-item" onclick="insertEmoji('😒')">😒</span>
+                        <span class="emoji-item" onclick="insertEmoji('😓')">😓</span>
+                        <span class="emoji-item" onclick="insertEmoji('😔')">😔</span>
+                        <span class="emoji-item" onclick="insertEmoji('😕')">😕</span>
+                        <span class="emoji-item" onclick="insertEmoji('🙃')">🙃</span>
+                        <span class="emoji-item" onclick="insertEmoji('🤑')">🤑</span>
+                        <span class="emoji-item" onclick="insertEmoji('😲')">😲</span>
+                        <span class="emoji-item" onclick="insertEmoji('☹️')">☹️</span>
+                        <span class="emoji-item" onclick="insertEmoji('🙁')">🙁</span>
+                        <span class="emoji-item" onclick="insertEmoji('😖')">😖</span>
+                        <span class="emoji-item" onclick="insertEmoji('😞')">😞</span>
+                        <span class="emoji-item" onclick="insertEmoji('😟')">😟</span>
+                        <span class="emoji-item" onclick="insertEmoji('😤')">😤</span>
+                        <span class="emoji-item" onclick="insertEmoji('😢')">😢</span>
+                        <span class="emoji-item" onclick="insertEmoji('😭')">😭</span>
+                        <span class="emoji-item" onclick="insertEmoji('😦')">😦</span>
+                        <span class="emoji-item" onclick="insertEmoji('😧')">😧</span>
+                        <span class="emoji-item" onclick="insertEmoji('😨')">😨</span>
+                        <span class="emoji-item" onclick="insertEmoji('😩')">😩</span>
+                        <span class="emoji-item" onclick="insertEmoji('🤯')">🤯</span>
+                        <span class="emoji-item" onclick="insertEmoji('😬')">😬</span>
+                        <span class="emoji-item" onclick="insertEmoji('😰')">😰</span>
+                        <span class="emoji-item" onclick="insertEmoji('😱')">😱</span>
+                        <span class="emoji-item" onclick="insertEmoji('🥵')">🥵</span>
+                        <span class="emoji-item" onclick="insertEmoji('🥶')">🥶</span>
+                        <span class="emoji-item" onclick="insertEmoji('😳')">😳</span>
+                        <span class="emoji-item" onclick="insertEmoji('🤪')">🤪</span>
+                        <span class="emoji-item" onclick="insertEmoji('😵')">😵</span>
+                        <span class="emoji-item" onclick="insertEmoji('🥴')">🥴</span>
+                        <span class="emoji-item" onclick="insertEmoji('😠')">😠</span>
+                        <span class="emoji-item" onclick="insertEmoji('😡')">😡</span>
+                        <span class="emoji-item" onclick="insertEmoji('🤬')">🤬</span>
+                        <span class="emoji-item" onclick="insertEmoji('❤️')">❤️</span>
+                        <span class="emoji-item" onclick="insertEmoji('💕')">💕</span>
+                        <span class="emoji-item" onclick="insertEmoji('💖')">💖</span>
+                        <span class="emoji-item" onclick="insertEmoji('💗')">💗</span>
+                        <span class="emoji-item" onclick="insertEmoji('💘')">💘</span>
+                        <span class="emoji-item" onclick="insertEmoji('💝')">💝</span>
+                        <span class="emoji-item" onclick="insertEmoji('💞')">💞</span>
+                        <span class="emoji-item" onclick="insertEmoji('💓')">💓</span>
+                        <span class="emoji-item" onclick="insertEmoji('💔')">💔</span>
+                        <span class="emoji-item" onclick="insertEmoji('🔥')">🔥</span>
+                        <span class="emoji-item" onclick="insertEmoji('✨')">✨</span>
+                        <span class="emoji-item" onclick="insertEmoji('⭐')">⭐</span>
+                        <span class="emoji-item" onclick="insertEmoji('🌟')">🌟</span>
+                        <span class="emoji-item" onclick="insertEmoji('💫')">💫</span>
+                        <span class="emoji-item" onclick="insertEmoji('👍')">👍</span>
+                        <span class="emoji-item" onclick="insertEmoji('👎')">👎</span>
+                        <span class="emoji-item" onclick="insertEmoji('👏')">👏</span>
+                        <span class="emoji-item" onclick="insertEmoji('🙌')">🙌</span>
+                        <span class="emoji-item" onclick="insertEmoji('👋')">👋</span>
+                        <span class="emoji-item" onclick="insertEmoji('🤝')">🤝</span>
+                        <span class="emoji-item" onclick="insertEmoji('🙏')">🙏</span>
+                    </div>
+                </div>
             <?php else: ?>
                 <div class="no-chat-selected" style="display: flex; align-items: center; justify-content: center; height: 100%; flex-direction: column; color: #999;">
                     <i class="fas fa-comments" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
-                    <h3 style="margin: 0 0 10px 0;">Chưa có cuộc trò chuyện</h3>
-                    <p>Hãy ghép đôi với ai đó để bắt đầu chat!</p>
-                    <button onclick="window.location.href='../trangchu/index.php'" style="
-                        margin-top: 20px;
-                        padding: 12px 30px;
-                        background: linear-gradient(135deg, #e94057 0%, #f27121 100%);
-                        color: white;
-                        border: none;
-                        border-radius: 25px;
-                        cursor: pointer;
-                        font-weight: 600;
-                    ">
-                        Khám phá ngay
-                    </button>
+                    <h3 style="margin: 0 0 10px 0;">Chọn một cuộc trò chuyện</h3>
+                    <p>Chọn một người từ danh sách bên trái để bắt đầu nhắn tin</p>
                 </div>
             <?php endif; ?>
         </div>
@@ -470,6 +580,12 @@ if ($matchedUserId) {
         const otherUserId = <?php echo $selectedMatch ? $selectedMatch['maNguoiDung'] : 'null'; ?>;
         let lastMessageId = <?php echo !empty($messages) ? end($messages)['maTinNhan'] : 0; ?>;
         let pollingInterval = null;
+
+        // Close conversation and show empty state
+        function closeConversation() {
+            // Redirect to message page without matchId parameter
+            window.location.href = 'message.php';
+        }
 
         // Toggle chat menu
         function toggleChatMenu(event) {
@@ -545,6 +661,10 @@ if ($matchedUserId) {
 
             // Disable input
             input.disabled = true;
+            
+            // Tắt typing indicator ngay khi gửi
+            clearTimeout(typingTimeout);
+            updateTypingStatus(false);
 
             // Gửi tin nhắn
             fetch('/controller/cMessage.php?action=send', {
@@ -608,11 +728,23 @@ if ($matchedUserId) {
             const status = message.trangThai || 'sent';
             let statusIcon = '';
             if (isSent) {
-                if (status === 'seen') {
+                if (status === 'recalled') {
+                    // Tin nhắn đã thu hồi
+                    statusIcon = '<span class="message-status" data-status="recalled"><i class="fas fa-ban" style="color: #e74c3c;" title="Đã thu hồi"></i></span>';
+                } else if (status === 'failed') {
+                    // Tin nhắn gửi thất bại
+                    statusIcon = '<span class="message-status message-failed" data-status="failed" data-message-id="' + message.maTinNhan + '"><i class="fas fa-exclamation-circle" style="color: #e74c3c;" title="Gửi thất bại - Nhấn để thử lại"></i></span>';
+                } else if (status === 'sending') {
+                    // Đang gửi
+                    statusIcon = '<span class="message-status" data-status="sending"><i class="fas fa-clock" style="color: #95a5a6;" title="Đang gửi"></i></span>';
+                } else if (status === 'seen') {
+                    // Đã xem
                     statusIcon = '<span class="message-status" data-status="seen"><i class="fas fa-eye" style="color: #2E7D32;" title="Đã xem"></i></span>';
                 } else if (status === 'delivered') {
+                    // Đã nhận
                     statusIcon = '<span class="message-status" data-status="delivered"><i class="fas fa-check-double" style="color: #95a5a6;" title="Đã nhận"></i></span>';
                 } else {
+                    // Đã gửi
                     statusIcon = '<span class="message-status" data-status="sent"><i class="fas fa-check" style="color: #95a5a6;" title="Đã gửi"></i></span>';
                 }
             }
@@ -621,12 +753,28 @@ if ($matchedUserId) {
             if (!isSent) {
                 html += `<img src="<?php echo $chatAvatarSrc ?? ''; ?>" alt="" class="message-avatar-small">`;
             }
-            html += `
-                <div class="message-bubble">
-                    <p>${escapeHtml(message.noiDung)}</p>
-                    <span class="message-time">${time} ${statusIcon}</span>
-                </div>
-            `;
+            
+            // Kiểm tra nếu tin nhắn bị thu hồi
+            if (status === 'recalled') {
+                html += `
+                    <div class="message-bubble message-recalled">
+                        <p><i class="fas fa-ban"></i> Tin nhắn đã bị thu hồi</p>
+                        <span class="message-time">${time}</span>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="message-bubble">
+                        <p>${escapeHtml(message.noiDung)}</p>
+                        <span class="message-time">${time}</span>
+                    </div>
+                `;
+            }
+            
+            // Thêm trạng thái bên ngoài message-bubble
+            if (isSent) {
+                html += statusIcon;
+            }
             
             messageDiv.innerHTML = html;
             messagesContainer.appendChild(messageDiv);
@@ -672,6 +820,12 @@ if ($matchedUserId) {
                             lastMessageId = msg.maTinNhan;
                         }
                     });
+                    
+                    // Xóa typing indicator khi có tin nhắn mới đến
+                    const typingDiv = document.getElementById('typingIndicator');
+                    if (typingDiv) {
+                        typingDiv.remove();
+                    }
 
                     // Scroll to bottom
                     scrollToBottom();
@@ -726,14 +880,32 @@ if ($matchedUserId) {
             // Cập nhật attribute
             statusElement.setAttribute('data-status', newStatus);
             
+            // Xóa class message-failed nếu không còn failed
+            if (newStatus !== 'failed') {
+                statusElement.classList.remove('message-failed');
+            }
+            
             // Cập nhật icon
             let iconHTML = '';
-            if (newStatus === 'seen') {
-                iconHTML = '<i class="fas fa-eye" style="color: #2E7D32;" title="Đã xem"></i>';
-            } else if (newStatus === 'delivered') {
-                iconHTML = '<i class="fas fa-check-double" style="color: #95a5a6;" title="Đã nhận"></i>';
-            } else {
-                iconHTML = '<i class="fas fa-check" style="color: #95a5a6;" title="Đã gửi"></i>';
+            switch(newStatus) {
+                case 'recalled':
+                    iconHTML = '<i class="fas fa-ban" style="color: #e74c3c;" title="Đã thu hồi"></i>';
+                    break;
+                case 'failed':
+                    iconHTML = '<i class="fas fa-exclamation-circle" style="color: #e74c3c;" title="Gửi thất bại - Nhấn để thử lại"></i>';
+                    statusElement.classList.add('message-failed');
+                    break;
+                case 'sending':
+                    iconHTML = '<i class="fas fa-clock" style="color: #95a5a6;" title="Đang gửi"></i>';
+                    break;
+                case 'seen':
+                    iconHTML = '<i class="fas fa-eye" style="color: #2E7D32;" title="Đã xem"></i>';
+                    break;
+                case 'delivered':
+                    iconHTML = '<i class="fas fa-check-double" style="color: #95a5a6;" title="Đã nhận"></i>';
+                    break;
+                default: // sent
+                    iconHTML = '<i class="fas fa-check" style="color: #95a5a6;" title="Đã gửi"></i>';
             }
             
             statusElement.innerHTML = iconHTML;
@@ -760,6 +932,68 @@ if ($matchedUserId) {
                 console.error('Error marking messages as seen:', error);
             });
         }
+        
+        // Cập nhật badge tin nhắn chưa đọc cho một match
+        function updateUnreadBadge(matchId, count) {
+            const messageItems = document.querySelectorAll('.message-item');
+            messageItems.forEach(item => {
+                const itemLink = item.getAttribute('onclick');
+                if (itemLink && itemLink.includes('match=' + matchId)) {
+                    const badge = item.querySelector('.unread-badge');
+                    const messageText = item.querySelector('.message-text');
+                    
+                    if (count > 0) {
+                        // Có tin nhắn chưa đọc
+                        if (!badge) {
+                            // Tạo badge mới
+                            const nameDiv = item.querySelector('.message-name').parentElement;
+                            const newBadge = document.createElement('span');
+                            newBadge.className = 'unread-badge';
+                            newBadge.textContent = count;
+                            nameDiv.appendChild(newBadge);
+                        } else {
+                            // Cập nhật badge có sẵn
+                            badge.textContent = count;
+                        }
+                        
+                        // Thêm class has-unread
+                        item.classList.add('has-unread');
+                        if (messageText) {
+                            messageText.classList.add('unread-text');
+                        }
+                    } else {
+                        // Không còn tin nhắn chưa đọc
+                        if (badge) {
+                            badge.remove();
+                        }
+                        item.classList.remove('has-unread');
+                        if (messageText) {
+                            messageText.classList.remove('unread-text');
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Cập nhật tất cả các badge
+        function updateAllUnreadBadges() {
+            fetch('/controller/cMessage.php?action=get_all_unread_counts')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.counts) {
+                    Object.keys(data.counts).forEach(matchId => {
+                        const count = data.counts[matchId];
+                        // Không cập nhật badge cho match đang mở
+                        if (matchId != currentMatchId) {
+                            updateUnreadBadge(matchId, count);
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error updating unread badges:', error);
+            });
+        }
 
         // Send message on Enter key
         document.addEventListener('DOMContentLoaded', function() {
@@ -774,6 +1008,15 @@ if ($matchedUserId) {
 
                 // Auto focus
                 input.focus();
+                
+                // Lắng nghe sự kiện nhập tin nhắn để hiển thị typing indicator
+                input.addEventListener('input', handleTypingInput);
+                
+                // Tắt typing khi blur (rời khỏi input)
+                input.addEventListener('blur', function() {
+                    clearTimeout(typingTimeout);
+                    updateTypingStatus(false);
+                });
             }
 
             // Scroll to bottom on load
@@ -787,9 +1030,29 @@ if ($matchedUserId) {
                 // Poll status updates mỗi 3 giây (để cập nhật trạng thái realtime)
                 setInterval(checkMessageStatusUpdates, 3000);
                 
+                // Poll typing status mỗi 1 giây
+                setInterval(checkTypingStatus, 1000);
+                
                 // Đánh dấu tin nhắn đã xem khi mở trang
                 markMessagesAsSeen();
+                
+                // Xóa badge ngay lập tức khi mở chat
+                updateUnreadBadge(currentMatchId, 0);
             }
+            
+            // Update unread badges cho tất cả các match mỗi 5 giây
+            setInterval(updateAllUnreadBadges, 5000);
+            
+            // Xử lý click vào tin nhắn gửi thất bại để retry
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.message-failed')) {
+                    const failedStatus = e.target.closest('.message-failed');
+                    const messageId = failedStatus.getAttribute('data-message-id');
+                    if (messageId) {
+                        retryFailedMessage(messageId);
+                    }
+                }
+            });
         });
 
         // Cleanup khi rời trang
@@ -820,6 +1083,164 @@ if ($matchedUserId) {
 
         // Cập nhật mỗi 2 phút
         setInterval(updateOnlineStatus, 120000);
+        
+        // ===== TYPING INDICATOR =====
+        let typingTimeout;
+        let lastTypingUpdate = 0; // Timestamp của lần update cuối
+        
+        function handleTypingInput() {
+            if (!currentMatchId) return;
+            
+            const now = Date.now();
+            
+            // Chỉ gửi typing update nếu đã qua 500ms từ lần cuối (throttle)
+            if (now - lastTypingUpdate > 500) {
+                updateTypingStatus(true);
+                lastTypingUpdate = now;
+            }
+            
+            // Clear timeout cũ
+            clearTimeout(typingTimeout);
+            
+            // Sau 2 giây không nhập thì ngừng hiển thị "đang nhập"
+            typingTimeout = setTimeout(() => {
+                updateTypingStatus(false);
+            }, 2000);
+        }
+        
+        function updateTypingStatus(isTyping) {
+            fetch('/controller/cUpdateTyping.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    matchId: currentMatchId,
+                    isTyping: isTyping
+                })
+            })
+            .catch(error => {
+                console.error('Error updating typing status:', error);
+            });
+        }
+        
+        function checkTypingStatus() {
+            if (!currentMatchId) return;
+            
+            fetch('/controller/cCheckTyping.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    matchId: currentMatchId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showTypingIndicator(data.isTyping, data.userName);
+                }
+            })
+            .catch(error => {
+                console.error('Error checking typing status:', error);
+            });
+        }
+        
+        function showTypingIndicator(isTyping, userName) {
+            const messagesContainer = document.getElementById('chatMessages');
+            let typingDiv = document.getElementById('typingIndicator');
+            
+            if (isTyping) {
+                if (!typingDiv) {
+                    typingDiv = document.createElement('div');
+                    typingDiv.id = 'typingIndicator';
+                    typingDiv.className = 'typing-indicator';
+                    typingDiv.innerHTML = `
+                        <img src="<?php echo $chatAvatarSrc ?? ''; ?>" alt="" class="message-avatar-small">
+                        <div class="typing-bubble">
+                            <span></span><span></span><span></span>
+                        </div>
+                    `;
+                    messagesContainer.appendChild(typingDiv);
+                    scrollToBottom();
+                }
+            } else {
+                if (typingDiv) {
+                    typingDiv.remove();
+                }
+            }
+        }
+        
+        // ===== RETRY FAILED MESSAGE =====
+        function retryFailedMessage(messageId) {
+            fetch('/controller/cRetryMessage.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    messageId: messageId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Cập nhật UI - xóa icon lỗi, hiển thị "đã gửi"
+                    const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+                    if (messageElement) {
+                        updateMessageStatusUI(messageElement, 'sent');
+                    }
+                } else {
+                    alert('Không thể gửi lại tin nhắn. Vui lòng thử lại sau.');
+                }
+            })
+            .catch(error => {
+                console.error('Error retrying message:', error);
+                alert('Có lỗi xảy ra. Vui lòng thử lại sau.');
+            });
+        }
+
+        
+        // ===== EMOJI PICKER =====
+        function toggleEmojiPicker() {
+            const picker = document.getElementById('emojiPicker');
+            if (picker.style.display === 'none' || !picker.style.display) {
+                picker.style.display = 'block';
+            } else {
+                picker.style.display = 'none';
+            }
+        }
+        
+        function insertEmoji(emoji) {
+            const input = document.getElementById('messageInput');
+            const cursorPos = input.selectionStart;
+            const textBefore = input.value.substring(0, cursorPos);
+            const textAfter = input.value.substring(cursorPos);
+            
+            input.value = textBefore + emoji + textAfter;
+            input.focus();
+            
+            // Đặt cursor sau emoji
+            const newCursorPos = cursorPos + emoji.length;
+            input.setSelectionRange(newCursorPos, newCursorPos);
+            
+            // Đóng emoji picker
+            document.getElementById('emojiPicker').style.display = 'none';
+        }
+        
+        // Đóng emoji picker khi click ra ngoài
+        document.addEventListener('click', function(e) {
+            const picker = document.getElementById('emojiPicker');
+            const emojiBtn = e.target.closest('.btn-input-action');
+            
+            if (picker && picker.style.display === 'block' && 
+                !picker.contains(e.target) && 
+                (!emojiBtn || emojiBtn.title !== 'Emoji')) {
+                picker.style.display = 'none';
+            }
+        });
+
 
         // Cập nhật khi user tương tác
         let activityTimeout;

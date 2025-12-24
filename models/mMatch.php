@@ -178,6 +178,114 @@ class MatchModel {
     }
     
     /**
+     * Lấy danh sách người đã ghép đôi mà MÌNH THÍCH TRƯỚC
+     * (Hiển thị ở trang "Người bạn thích")
+     */
+    public function getMatchesILikedFirst($userId) {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                g.maGhepDoi,
+                g.thoiDiemGhepDoi,
+                CASE 
+                    WHEN g.maNguoiA = ? THEN g.maNguoiB 
+                    ELSE g.maNguoiA 
+                END as maNguoiDung,
+                h.ten,
+                h.avt,
+                h.ngaySinh,
+                h.noiSong,
+                t1.thoiDiemThich as myLikeTime,
+                t2.thoiDiemThich as theirLikeTime
+            FROM ghepdoi g
+            JOIN hoso h ON (
+                CASE 
+                    WHEN g.maNguoiA = ? THEN g.maNguoiB 
+                    ELSE g.maNguoiA 
+                END = h.maNguoiDung
+            )
+            LEFT JOIN thich t1 ON t1.maNguoiThich = ? AND t1.maNguoiDuocThich = (
+                CASE 
+                    WHEN g.maNguoiA = ? THEN g.maNguoiB 
+                    ELSE g.maNguoiA 
+                END
+            )
+            LEFT JOIN thich t2 ON t2.maNguoiThich = (
+                CASE 
+                    WHEN g.maNguoiA = ? THEN g.maNguoiB 
+                    ELSE g.maNguoiA 
+                END
+            ) AND t2.maNguoiDuocThich = ?
+            WHERE (g.maNguoiA = ? OR g.maNguoiB = ?)
+            AND g.trangThaiGhepDoi = 'matched'
+            AND t1.thoiDiemThich < t2.thoiDiemThich
+            ORDER BY g.thoiDiemGhepDoi DESC
+        ");
+        $stmt->bind_param("iiiiiiii", $userId, $userId, $userId, $userId, $userId, $userId, $userId, $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $matches = [];
+        while ($row = $result->fetch_assoc()) {
+            $matches[] = $row;
+        }
+        return $matches;
+    }
+    
+    /**
+     * Lấy danh sách người đã ghép đôi mà HỌ THÍCH MÌNH TRƯỚC
+     * (Hiển thị ở trang "Người thích bạn")
+     */
+    public function getMatchesTheyLikedFirst($userId) {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                g.maGhepDoi,
+                g.thoiDiemGhepDoi,
+                CASE 
+                    WHEN g.maNguoiA = ? THEN g.maNguoiB 
+                    ELSE g.maNguoiA 
+                END as maNguoiDung,
+                h.ten,
+                h.avt,
+                h.ngaySinh,
+                h.noiSong,
+                t1.thoiDiemThich as myLikeTime,
+                t2.thoiDiemThich as theirLikeTime
+            FROM ghepdoi g
+            JOIN hoso h ON (
+                CASE 
+                    WHEN g.maNguoiA = ? THEN g.maNguoiB 
+                    ELSE g.maNguoiA 
+                END = h.maNguoiDung
+            )
+            LEFT JOIN thich t1 ON t1.maNguoiThich = ? AND t1.maNguoiDuocThich = (
+                CASE 
+                    WHEN g.maNguoiA = ? THEN g.maNguoiB 
+                    ELSE g.maNguoiA 
+                END
+            )
+            LEFT JOIN thich t2 ON t2.maNguoiThich = (
+                CASE 
+                    WHEN g.maNguoiA = ? THEN g.maNguoiB 
+                    ELSE g.maNguoiA 
+                END
+            ) AND t2.maNguoiDuocThich = ?
+            WHERE (g.maNguoiA = ? OR g.maNguoiB = ?)
+            AND g.trangThaiGhepDoi = 'matched'
+            AND t2.thoiDiemThich < t1.thoiDiemThich
+            ORDER BY g.thoiDiemGhepDoi DESC
+        ");
+        $stmt->bind_param("iiiiiiii", $userId, $userId, $userId, $userId, $userId, $userId, $userId, $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $matches = [];
+        while ($row = $result->fetch_assoc()) {
+            $matches[] = $row;
+        }
+        return $matches;
+    }
+    
+    /**
      * Hủy ghép đôi HOÀN TOÀN
      * - Xóa tất cả TIN NHẮN giữa 2 người trong cuộc trò chuyện
      * - Xóa tất cả lượt thích giữa 2 người (cả 2 chiều)

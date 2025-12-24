@@ -94,20 +94,20 @@ $successMessage = Session::getFlash('register_success');
 
         <form action="<?php echo $formAction; ?>" method="POST" id="registerForm">
             <div class="form-group">
-                <label for="email">Email/SĐT</label>
+                <label for="email">Email</label>
                 <div class="input-wrapper">
                     <input 
                         type="text" 
                         id="email" 
                         name="email" 
                         class="form-control" 
-                        placeholder="Nhập email hoặc số điện thoại"
+                        placeholder="Nhập email"
                         value="<?php echo isset($formData['email']) ? htmlspecialchars($formData['email']) : ''; ?>"
                         required
                         autocomplete="off"
                     >
                 </div>
-                <span class="error-message">Vui lòng nhập email hợp lệ hoặc số điện thoại hợp lệ</span>
+                <span class="error-message">Vui lòng nhập email hợp lệ</span>
             </div>
 
             <div class="form-group">
@@ -174,22 +174,6 @@ $successMessage = Session::getFlash('register_success');
                 Đăng ký
             </button>
         </form>
-
-        <div class="divider">
-            <span>hoặc đăng ký với</span>
-        </div>
-
-        <div class="social-register">
-            <button class="btn-social facebook" onclick="registerWithFacebook()">
-                <i class="fab fa-facebook-f"></i>
-            </button>
-            <button class="btn-social google" onclick="registerWithGoogle()">
-                <i class="fab fa-google"></i>
-            </button>
-            <button class="btn-social twitter" onclick="registerWithTwitter()">
-                <i class="fab fa-twitter"></i>
-            </button>
-        </div>
 
         <?php
         // Build login link with params
@@ -305,15 +289,13 @@ $successMessage = Session::getFlash('register_success');
             let isValid = true;
             let errorMessages = [];
             
-            // Validate email/phone
+            // Validate email
             const email = document.getElementById('email').value.trim();
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            // Phone must be 10 digits and start with one of the allowed Vietnamese prefixes
-            const phoneRegex = /^(?:032|033|034|035|036|037|038|039|096|097|098|081|082|083|084|085|091|094|070|076|077|078|079|090|093)\d{7}$/;
             
-            if (!emailRegex.test(email) && !phoneRegex.test(email)) {
+            if (!emailRegex.test(email)) {
                 document.getElementById('email').closest('.form-group').classList.add('error');
-                errorMessages.push('Email hoặc số điện thoại không hợp lệ');
+                errorMessages.push('Email không hợp lệ');
                 isValid = false;
             }
             
@@ -363,18 +345,6 @@ $successMessage = Session::getFlash('register_success');
                 formGroup.classList.remove('error');
             }
         });
-
-        function registerWithFacebook() {
-            alert('Tính năng đăng ký bằng Facebook sẽ sớm được cập nhật!');
-        }
-
-        function registerWithGoogle() {
-            alert('Tính năng đăng ký bằng Google sẽ sớm được cập nhật!');
-        }
-
-        function registerWithTwitter() {
-            alert('Tính năng đăng ký bằng Twitter sẽ sớm được cập nhật!');
-        }
 
         // Hàm hiển thị thông báo
         function showNotification(message, type) {

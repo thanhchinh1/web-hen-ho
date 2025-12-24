@@ -148,5 +148,32 @@ class Like {
         $row = $result->fetch_assoc();
         return $row['total'];
     }
+    
+    /**
+     * Kiểm tra xem user có thể thích thêm người nữa không (giới hạn cho non-VIP)
+     * Non-VIP: giới hạn 10 lượt thích
+     * VIP: không giới hạn
+     */
+    public function canLikeMore($userId) {
+        // Kiểm tra VIP
+        require_once 'mVIP.php';
+        $vipModel = new VIP();
+        
+        if ($vipModel->isVIP($userId)) {
+            return ['canLike' => true, 'isVIP' => true];
+        }
+        
+        // Non-VIP: kiểm tra số lượt thích
+        $count = $this->countPeopleLikedByUser($userId);
+        $limit = 10;
+        
+        return [
+            'canLike' => $count < $limit,
+            'isVIP' => false,
+            'currentCount' => $count,
+            'limit' => $limit,
+            'remaining' => max(0, $limit - $count)
+        ];
+    }
 }
 ?>

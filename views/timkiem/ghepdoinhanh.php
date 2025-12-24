@@ -210,6 +210,43 @@ if (!$vipModel->isVIP($userId)) {
             justify-content: center;
         }
 
+        /* Floating hearts animation */
+        .floating-hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .floating-hearts i {
+            position: absolute;
+            bottom: -20px;
+            font-size: 20px;
+            color: #FF6B9D;
+            opacity: 0;
+            animation: float-up 4s ease-in infinite;
+            animation-delay: calc(var(--i) * 0.5s);
+        }
+
+        .floating-hearts i:nth-child(1) { left: 10%; }
+        .floating-hearts i:nth-child(2) { left: 30%; }
+        .floating-hearts i:nth-child(3) { left: 50%; }
+        .floating-hearts i:nth-child(4) { left: 70%; }
+        .floating-hearts i:nth-child(5) { left: 90%; }
+
+        @keyframes float-up {
+            0% {
+                opacity: 0;
+                transform: translateY(0) scale(0.5);
+            }
+            20% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-250px) scale(1.2);
+            }
+        }
+
         .heart-icon {
             font-size: 100px;
             background: linear-gradient(135deg, #FF6B9D 0%, #FF8E53 100%);
@@ -218,6 +255,8 @@ if (!$vipModel->isVIP($userId)) {
             background-clip: text;
             animation: heartbeat 1.5s ease-in-out infinite;
             filter: drop-shadow(0 10px 30px rgba(255, 107, 157, 0.4));
+            position: relative;
+            z-index: 2;
         }
 
         @keyframes heartbeat {
@@ -611,37 +650,19 @@ if (!$vipModel->isVIP($userId)) {
 
                 <div class="card-body">
                     <div class="animation-container">
+                        <div class="floating-hearts">
+                            <i class="fas fa-heart" style="--i: 1"></i>
+                            <i class="fas fa-heart" style="--i: 2"></i>
+                            <i class="fas fa-heart" style="--i: 3"></i>
+                            <i class="fas fa-heart" style="--i: 4"></i>
+                            <i class="fas fa-heart" style="--i: 5"></i>
+                        </div>
                         <i class="fas fa-heart heart-icon"></i>
-                    </div>
-
-                    <div class="description">
-                        Hệ thống AI của chúng tôi sẽ tự động kết nối bạn với những người đang online và có độ tương thích cao nhất
-                    </div>
-
-                    <div class="feature-list">
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <i class="fas fa-bolt"></i>
-                            </div>
-                            <div class="feature-text">Ghép đôi cực nhanh chỉ trong vài giây</div>
-                        </div>
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <i class="fas fa-brain"></i>
-                            </div>
-                            <div class="feature-text">AI phân tích độ tương thích chính xác</div>
-                        </div>
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="feature-text">Chỉ ghép với người đang online</div>
-                        </div>
                     </div>
 
                     <div class="btn-container">
                         <button class="btn btn-primary" onclick="startSearching()">
-                            <i class="fas fa-search"></i>
+                            <i class="fas fa-rocket"></i>
                             <span>Bắt đầu tìm kiếm</span>
                         </button>
                     </div>
@@ -768,6 +789,12 @@ if (!$vipModel->isVIP($userId)) {
             timerInterval = setInterval(() => {
                 const duration = Math.floor((Date.now() - searchStartTime) / 1000);
                 document.getElementById('timer').textContent = `Đã tìm: ${duration} giây`;
+                
+                // Kiểm tra nếu đã quá 60 giây (1 phút)
+                if (duration >= 60) {
+                    console.log('⏱️ Timeout: Đã tìm kiếm quá 60 giây');
+                    stopSearchingWithTimeout();
+                }
             }, 1000);
 
             // Gửi request bắt đầu tìm kiếm
@@ -808,6 +835,79 @@ if (!$vipModel->isVIP($userId)) {
             .catch(error => {
                 console.error('❌ Catch error:', error);
                 alert('Có lỗi xảy ra: ' + error.message);
+                location.reload();
+            });
+        }
+
+        function stopSearchingWithTimeout() {
+            clearInterval(searchInterval);
+            clearInterval(timerInterval);
+            
+            // Hủy tìm kiếm trên server
+            fetch('../../controller/cQuickMatch.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=cancel'
+            })
+            .then(() => {
+                // Hiển thị thông báo đẹp
+                const notification = document.createElement('div');
+                notification.innerHTML = `
+                    <div style="
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: white;
+                        padding: 40px 50px;
+                        border-radius: 20px;
+                        box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+                        z-index: 10001;
+                        text-align: center;
+                        max-width: 450px;
+                    ">
+                        <div style="font-size: 70px; margin-bottom: 20px;">
+                            😔
+                        </div>
+                        <h2 style="margin: 0 0 15px 0; color: #FF6B9D; font-size: 26px; font-weight: 700;">
+                            Không tìm thấy người phù hợp
+                        </h2>
+                        <p style="margin: 0 0 25px 0; color: #7F8C8D; font-size: 16px; line-height: 1.6;">
+                            Hiện tại không có người dùng phù hợp đang online.<br>
+                            Vui lòng thử lại sau nhé!
+                        </p>
+                        <button onclick="location.reload()" style="
+                            padding: 14px 40px;
+                            border: none;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            border-radius: 50px;
+                            font-size: 16px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.3)'">
+                            <i class="fas fa-redo"></i> Thử lại
+                        </button>
+                    </div>
+                    <div style="
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(0,0,0,0.6);
+                        z-index: 10000;
+                    "></div>
+                `;
+                document.body.appendChild(notification);
+            })
+            .catch(error => {
+                console.error('❌ Error canceling:', error);
+                alert('Không tìm thấy người phù hợp. Vui lòng thử lại sau!');
                 location.reload();
             });
         }
