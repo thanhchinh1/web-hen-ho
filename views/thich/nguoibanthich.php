@@ -42,6 +42,9 @@ foreach ($likedUsers as $person) {
 
 $likedUsers = $filteredUsers;
 
+// Lấy danh sách người đã ghép đôi
+$matchedUsers = $matchModel->getMyMatches($currentUserId);
+
 // Helper function để hiển thị thời gian
 function timeAgo($datetime) {
     $timestamp = strtotime($datetime);
@@ -111,13 +114,68 @@ function timeAgo($datetime) {
 
     <div class="likes-wrapper">
         <div class="likes-container" style="position:relative;">
-            <button class="back-btn" onclick="window.history.back()" title="Quay lại">
+            <button class="back-btn" onclick="window.location.href='/views/trangchu/index.php'" title="Quay lại">
                 <i class="fas fa-arrow-left"></i>
             </button>
             <div class="likes-header">
                 <h1>Người bạn đã thích</h1>
                 <p>Danh sách những người bạn đã thể hiện sự quan tâm</p>
             </div>
+            
+            <!-- Card Đã ghép đôi -->
+        <?php if (!empty($matchedUsers)): ?>
+            <div class="matched-section">
+                <h2 class="section-title">
+                    <i class="fas fa-heart"></i> Đã ghép đôi (<?php echo count($matchedUsers); ?>)
+                </h2>
+                <div class="matches-grid">
+                    <?php foreach ($matchedUsers as $match): 
+                        $age = $profileModel->calculateAge($match['ngaySinh']);
+                        
+                        // Xử lý đường dẫn avatar
+                        if (!empty($match['avt'])) {
+                            if (strpos($match['avt'], '/') === 0) {
+                                $avatarSrc = htmlspecialchars($match['avt']);
+                            } elseif (strpos($match['avt'], 'public/') === 0) {
+                                $avatarSrc = '/' . htmlspecialchars($match['avt']);
+                            } else {
+                                $avatarSrc = '/public/uploads/avatars/' . htmlspecialchars($match['avt']);
+                            }
+                        } else {
+                            $avatarSrc = '/public/img/default-avatar.jpg';
+                        }
+                        
+                        $matchDate = date('d/m/Y', strtotime($match['thoiDiemGhepDoi']));
+                    ?>
+                    <div class="match-card" onclick="window.location.href='/views/hoso/xemnguoikhac.php?id=<?php echo $match['maNguoiDung']; ?>'">
+                        <div class="match-avatar">
+                            <img src="<?php echo $avatarSrc; ?>" 
+                                 alt="<?php echo htmlspecialchars($match['ten']); ?>">
+                            <div class="match-badge">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                        </div>
+                        <div class="match-info">
+                            <h3 class="match-name"><?php echo htmlspecialchars($match['ten']); ?>, <?php echo $age; ?></h3>
+                            <p class="match-location">
+                                <i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($match['noiSong'] ?? 'N/A'); ?>
+                            </p>
+                            <p class="match-date">
+                                Ghép đôi: <?php echo $matchDate; ?>
+                            </p>
+                        </div>
+                        <div class="match-actions">
+                            <a href="/views/nhantin/message.php?matchId=<?php echo $match['maGhepDoi']; ?>" 
+                               class="btn-chat"
+                               onclick="event.stopPropagation();">
+                                <i class="fas fa-comment"></i> Nhắn tin
+                            </a>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endif; ?>
             
         <?php if (empty($likedUsers)): ?>
             <div class="empty-state">
@@ -176,16 +234,11 @@ function timeAgo($datetime) {
     <script>
         function unlikeUser(targetUserId) {
             console.log('unlikeUser called with userId:', targetUserId);
-            
-            if (!confirm('Bạn có chắc muốn bỏ thích người này?')) {
+            if (!confirm('Bạn có chắc chắn muốn bỏ thích người này?')) {
                 return;
             }
-            
-            console.log('Sending request to /controller/cLike.php');
-            
             // Lấy CSRF token
             const csrfToken = '<?php echo Session::getCSRFToken(); ?>';
-            
             fetch('/controller/cLike.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -197,7 +250,6 @@ function timeAgo($datetime) {
             })
             .then(data => {
                 console.log('Response data:', data);
-                
                 if (data.success && data.action === 'unliked') {
                     // Remove card with animation
                     const item = document.getElementById('like-' + targetUserId);
@@ -206,7 +258,6 @@ function timeAgo($datetime) {
                         item.style.transform = 'translateX(-20px)';
                         setTimeout(() => {
                             item.remove();
-                            
                             // Check if empty
                             const list = document.querySelector('.likes-list');
                             if (list && list.children.length === 0) {
@@ -214,7 +265,6 @@ function timeAgo($datetime) {
                             }
                         }, 300);
                     }   
-                    
                     showNotification('Đã bỏ thích!', 'success');
                 } else {
                     showNotification(data.message || 'Có lỗi xảy ra!', 'error');

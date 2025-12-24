@@ -10,18 +10,17 @@ class MatchModel {
     }
     
     /**
-     * Kiểm tra xem 2 người đã ghép đôi chưa
+     * Kiểm tra xem 2 người đã ghép đôi chưa (có bất kỳ match nào đang active)
      */
     public function isMatched($userId1, $userId2) {
-        $userA = min($userId1, $userId2);
-        $userB = max($userId1, $userId2);
-        
+        // KHÔNG sử dụng min/max vì cho phép nhiều match
         $stmt = $this->conn->prepare("
             SELECT maGhepDoi FROM ghepdoi 
-            WHERE maNguoiA = ? AND maNguoiB = ?
+            WHERE ((maNguoiA = ? AND maNguoiB = ?) OR (maNguoiA = ? AND maNguoiB = ?))
             AND trangThaiGhepDoi = 'matched'
+            LIMIT 1
         ");
-        $stmt->bind_param("ii", $userA, $userB);
+        $stmt->bind_param("iiii", $userId1, $userId2, $userId2, $userId1);
         $stmt->execute();
         $result = $stmt->get_result();
         return $result->num_rows > 0;
@@ -55,19 +54,39 @@ class MatchModel {
         try {
             // Kiểm tra đã match chưa (với lock để tránh race condition)
             $checkStmt = $this->conn->prepare("
-                SELECT maGhepDoi FROM ghepdoi 
+                SELECT maGhepDoi, trangThaiGhepDoi FROM ghepdoi 
                 WHERE maNguoiA = ? AND maNguoiB = ?
-                AND trangThaiGhepDoi = 'matched'
                 FOR UPDATE
             ");
             $checkStmt->bind_param("ii", $userA, $userB);
             $checkStmt->execute();
             $result = $checkStmt->get_result();
+            $existingMatch = $result->fetch_assoc();
+            $checkStmt->close();
             
-            if ($result->num_rows > 0) {
-                // Đã tồn tại match
-                $this->conn->rollback();
-                return false;
+            if ($existingMatch) {
+                // Nếu đã có record ghép đôi
+                if ($existingMatch['trangThaiGhepDoi'] === 'matched') {
+                    // Đã matched rồi
+                    $this->conn->rollback();
+                    return false;
+                } elseif ($existingMatch['trangThaiGhepDoi'] === 'blocked') {
+                    // Record cũ bị block, cập nhật lại thành matched
+                    $updateStmt = $this->conn->prepare("
+                        UPDATE ghepdoi 
+                        SET trangThaiGhepDoi = 'matched', 
+                            thoiDiemGhepDoi = CURRENT_TIMESTAMP
+                        WHERE maGhepDoi = ?
+                    ");
+                    $updateStmt->bind_param("i", $existingMatch['maGhepDoi']);
+                    if ($updateStmt->execute()) {
+                        $this->conn->commit();
+                        return $existingMatch['maGhepDoi'];
+                    } else {
+                        $this->conn->rollback();
+                        return false;
+                    }
+                }
             }
             
             // Kiểm tra điều kiện match (cả 2 đều đã like nhau)
@@ -76,7 +95,7 @@ class MatchModel {
                 return false;
             }
             
-            // Insert record ghép đôi (luôn đảm bảo maNguoiA < maNguoiB)
+            // Insert record ghép đôi mới (luôn đảm bảo maNguoiA < maNguoiB)
             $stmt = $this->conn->prepare("
                 INSERT INTO ghepdoi (maNguoiA, maNguoiB, trangThaiGhepDoi) 
                 VALUES (?, ?, 'matched')
@@ -214,19 +233,19 @@ class MatchModel {
             $stmt->execute();
             $stmt->close();
             
-            // Bước 4: XÓA RECORD ghép đôi thay vì UPDATE
-            // (Do có UNIQUE constraint trên (maNguoiA, maNguoiB, trangThaiGhepDoi))
+            // Bước 4: XÓA TẤT CẢ RECORD ghép đôi giữa 2 người (cả 2 chiều)
+            // Vì cho phép nhiều match giữa cùng 2 người
             $stmt = $this->conn->prepare("
                 DELETE FROM ghepdoi 
-                WHERE maNguoiA = ? AND maNguoiB = ?
+                WHERE ((maNguoiA = ? AND maNguoiB = ?) OR (maNguoiA = ? AND maNguoiB = ?))
                 AND trangThaiGhepDoi = 'matched'
             ");
-            $stmt->bind_param("ii", $userA, $userB);
+            $stmt->bind_param("iiii", $userId1, $userId2, $userId2, $userId1);
             $stmt->execute();
             $deletedRows = $stmt->affected_rows;
             $stmt->close();
             
-            error_log("Unmatch: Deleted $deletedRows match record(s)");
+            error_log("Unmatch: Deleted $deletedRows match record(s) giữa user $userId1 và $userId2");
             
             // Commit transaction
             $this->conn->commit();
@@ -236,6 +255,48 @@ class MatchModel {
             // Rollback nếu có lỗi
             $this->conn->rollback();
             error_log("Unmatch error: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Xóa match theo matchId cụ thể (dùng khi có nhiều match giữa 2 người)
+     */
+    public function unmatchById($matchId, $userId) {
+        // Bắt đầu transaction
+        $this->conn->begin_transaction();
+        
+        try {
+            // Kiểm tra user có quyền xóa match này không
+            if (!$this->isMatchMember($matchId, $userId)) {
+                $this->conn->rollback();
+                return false;
+            }
+            
+            // Xóa tất cả tin nhắn của match này
+            $deleteMessagesStmt = $this->conn->prepare("
+                DELETE FROM tinnhan WHERE maGhepDoi = ?
+            ");
+            $deleteMessagesStmt->bind_param("i", $matchId);
+            $deleteMessagesStmt->execute();
+            $deletedMessages = $deleteMessagesStmt->affected_rows;
+            
+            // Xóa bản ghi ghép đôi
+            $deleteMatchStmt = $this->conn->prepare("
+                DELETE FROM ghepdoi WHERE maGhepDoi = ?
+            ");
+            $deleteMatchStmt->bind_param("i", $matchId);
+            $deleteMatchStmt->execute();
+            
+            error_log("UnmatchById: Xóa match ID $matchId - $deletedMessages tin nhắn");
+            
+            // Commit transaction
+            $this->conn->commit();
+            return true;
+            
+        } catch (Exception $e) {
+            $this->conn->rollback();
+            error_log("Error in unmatchById: " . $e->getMessage());
             return false;
         }
     }

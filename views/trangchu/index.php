@@ -1,4 +1,7 @@
 <?php
+// Set timezone to Vietnam
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -48,7 +51,8 @@ $whoLikedMeIds = $likeModel->getUserIdsWhoLikedMe($currentUserId); // Người �
 // Thêm người đã block vào danh sách loại trừ
 require_once '../../models/mBlock.php';
 $blockModel = new Block();
-$blockedUserIds = $blockModel->getBlockedUserIds($currentUserId);
+$blockedUserIds = $blockModel->getBlockedUserIds($currentUserId); // Người mình đã chặn
+$whoBlockedMeIds = $blockModel->getUserIdsWhoBlockedMe($currentUserId); // Người đã chặn mình
 
 // Thêm người đã ghép đôi vào danh sách loại trừ
 require_once '../../models/mMatch.php';
@@ -58,11 +62,21 @@ $matchedUserIds = array_map(function($match) {
     return $match['maNguoiDung'];
 }, $myMatches);
 
-// Kết hợp và thêm chính mình vào danh sách loại trừ
-$excludeIds = array_unique(array_merge([$currentUserId], $likedUserIds, $whoLikedMeIds, $blockedUserIds, $matchedUserIds));
+// Kết hợp và thêm chính mình vào danh sách loại trừ (bao gồm cả người đã chặn và bị chặn)
+$excludeIds = array_unique(array_merge(
+    [$currentUserId], 
+    $likedUserIds, 
+    $whoLikedMeIds, 
+    $blockedUserIds, 
+    $whoBlockedMeIds, 
+    $matchedUserIds
+));
 
-// Lấy danh sách hồ sơ để hiển thị (loại trừ những người đã like và được like)
-$allProfiles = $profileModel->getAllProfiles(12, 0, $excludeIds);
+// Lấy giới tính của người dùng hiện tại
+$currentUserGender = $currentUserProfile['gioiTinh'] ?? null;
+
+// Lấy danh sách hồ sơ để hiển thị (chỉ lấy giới tính đối lập)
+$allProfiles = $profileModel->getAllProfiles(12, 0, $excludeIds, $currentUserGender);
 
 // Lấy thông báo hệ thống từ admin
 $systemNotifications = $notificationModel->getSystemNotifications(3);
@@ -212,7 +226,7 @@ $infoMessage = Session::getFlash('info_message');
                         Trang chủ
                     </a>
                     <a href="../nhantin/message.php" class="nav-link">
-                        <i class="fas fa-comment"></i>
+                        <i class="fas fa-comments"></i>
                         Tin nhắn
                         <?php if ($newMatchesCount > 0): ?>
                             <span class="notification-badge"><?php echo $newMatchesCount; ?></span>
@@ -223,14 +237,14 @@ $infoMessage = Session::getFlash('info_message');
                         Tìm kiếm
                     </a>
                     <a href="#" class="nav-link">
-                        <i class="fas fa-search"></i>
+                        <i class="fas fa-question-circle"></i>
                         <span>Trợ giúp</span>
                     </a>
                 </nav>
             </div>
 
             <div class="header-right">
-                <a href="../../controller/cLogout.php" class="btn-logout">
+                <a href="#" class="btn-logout" onclick="confirmLogout(event)">
                     <i class="fas fa-sign-out-alt"></i>
                     Đăng Xuất
                 </a>
@@ -284,6 +298,15 @@ $infoMessage = Session::getFlash('info_message');
                 </script>
             </div>
         </div>
+
+    <script>
+    function confirmLogout(e) {
+        e.preventDefault();
+        if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+            window.location.href = '../../controller/cLogout.php';
+        }
+    }
+    </script>
     </header>
 
     <!-- Hero Section -->
@@ -445,9 +468,10 @@ $infoMessage = Session::getFlash('info_message');
                     $age = $profileModel->calculateAge($profile['ngaySinh']);
                     $avatarSrc = !empty($profile['avt']) ? '../../' . htmlspecialchars($profile['avt']) : 'https://i.pravatar.cc/200';
                     $isOnline = $userModel->isUserOnline($profile['maNguoiDung']);
+                    $isInactive = $userModel->isUserInactive($profile['maNguoiDung']);
                     $lastActivity = $userModel->getLastActivity($profile['maNguoiDung']);
                 ?>
-                <div class="profile-card" onclick="viewProfile(<?php echo $profile['maNguoiDung']; ?>)">
+                <div class="profile-card" data-user-id="<?php echo $profile['maNguoiDung']; ?>" onclick="viewProfile(<?php echo $profile['maNguoiDung']; ?>)">
                     <div class="profile-avatar-wrapper">
                         <img src="<?php echo $avatarSrc; ?>" alt="<?php echo htmlspecialchars($profile['ten']); ?>">
                         <?php if ($isOnline): ?>
@@ -460,6 +484,8 @@ $infoMessage = Session::getFlash('info_message');
                         <p class="profile-status"><?php echo htmlspecialchars($profile['mucTieuPhatTrien']); ?></p>
                         <?php if ($isOnline): ?>
                             <p class="last-seen online"><i class="fas fa-circle"></i> Đang hoạt động</p>
+                        <?php elseif ($isInactive): ?>
+                            <p class="last-seen inactive"><i class="fas fa-circle"></i> Không hoạt động</p>
                         <?php elseif ($lastActivity && $lastActivity['minutesAgo'] !== null): ?>
                             <?php
                                 $minutes = $lastActivity['minutesAgo'];
@@ -538,21 +564,6 @@ $infoMessage = Session::getFlash('info_message');
                     <p>Không giới hạn số lượt thích mỗi ngày</p>
                 </div>
 
-                <div class="benefit-item">
-                    <div class="benefit-icon">
-                        <i class="fas fa-eye"></i>
-                    </div>
-                    <h3>Xem ai thích bạn</h3>
-                    <p>Biết được ai đã thích hồ sơ của bạn</p>
-                </div>
-
-                <div class="benefit-item">
-                    <div class="benefit-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <h3>Hồ sơ nổi bật</h3>
-                    <p>Xuất hiện nhiều hơn với người dùng khác</p>
-                </div>
             </div>
             <!-- Reload Button Section -->
        
@@ -681,7 +692,6 @@ $infoMessage = Session::getFlash('info_message');
                                 <option value="">Tất cả</option>
                                 <option value="Nam">Nam</option>
                                 <option value="Nữ">Nữ</option>
-                                <option value="Khac">Khác</option>
                             </select>
                         </div>
 
@@ -794,7 +804,12 @@ $infoMessage = Session::getFlash('info_message');
                     <!-- Interests Section -->
                     <div class="modal-interests-section">
                         <h3>Sở thích (chọn nhiều)</h3>
-                        <div class="interests-grid">
+                        <div style="margin-bottom: 10px;">
+                            <label class="interest-checkbox" style="font-weight:600;">
+                                <input type="checkbox" id="all-interests-checkbox"> Tất cả sở thích
+                            </label>
+                        </div>
+                        <div class="interests-grid" id="interestsGrid">
                             <label class="interest-checkbox">
                                 <input type="checkbox" value="Đọc sách">
                                 <label>Đọc sách</label>
@@ -877,6 +892,25 @@ $infoMessage = Session::getFlash('info_message');
                             </label>
                         </div>
                     </div>
+    <script>
+    // Chức năng chọn tất cả sở thích
+    document.addEventListener('DOMContentLoaded', function() {
+        const allCheckbox = document.getElementById('all-interests-checkbox');
+        const interestsGrid = document.getElementById('interestsGrid');
+        if (allCheckbox && interestsGrid) {
+            allCheckbox.addEventListener('change', function() {
+                const checkboxes = interestsGrid.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(cb => cb.checked = allCheckbox.checked);
+            });
+            // Nếu tất cả đều được chọn thủ công thì cũng check vào "Tất cả"
+            interestsGrid.addEventListener('change', function() {
+                const checkboxes = interestsGrid.querySelectorAll('input[type="checkbox"]');
+                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                allCheckbox.checked = allChecked;
+            });
+        }
+    });
+    </script>
 
                     <div class="modal-actions">
                         <button type="button" class="modal-btn modal-btn-search" onclick="performSearch()">Tìm kiếm</button>
@@ -1000,6 +1034,7 @@ $infoMessage = Session::getFlash('info_message');
             profiles.forEach(profile => {
                 const card = document.createElement('div');
                 card.className = 'profile-card';
+                card.setAttribute('data-user-id', profile.id);
                 card.onclick = () => viewProfile(profile.id);
                 
                 const avatarSrc = profile.avatar.startsWith('public/') ? 
@@ -1088,6 +1123,66 @@ $infoMessage = Session::getFlash('info_message');
         // View profile
         function viewProfile(userId) {
             window.location.href = '../hoso/xemnguoikhac.php?id=' + userId;
+        }
+
+        // Load more profiles
+        function loadMoreProfiles(count = 1) {
+            fetch('../../controller/cLoadMoreProfiles.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'count=' + count
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.profiles.length > 0) {
+                    const profilesGrid = document.querySelector('.profiles-grid');
+                    
+                    data.profiles.forEach((profile, index) => {
+                        // Tạo profile card mới
+                        const card = document.createElement('div');
+                        card.className = 'profile-card';
+                        card.setAttribute('data-user-id', profile.maNguoiDung);
+                        card.onclick = function() { viewProfile(profile.maNguoiDung); };
+                        
+                        // Xác định loại indicator
+                        let statusIndicator = '';
+                        if (profile.isOnline) {
+                            statusIndicator = '<div class="online-indicator pulse" title="Đang online"></div>';
+                        }
+                        
+                        card.innerHTML = `
+                            <div class="profile-avatar-wrapper">
+                                <img src="../../${profile.avt}" alt="${profile.ten}">
+                                ${statusIndicator}
+                            </div>
+                            <div class="profile-info">
+                                <h3>${profile.ten}, ${profile.tuoi}</h3>
+                                <p class="profile-location"><i class="fas fa-map-marker-alt"></i> ${profile.noiSong}</p>
+                                <p class="profile-status">${profile.mucTieuPhatTrien}</p>
+                                ${profile.lastSeenText}
+                            </div>
+                            <button class="btn-like" onclick="event.stopPropagation(); likeProfile(${profile.maNguoiDung})"><i class="fas fa-heart"></i></button>
+                        `;
+                        
+                        // Animation mượt mà hơn với cubic-bezier và slide from bottom
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(30px) scale(0.95)';
+                        profilesGrid.appendChild(card);
+                        
+                        // Trigger animation với delay nhỏ cho mỗi card
+                        setTimeout(() => {
+                            card.style.transition = 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0) scale(1)';
+                        }, 150 + (index * 100));
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error loading more profiles:', error);
+            });
         }
 
         // Like button with AJAX
@@ -1214,11 +1309,31 @@ $infoMessage = Session::getFlash('info_message');
                         `;
                         document.body.appendChild(successNotif);
                         
+                        // Thêm fade out animation cho notification
+                        setTimeout(() => {
+                            successNotif.style.transition = 'opacity 0.3s ease';
+                            successNotif.style.opacity = '0';
+                        }, 550);
+                        
                         setTimeout(() => {
                             successNotif.remove();
-                            // Reload trang để cập nhật danh sách
-                            window.location.reload();
-                        }, 1500);
+                            // Xóa profile card khỏi DOM thay vì reload trang
+                            const profileCard = document.querySelector('.profile-card[data-user-id="' + userId + '"]');
+                            if (profileCard) {
+                                // Animation mượt mà hơn: fade out + slide up + scale
+                                profileCard.style.transition = 'all 0.45s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                                profileCard.style.opacity = '0';
+                                profileCard.style.transform = 'translateY(-30px) scale(0.85) rotateX(10deg)';
+                                profileCard.style.filter = 'blur(3px)';
+                                
+                                // Xóa card sau khi animation hoàn tất
+                                setTimeout(() => {
+                                    profileCard.remove();
+                                    // Tải thêm hồ sơ mới để thay thế với delay nhỏ
+                                    setTimeout(() => loadMoreProfiles(1), 100);
+                                }, 300);
+                            }
+                        }, 850);
                     }
                 } else {
                     alert(data.message);

@@ -126,10 +126,72 @@ if ($action === 'send') {
     // Lấy tin nhắn mới
     $newMessages = $messageModel->getNewMessages($matchId, $lastMessageId);
     
+    // Đánh dấu tin nhắn là đã nhận (delivered)
+    if (!empty($newMessages)) {
+        $messageModel->markAsDelivered($matchId, $currentUserId);
+    }
+    
     echo json_encode([
         'success' => true,
         'messages' => $newMessages,
         'count' => count($newMessages)
+    ]);
+    
+} elseif ($action === 'mark_seen') {
+    // Đánh dấu tin nhắn đã xem
+    $matchId = intval($_POST['matchId'] ?? 0);
+    
+    if ($matchId <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Thiếu matchId!']);
+        exit;
+    }
+    
+    // Kiểm tra quyền
+    if (!$matchModel->isMatchMember($matchId, $currentUserId)) {
+        echo json_encode(['success' => false, 'message' => 'Không có quyền truy cập!']);
+        exit;
+    }
+    
+    // Đánh dấu đã xem
+    $result = $messageModel->markAsSeen($matchId, $currentUserId);
+    
+    echo json_encode([
+        'success' => $result,
+        'message' => $result ? 'Đã đánh dấu đã xem' : 'Có lỗi xảy ra'
+    ]);
+    
+} elseif ($action === 'get_status_updates') {
+    // Lấy status updates của tin nhắn đã gửi (cho người gửi)
+    $matchId = intval($_GET['matchId'] ?? 0);
+    $messageIds = $_GET['messageIds'] ?? '';
+    
+    if ($matchId <= 0 || empty($messageIds)) {
+        echo json_encode(['success' => false, 'message' => 'Thiếu thông tin!']);
+        exit;
+    }
+    
+    // Kiểm tra quyền
+    if (!$matchModel->isMatchMember($matchId, $currentUserId)) {
+        echo json_encode(['success' => false, 'message' => 'Không có quyền truy cập!']);
+        exit;
+    }
+    
+    // Parse message IDs
+    $ids = explode(',', $messageIds);
+    $ids = array_map('intval', $ids);
+    $ids = array_filter($ids, function($id) { return $id > 0; });
+    
+    if (empty($ids)) {
+        echo json_encode(['success' => false, 'message' => 'Message IDs không hợp lệ!']);
+        exit;
+    }
+    
+    // Lấy status của các tin nhắn
+    $statuses = $messageModel->getMessagesStatus($matchId, $currentUserId, $ids);
+    
+    echo json_encode([
+        'success' => true,
+        'statuses' => $statuses
     ]);
     
 } else {

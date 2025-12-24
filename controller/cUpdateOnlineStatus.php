@@ -4,6 +4,9 @@
  * Endpoint này được gọi định kỳ từ JavaScript để cập nhật thời gian hoạt động cuối
  */
 
+// Set timezone to Vietnam
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 require_once '../models/mSession.php';
 require_once '../models/mDbconnect.php';
 

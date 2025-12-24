@@ -113,7 +113,6 @@ $currentUserId = Session::getUserId();
                                     <option value="" selected>Chọn giới tính</option>
                                     <option value="Nam">Nam</option>
                                     <option value="Nữ">Nữ</option>
-                                    <option value="Khác">Khác</option>
                                 </select>
                             </div>
                         </div>

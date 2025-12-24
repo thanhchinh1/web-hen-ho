@@ -75,7 +75,7 @@ if ($action === 'like_back') {
                     'matched' => true,
                     'message' => 'Ghép đôi thành công! 💕',
                     'matchId' => $matchId,
-                    'redirect' => '/views/nhantin/message.php?match=' . $matchId
+                    'redirect' => '/views/nhantin/message.php?matchId=' . $matchId
                 ]);
                 exit;
             }
@@ -96,32 +96,54 @@ if ($action === 'like_back') {
 } elseif ($action === 'unmatch') {
     // Hủy ghép đôi
     
+    // Nhận matchId nếu có (cho trường hợp nhiều match giữa 2 người)
+    $matchId = intval($_POST['matchId'] ?? 0);
+    
     // Log để debug
-    error_log("Unmatch request - Current User: $currentUserId, Target User: $targetUserId");
+    error_log("Unmatch request - Current User: $currentUserId, Target User: $targetUserId, Match ID: $matchId");
     
-    // Kiểm tra xem có đang matched không
-    $isMatched = $matchModel->isMatched($currentUserId, $targetUserId);
-    error_log("Is matched: " . ($isMatched ? 'YES' : 'NO'));
-    
-    if (!$isMatched) {
-        echo json_encode(['success' => false, 'message' => 'Bạn và người này chưa ghép đôi!']);
-        exit;
-    }
-    
-    // Thực hiện unmatch
-    $result = $matchModel->unmatch($currentUserId, $targetUserId);
-    error_log("Unmatch result: " . ($result ? 'SUCCESS' : 'FAILED'));
-    
-    if ($result) {
-        echo json_encode([
-            'success' => true,
-            'message' => '✅ Đã hủy ghép đôi!\n🗑️ Tất cả tin nhắn đã bị xóa vĩnh viễn!',
-            'redirect' => '/views/thich/nguoithichban.php'
-        ]);
-        exit;
+    if ($matchId > 0) {
+        // Xóa match cụ thể theo ID
+        $result = $matchModel->unmatchById($matchId, $currentUserId);
+        error_log("UnmatchById result: " . ($result ? 'SUCCESS' : 'FAILED'));
+        
+        if ($result) {
+            echo json_encode([
+                'success' => true,
+                'message' => '✅ Đã hủy ghép đôi!\n🗑️ Tất cả tin nhắn đã bị xóa vĩnh viễn!',
+                'redirect' => '/views/nhantin/message.php'
+            ]);
+            exit;
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Không thể xóa match này!']);
+            exit;
+        }
     } else {
-        echo json_encode(['success' => false, 'message' => 'Có lỗi khi hủy ghép đôi! Chi tiết trong error log.']);
-        exit;
+        // Xóa tất cả match giữa 2 người (fallback)
+        // Kiểm tra xem có đang matched không
+        $isMatched = $matchModel->isMatched($currentUserId, $targetUserId);
+        error_log("Is matched: " . ($isMatched ? 'YES' : 'NO'));
+        
+        if (!$isMatched) {
+            echo json_encode(['success' => false, 'message' => 'Bạn và người này chưa ghép đôi!']);
+            exit;
+        }
+        
+        // Thực hiện unmatch
+        $result = $matchModel->unmatch($currentUserId, $targetUserId);
+        error_log("Unmatch result: " . ($result ? 'SUCCESS' : 'FAILED'));
+        
+        if ($result) {
+            echo json_encode([
+                'success' => true,
+                'message' => '✅ Đã hủy ghép đôi!\n🗑️ Tất cả tin nhắn đã bị xóa vĩnh viễn!',
+                'redirect' => '/views/nhantin/message.php'
+            ]);
+            exit;
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Có lỗi khi hủy ghép đôi! Chi tiết trong error log.']);
+            exit;
+        }
     }
     
 } else {

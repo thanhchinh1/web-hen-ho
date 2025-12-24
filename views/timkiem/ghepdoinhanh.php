@@ -32,6 +32,9 @@ if (!$vipModel->isVIP($userId)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ghép đôi nhanh - DuyenHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -41,105 +44,343 @@ if (!$vipModel->isVIP($userId)) {
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(100px, -1000px) rotate(360deg);
+                opacity: 0;
+            }
         }
 
         .container {
-            max-width: 600px;
+            max-width: 450px;
             width: 100%;
+            position: relative;
+            z-index: 1;
         }
 
-        .card {
-            background: white;
-            border-radius: 30px;
-            padding: 50px 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            text-align: center;
+        /* Header Navigation */
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 0 10px;
         }
 
-        .header {
-            margin-bottom: 40px;
+        .back-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .header h1 {
-            color: #2C3E50;
-            font-size: 32px;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .header p {
-            color: #7F8C8D;
-            font-size: 16px;
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-5px);
         }
 
         .vip-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 25px;
             font-size: 14px;
             font-weight: 600;
-            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
         }
 
         .vip-badge i {
-            margin-right: 5px;
+            font-size: 16px;
+        }
+
+        /* Main Card */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 0;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .card-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-header p {
+            font-size: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-body {
+            padding: 40px 30px;
         }
 
         /* Animation container */
         .animation-container {
-            margin: 40px 0;
+            margin: 30px 0;
             position: relative;
-            height: 200px;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .heart-animation {
-            font-size: 80px;
-            color: #FF6B9D;
+        .heart-icon {
+            font-size: 100px;
+            background: linear-gradient(135deg, #FF6B9D 0%, #FF8E53 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             animation: heartbeat 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 10px 30px rgba(255, 107, 157, 0.4));
         }
 
         @keyframes heartbeat {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.05); }
         }
 
         .pulse-ring {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 150px;
-            height: 150px;
+            width: 160px;
+            height: 160px;
             border: 3px solid #FF6B9D;
             border-radius: 50%;
             animation: pulse 2s ease-out infinite;
         }
 
+        .pulse-ring:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .pulse-ring:nth-child(3) {
+            animation-delay: 1s;
+        }
+
         @keyframes pulse {
             0% {
-                transform: translate(-50%, -50%) scale(0.8);
+                transform: scale(0.8);
                 opacity: 1;
             }
             100% {
-                transform: translate(-50%, -50%) scale(1.5);
+                transform: scale(1.8);
                 opacity: 0;
             }
         }
 
+        /* Description */
+        .description {
+            text-align: center;
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .feature-text {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 16px 40px;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn i {
+            font-size: 18px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            box-shadow: 0 5px 25px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.5);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Searching Screen */
         .searching-dots {
             margin-top: 20px;
             font-size: 18px;
             color: #667eea;
             font-weight: 600;
+            text-align: center;
         }
 
         .searching-dots span {
@@ -163,111 +404,147 @@ if (!$vipModel->isVIP($userId)) {
             margin-top: 15px;
             font-size: 14px;
             color: #95A5A6;
+            text-align: center;
         }
 
-        .btn {
-            padding: 15px 40px;
-            border: none;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 10px;
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            animation: progress 30s linear;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        @keyframes progress {
+            from { width: 0%; }
+            to { width: 100%; }
         }
 
-        .btn-secondary {
-            background: #ECF0F1;
-            color: #2C3E50;
-        }
-
-        .btn-secondary:hover {
-            background: #BDC3C7;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.5);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        /* Match found screen */
+        /* Match Found Screen */
         .match-found {
             display: none;
         }
 
         .match-found.active {
             display: block;
-            animation: fadeIn 0.5s ease;
+            animation: slideUp 0.5s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
+        @keyframes slideUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        .match-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .match-header h2 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .match-emoji {
+            font-size: 70px;
+            margin-bottom: 20px;
+            animation: bounce 1s ease infinite;
+            display: block;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .partner-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 25px;
+            padding: 35px 25px;
+            margin: 25px 0;
+            text-align: center;
+            position: relative;
         }
 
         .partner-avatar {
-            width: 150px;
-            height: 150px;
+            width: 160px;
+            height: 160px;
             border-radius: 50%;
             object-fit: cover;
-            border: 5px solid #FF6B9D;
-            margin: 20px auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 6px solid white;
+            margin: 0 auto 25px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            display: block;
         }
 
-        .compatibility-score {
-            font-size: 48px;
-            font-weight: 700;
+        .compatibility-badge {
+            display: inline-block;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 20px 0;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .partner-info {
-            margin: 20px 0;
-        }
-
-        .partner-info h2 {
-            color: #2C3E50;
+        .partner-info h3 {
+            color: #333;
             font-size: 28px;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
+            font-weight: 700;
         }
 
-        .partner-info p {
-            color: #7F8C8D;
-            font-size: 16px;
-            margin: 5px 0;
+        .info-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
         }
 
+        .info-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 14px;
+            color: #666;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+            font-weight: 500;
+        }
+
+        .info-tag i {
+            color: #667eea;
+            font-size: 15px;
+        }
+
+        /* Confetti */
         .confetti {
             position: fixed;
             width: 10px;
             height: 10px;
             background: #FF6B9D;
-            position: absolute;
-            animation: confetti-fall 3s linear;
+            z-index: 9999;
         }
 
         @keyframes confetti-fall {
@@ -277,98 +554,179 @@ if (!$vipModel->isVIP($userId)) {
             }
         }
 
-        .back-link {
-            display: inline-block;
-            margin-top: 20px;
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-        }
+        /* Responsive */
+        @media (max-width: 576px) {
+            .container {
+                padding: 0 10px;
+            }
 
-        .back-link:hover {
-            text-decoration: underline;
+            .card-header {
+                padding: 30px 20px;
+            }
+
+            .card-header h1 {
+                font-size: 26px;
+            }
+
+            .card-body {
+                padding: 30px 20px;
+            }
+
+            .heart-icon {
+                font-size: 80px;
+            }
+
+            .btn {
+                padding: 14px 30px;
+                font-size: 15px;
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Background Animation -->
+    <div class="bg-animation" id="bgAnimation"></div>
+
     <div class="container">
+        <!-- Top Navigation -->
+        <div class="top-nav">
+            <div class="back-btn" onclick="window.location.href='../trangchu/index.php'">
+                <i class="fas fa-arrow-left"></i>
+            </div>
+            <div class="vip-badge">
+                <i class="fas fa-crown"></i>
+                <span>VIP Member</span>
+            </div>
+        </div>
+
         <div class="card">
             <!-- Idle Screen -->
             <div id="idleScreen">
-                <div class="header">
-                    <span class="vip-badge">
-                        <i class="fas fa-crown"></i> VIP Member
-                    </span>
-                    <h1>Ghép đôi nhanh</h1>
-                    <p>Tìm kiếm người phù hợp với bạn ngay bây giờ!</p>
+                <div class="card-header">
+                    <h1>⚡ Ghép Đôi Nhanh</h1>
+                    <p>Tìm kiếm người phù hợp trong tích tắc!</p>
                 </div>
 
-                <div class="animation-container">
-                    <i class="fas fa-heart heart-animation"></i>
+                <div class="card-body">
+                    <div class="animation-container">
+                        <i class="fas fa-heart heart-icon"></i>
+                    </div>
+
+                    <div class="description">
+                        Hệ thống AI của chúng tôi sẽ tự động kết nối bạn với những người đang online và có độ tương thích cao nhất
+                    </div>
+
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div class="feature-text">Ghép đôi cực nhanh chỉ trong vài giây</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="feature-text">AI phân tích độ tương thích chính xác</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="feature-text">Chỉ ghép với người đang online</div>
+                        </div>
+                    </div>
+
+                    <div class="btn-container">
+                        <button class="btn btn-primary" onclick="startSearching()">
+                            <i class="fas fa-search"></i>
+                            <span>Bắt đầu tìm kiếm</span>
+                        </button>
+                    </div>
                 </div>
-
-                <p style="color: #7F8C8D; margin-bottom: 30px;">
-                    Hệ thống sẽ tự động tìm kiếm những người đang online và có độ tương thích cao với bạn
-                </p>
-
-                <button class="btn btn-primary" onclick="startSearching()">
-                    <i class="fas fa-search"></i> Bắt đầu tìm kiếm
-                </button>
-                <br>
-                <a href="../trangchu/index.php" class="back-link">
-                    <i class="fas fa-arrow-left"></i> Quay lại trang chủ
-                </a>
             </div>
 
             <!-- Searching Screen -->
             <div id="searchingScreen" style="display: none;">
-                <div class="header">
-                    <h1>Đang tìm kiếm...</h1>
-                    <p>Vui lòng đợi trong giây lát</p>
+                <div class="card-header">
+                    <h1>🔍 Đang Tìm Kiếm</h1>
+                    <p>AI đang phân tích để tìm người phù hợp nhất...</p>
                 </div>
 
-                <div class="animation-container">
-                    <div class="pulse-ring"></div>
-                    <div class="pulse-ring" style="animation-delay: 0.5s;"></div>
-                    <div class="pulse-ring" style="animation-delay: 1s;"></div>
-                    <i class="fas fa-heart heart-animation"></i>
-                </div>
+                <div class="card-body">
+                    <div class="animation-container">
+                        <div class="pulse-ring"></div>
+                        <div class="pulse-ring"></div>
+                        <div class="pulse-ring"></div>
+                        <i class="fas fa-heart heart-icon"></i>
+                    </div>
 
-                <div class="searching-dots">
-                    Đang tìm kiếm<span>.</span><span>.</span><span>.</span>
-                </div>
-                <div class="timer" id="timer">Đã tìm: 0 giây</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
 
-                <button class="btn btn-danger" onclick="cancelSearching()">
-                    <i class="fas fa-times"></i> Hủy tìm kiếm
-                </button>
+                    <div class="searching-dots">
+                        Đang phân tích<span>.</span><span>.</span><span>.</span>
+                    </div>
+                    <div class="timer" id="timer">Đã tìm: 0 giây</div>
+
+                    <div class="btn-container">
+                        <button class="btn btn-danger" onclick="cancelSearching()">
+                            <i class="fas fa-times"></i>
+                            <span>Hủy tìm kiếm</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Match Found Screen -->
             <div id="matchScreen" class="match-found">
-                <div class="header">
-                    <h1>🎉 Tìm thấy người phù hợp!</h1>
+                <div class="card-header">
+                    <h1>💕 Tìm Thấy!</h1>
+                    <p>Chúc mừng! Bạn đã được ghép đôi thành công</p>
                 </div>
 
-                <img id="partnerAvatar" src="" alt="Partner" class="partner-avatar">
-                
-                <div class="compatibility-score" id="compatibilityScore">
-                    0%
-                </div>
+                <div class="card-body">
+                    <div class="match-header">
+                        <div class="match-emoji">🎉</div>
+                    </div>
 
-                <div class="partner-info">
-                    <h2 id="partnerName">Đang tải...</h2>
-                    <p id="partnerAge"></p>
-                    <p id="partnerLocation"></p>
-                    <p id="partnerGoal"></p>
-                </div>
+                    <div class="partner-card">
+                        <img id="partnerAvatar" src="" alt="Partner" class="partner-avatar">
+                        
+                        <div class="compatibility-badge" id="compatibilityScore">
+                            0% Phù hợp
+                        </div>
 
-                <button class="btn btn-primary" onclick="openChat()">
-                    <i class="fas fa-comment"></i> Bắt đầu trò chuyện
-                </button>
-                <button class="btn btn-secondary" onclick="location.reload()">
-                    <i class="fas fa-search"></i> Tìm người khác
-                </button>
+                        <div class="partner-info">
+                            <h3 id="partnerName">Đang tải...</h3>
+                            
+                            <div class="info-tags">
+                                <div class="info-tag">
+                                    <i class="fas fa-birthday-cake"></i>
+                                    <span id="partnerAge">-- tuổi</span>
+                                </div>
+                                <div class="info-tag">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span id="partnerLocation">Không rõ</span>
+                                </div>
+                                <div class="info-tag">
+                                    <i class="fas fa-heart"></i>
+                                    <span id="partnerGoal">Không rõ</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="btn-container">
+                        <button class="btn btn-primary" onclick="openChat()">
+                            <i class="fas fa-comment"></i>
+                            <span>Bắt đầu trò chuyện</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -378,6 +736,26 @@ if (!$vipModel->isVIP($userId)) {
         let timerInterval = null;
         let searchStartTime = 0;
         let matchId = null;
+
+        // Create animated background particles
+        function createBackgroundParticles() {
+            const bgAnimation = document.getElementById('bgAnimation');
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 60 + 20;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.bottom = '-100px';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                bgAnimation.appendChild(particle);
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', createBackgroundParticles);
 
         function startSearching() {
             // Hiển thị màn hình tìm kiếm
@@ -435,8 +813,8 @@ if (!$vipModel->isVIP($userId)) {
         }
 
         function startPolling() {
-            console.log('📊 Bắt đầu polling mỗi 2 giây...');
-            // Kiểm tra trạng thái mỗi 2 giây
+            console.log('📊 Bắt đầu polling mỗi 5 giây...');
+            // Kiểm tra trạng thái mỗi 5 giây
             searchInterval = setInterval(() => {
                 console.log('🔄 Polling check...');
                 fetch('../../controller/cQuickMatch.php', {
@@ -466,7 +844,7 @@ if (!$vipModel->isVIP($userId)) {
                 .catch(error => {
                     console.error('❌ Polling error:', error);
                 });
-            }, 2000);
+            }, 5000);
         }
 
         function cancelSearching() {
@@ -497,29 +875,35 @@ if (!$vipModel->isVIP($userId)) {
             document.getElementById('matchScreen').classList.add('active');
             
             // Cập nhật thông tin partner
-            const avatarSrc = partner.avt ? '../../' + partner.avt : 'https://i.pravatar.cc/150';
+            const avatarSrc = partner.avt ? 
+                (partner.avt.startsWith('public/') ? '/' + partner.avt : '../../public/uploads/avatars/' + partner.avt) : 
+                '../../public/img/default-avatar.jpg';
+            
             document.getElementById('partnerAvatar').src = avatarSrc;
-            document.getElementById('compatibilityScore').textContent = Math.round(data.score) + '%';
+            document.getElementById('compatibilityScore').textContent = Math.round(data.score) + '% Phù hợp';
             document.getElementById('partnerName').textContent = partner.ten;
-            document.getElementById('partnerAge').innerHTML = `<i class="fas fa-birthday-cake"></i> ${partner.tuoi} tuổi`;
-            document.getElementById('partnerLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${partner.noiSong || 'Không rõ'}`;
-            document.getElementById('partnerGoal').innerHTML = `<i class="fas fa-heart"></i> ${partner.mucTieuPhatTrien || 'Không rõ'}`;
+            document.getElementById('partnerAge').textContent = partner.tuoi + ' tuổi';
+            document.getElementById('partnerLocation').textContent = partner.noiSong || 'Không rõ';
+            document.getElementById('partnerGoal').textContent = partner.mucTieuPhatTrien || 'Không rõ';
             
             // Hiệu ứng confetti
             createConfetti();
         }
 
         function createConfetti() {
-            for (let i = 0; i < 50; i++) {
+            const colors = ['#FF6B9D', '#667eea', '#764ba2', '#f093fb', '#FFD700'];
+            for (let i = 0; i < 100; i++) {
                 setTimeout(() => {
                     const confetti = document.createElement('div');
                     confetti.className = 'confetti';
                     confetti.style.left = Math.random() * 100 + '%';
-                    confetti.style.background = ['#FF6B9D', '#667eea', '#764ba2', '#f093fb'][Math.floor(Math.random() * 4)];
-                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    confetti.style.top = '-10px';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animation = `confetti-fall ${Math.random() * 3 + 2}s linear forwards`;
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
                     document.body.appendChild(confetti);
                     
-                    setTimeout(() => confetti.remove(), 3000);
+                    setTimeout(() => confetti.remove(), 5000);
                 }, i * 30);
             }
         }

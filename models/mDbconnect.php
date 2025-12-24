@@ -44,6 +44,9 @@ class clsConnect {
             
             // Set charset to utf8mb4
             self::$connection->set_charset("utf8mb4");
+            
+            // Set timezone to Vietnam (UTC+7)
+            self::$connection->query("SET time_zone = '+07:00'");
         }
         
         return self::$connection;

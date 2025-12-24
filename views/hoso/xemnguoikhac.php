@@ -115,7 +115,7 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
 
     <div class="profile-view-wrapper">
         <div class="profile-view-container">
-            <button class="back-btn" onclick="window.location.href='../trangchu/index.php';" title="Quay lại">
+            <button class="back-btn" onclick="window.history.back();" title="Quay lại">
                 <i class="fas fa-arrow-left"></i>
             </button>
 
@@ -135,10 +135,18 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
                 <!-- Action Buttons -->
                 <div class="profile-actions">
                     <?php if ($isMatched): ?>
+                        <button class="btn-action btn-message" 
+                                onclick="window.location.href='../nhantin/message.php?matchId=<?php echo $matchModel->getMatchId($currentUserId, $profileId); ?>'" 
+                                id="messageBtn">
+                            <i class="fas fa-comments"></i>
+                            Nhắn tin
+                        </button>
                         <button class="btn-action btn-matched" 
                                 onclick="confirmUnmatch(<?php echo $profileId; ?>)" 
-                                id="matchBtn">
-                            <i class="fas fa-check-circle"></i>
+                                id="matchBtn" 
+                                title="Nhấn để hủy ghép đôi">
+                            <i class="fas fa-heart"></i>
+                            <i class="fas fa-check-circle" style="margin-left: -8px; font-size: 12px;"></i>
                             Đã ghép đôi
                         </button>
                     <?php else: ?>
@@ -360,9 +368,16 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
             const icon = likeBtn.querySelector('i');
             const text = document.getElementById('likeText');
             const isLiked = likeBtn.classList.contains('liked');
-            
+
             console.log('toggleLike called, targetUserId:', targetUserId, 'isLiked:', isLiked);
-            
+
+            // Nếu đang ở trạng thái đã thích (bấm để bỏ thích) thì xác nhận
+            if (isLiked) {
+                if (!confirm('Bạn có chắc chắn muốn BỎ THÍCH hồ sơ này?')) {
+                    return;
+                }
+            }
+
             fetch('/controller/cLike.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -371,15 +386,23 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
             .then(res => res.json())
             .then(data => {
                 console.log('Response:', data);
-                
+
                 if (data.success) {
                     if (data.matched) {
                         // Ghép đôi thành công!
+                        // Xóa khỏi localStorage unmatchedUsers nếu có
+                        const unmatchedUsers = JSON.parse(localStorage.getItem('unmatchedUsers') || '[]');
+                        const index = unmatchedUsers.indexOf(targetUserId);
+                        if (index > -1) {
+                            unmatchedUsers.splice(index, 1);
+                            localStorage.setItem('unmatchedUsers', JSON.stringify(unmatchedUsers));
+                        }
+                        
                         showMatchNotification(data.message, data.redirect);
                     } else if (data.action === 'liked') {
                         // Đã thả tim thành công
                         showNotification('Đã thích! 💖 Chuyển về trang chủ...');
-                        
+
                         // Chuyển hướng về trang chủ sau 1 giây
                         setTimeout(() => {
                             window.location.href = '/views/trangchu/index.php';
@@ -387,7 +410,7 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
                     } else if (data.action === 'unliked') {
                         // Bỏ thích thành công
                         showNotification('Đã bỏ thích!');
-                        
+
                         // Chuyển hướng về trang chủ sau 1 giây
                         // Hồ sơ sẽ xuất hiện lại trên trang chủ
                         setTimeout(() => {
@@ -660,9 +683,9 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
                             localStorage.setItem('unmatchedUsers', JSON.stringify(unmatchedUsers));
                         }
                         
-                        // Quay về trang nguoithichban sau 1.5 giây
+                        // Quay về trang tin nhắn sau 1.5 giây
                         setTimeout(() => {
-                            window.location.href = '../thich/nguoithichban.php';
+                            window.location.href = '../nhantin/message.php';
                         }, 1500);
                     } else {
                         showNotification(data.message || 'Có lỗi xảy ra!', 'error');
@@ -674,6 +697,16 @@ $interests = !empty($profile['soThich']) ? explode(', ', $profile['soThich']) : 
                 });
             }
         }
+    </script>
+
+    <script>
+    // Khi quay lại trang này, luôn reload để cập nhật trạng thái ghép đôi
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            // Trang được load từ cache (người dùng nhấn nút back)
+            window.location.reload();
+        }
+    });
     </script>
 
 </body>

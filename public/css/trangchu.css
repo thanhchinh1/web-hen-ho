@@ -832,6 +832,19 @@ body {
     50% { opacity: 0.7; }
 }
 
+/* Offline Indicator - Gray dot for inactive users */
+.offline-indicator {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 18px;
+    height: 18px;
+    background: #95a5a6;
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
 .reply-header {
     display: flex;
     gap: 12px;
@@ -968,12 +981,14 @@ body {
     background: #ffffff;
     text-align: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     padding: 1.5rem 1rem;
     border-radius: 20px;
     border: 2px solid #f0f0f0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transform-origin: center;
+    will-change: transform, opacity;
 }
 
 .profile-card:hover {
@@ -1001,7 +1016,20 @@ body {
     object-fit: cover;
     border: 3px solid #ffffff;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Online Indicator - Green dot for active users */
+.online-indicator {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 18px;
+    height: 18px;
+    background: #27ae60;
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .profile-info {
@@ -1040,6 +1068,35 @@ body {
     -webkit-box-orient: vertical;
     overflow: hidden;
     padding: 0 0.5rem;
+}
+
+/* Last seen status */
+.last-seen {
+    font-size: 0.7rem;
+    color: #95a5a6;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.last-seen.online {
+    color: #27ae60;
+    font-weight: 500;
+}
+
+.last-seen.online i {
+    font-size: 0.5rem;
+}
+
+.last-seen.inactive {
+    color: #95a5a6;
+    font-weight: 500;
+}
+
+.last-seen.inactive i {
+    font-size: 0.5rem;
 }
 
 .btn-like {
